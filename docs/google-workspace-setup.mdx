@@ -1,0 +1,81 @@
+# Google Workspace Addon Setup Guide
+
+## Prerequisites
+- A Google Workspace account with admin privileges
+- Access to the Google Cloud Console
+- Domain verification completed for your organization
+
+## Step 1: Create Google Cloud Project
+1. Go to [Google Cloud Console](https://console.cloud.google.com)
+2. Create a new project named "GSuite Signature Manager"
+3. Enable billing for the project (required for some APIs)
+
+## Step 2: Enable Required APIs
+Enable the following APIs in the Google Cloud Console:
+- Gmail API
+- Google Workspace Marketplace SDK
+- Admin SDK
+- OAuth2 API
+
+## Step 3: Configure OAuth Consent Screen
+1. In Google Cloud Console, go to "APIs & Services" > "OAuth consent screen"
+2. Choose "External" user type
+3. Fill in the required information:
+   - App name: "GSuite Signature Manager"
+   - User support email: [Your email]
+   - Developer contact information: [Your email]
+4. Add the following scopes:
+   - `https://www.googleapis.com/auth/gmail.settings.basic`
+   - `https://www.googleapis.com/auth/gmail.settings.sharing`
+   - `https://www.googleapis.com/auth/admin.directory.user`
+   - `https://www.googleapis.com/auth/admin.directory.domain.readonly`
+
+## Step 4: Create OAuth 2.0 Credentials
+1. Go to "APIs & Services" > "Credentials"
+2. Create new OAuth 2.0 Client ID
+3. Choose "Web application" as the application type
+4. Add authorized JavaScript origins:
+   - Development: `http://localhost:3000`
+   - Production: [Your production domain]
+5. Add authorized redirect URIs:
+   - Development: `http://localhost:3000/oauth2callback`
+   - Production: `https://[your-domain]/oauth2callback`
+
+## Step 5: Create Addon Configuration
+Create a new file `appsscript.json` in the project root:
+
+```json
+{
+  "timeZone": "America/New_York",
+  "dependencies": {
+  },
+  "exceptionLogging": "STACKDRIVER",
+  "runtimeVersion": "V8",
+  "oauthScopes": [
+    "https://www.googleapis.com/auth/gmail.settings.basic",
+    "https://www.googleapis.com/auth/gmail.settings.sharing",
+    "https://www.googleapis.com/auth/admin.directory.user",
+    "https://www.googleapis.com/auth/admin.directory.domain.readonly"
+  ]
+}
+```
+
+## Step 6: Environment Configuration
+Create a `.env` file in the project root (add to .gitignore):
+
+```env
+GOOGLE_CLIENT_ID=your_client_id
+GOOGLE_CLIENT_SECRET=your_client_secret
+GOOGLE_REDIRECT_URI=http://localhost:3000/oauth2callback
+```
+
+## Security Considerations
+1. Never commit credentials to version control
+2. Use environment variables for sensitive data
+3. Implement proper token storage and refresh mechanisms
+4. Follow the principle of least privilege for API scopes
+
+## Next Steps
+1. Set up Firebase project
+2. Implement authentication flow
+3. Create template storage structure 
