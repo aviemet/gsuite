@@ -1,48 +1,26 @@
 {
-  "name": "vite-react",
+  "name": "gsuite-signature-manager",
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview",
+    "dev": "yarn workspace @gsuite/frontend dev",
+    "build": "yarn workspaces foreach --all -p run build",
+    "lint": "yarn workspaces foreach --all -p run lint",
+    "test": "yarn workspaces foreach --all -p run test",
     "commit": "git-cz",
     "prepare": "husky"
-  },
-  "dependencies": {
-    "firebase": "^11.6.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.0",
     "@commitlint/config-conventional": "^19.8.0",
-    "@eslint/compat": "^1.2.8",
-    "@eslint/js": "^9.9.0",
-    "@eslint/json": "^0.11.0",
-    "@firebase/firestore-types": "^3.0.3",
-    "@stylistic/eslint-plugin": "^4.2.0",
-    "@types/eslint-plugin-jsx-a11y": "^6",
-    "@types/react": "^18.3.3",
-    "@types/react-dom": "^18.3.0",
-    "@typescript-eslint/parser": "^8.29.0",
-    "@vitejs/plugin-react": "^4.3.1",
     "commitizen": "^4.3.1",
     "cz-conventional-changelog": "^3.3.0",
-    "eslint": "^9.9.0",
-    "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-jsonc": "^2.20.0",
-    "eslint-plugin-jsx-a11y": "^6.10.2",
-    "eslint-plugin-react-hooks": "^5.2.0",
-    "eslint-plugin-react-refresh": "^0.4.9",
-    "globals": "^15.9.0",
-    "husky": "^9.1.7",
-    "jsonc-eslint-parser": "^2.4.0",
-    "typescript": "^5.5.3",
-    "typescript-eslint": "^8.0.1",
-    "vite": "^5.4.1"
+    "eslint-config-google": "^0.14.0",
+    "husky": "^9.1.7"
   },
   "config": {
     "commitizen": {

@@ -7,6 +7,13 @@ import jsoncPlugin from "eslint-plugin-jsonc"
 import jsxA11yPlugin from "eslint-plugin-jsx-a11y"
 import reactHooksPlugin from "eslint-plugin-react-hooks"
 import jsoncParser from "jsonc-eslint-parser"
+import js from '@eslint/js';
+import globals from 'globals';
+import tseslint from 'typescript-eslint';
+import reactRefresh from 'eslint-plugin-react-refresh';
+import reactHooks from 'eslint-plugin-react-hooks';
+import jsxA11y from 'eslint-plugin-jsx-a11y';
+import google from 'eslint-config-google';
 
 const ignores = [
 	"app/javascript/**/*",
@@ -21,163 +28,49 @@ const ignores = [
 ]
 
 export default [
-	importPlugin.flatConfigs.recommended,
-	importPlugin.flatConfigs.typescript,
-	// Typescript/Javascript files
+	js.configs.recommended,
+	...tseslint.configs.recommended,
+	...google.configs.recommended,
 	{
-		...stylistic.configs.customize({
-			indent: "tab",
-		}),
-
-		files: ["**/*.{js,jsx,ts,tsx}"],
-		ignores,
+		files: ['**/*.{js,jsx,ts,tsx}'],
 		languageOptions: {
-			ecmaVersion: "latest",
-			sourceType: "module",
-			parser: tsParser,
+			globals: {
+				...globals.browser,
+				...globals.node,
+				...globals.es2021
+			},
 			parserOptions: {
-				ecmaFeatures: {
-					jsx: true,
-				},
-			},
-		},
-		settings: {
-			"react": {
-				version: "detect",
-			},
-			"import/resolver": {
-				typescript: {},
-			},
-			"jsx-a11y": {
-				polymorphicPropName: "component",
-			},
+				ecmaVersion: 'latest',
+				sourceType: 'module',
+				project: ['./tsconfig.json', './packages/*/tsconfig.json']
+			}
 		},
 		plugins: {
-			"react-hooks": fixupPluginRules(reactHooksPlugin),
-			"jsx-a11y": jsxA11yPlugin,
-			"@stylistic": stylistic,
+			'@typescript-eslint': tseslint.plugin,
+			'react-refresh': reactRefresh,
+			'react-hooks': reactHooks,
+			'jsx-a11y': jsxA11y,
+			'import': importPlugin,
+			'@stylistic': stylistic
 		},
 		rules: {
-			"@stylistic/indent": ["error", "tab", {
-				SwitchCase: 1,
-				VariableDeclarator: "first",
-				MemberExpression: 1,
-				ArrayExpression: 1,
-				ignoredNodes: [
-					"TSTypeParameterInstantiation",
-				],
-			}],
-			"@stylistic/brace-style": ["error", "1tbs", {
-				allowSingleLine: true,
-			}],
-			"@stylistic/object-curly-spacing": ["error", "always", {
-				objectsInObjects: true,
-			}],
-			"@stylistic/jsx-curly-spacing": ["error", {
-				when: "always",
-				children: true,
-			}],
-			"@stylistic/member-delimiter-style": ["error", {
-				multiline: {
-					delimiter: "none",
-				},
-				singleline: {
-					delimiter: "comma",
-				},
-				multilineDetection: "brackets",
-			}],
-			"@stylistic/jsx-one-expression-per-line": "off",
-			"@stylistic/keyword-spacing": ["error", {
-				after: true,
-				before: true,
-				overrides: {
-					if: { after: false },
-					for: { after: false },
-					while: { after: false },
-					switch: { after: false },
-					catch: { after: false },
-				},
-			}],
-			"@stylistic/comma-dangle": ["error", {
-				arrays: "always-multiline",
-				objects: "always-multiline",
-				imports: "always-multiline",
-				exports: "always-multiline",
-				functions: "only-multiline",
-			}],
-			"@stylistic/multiline-ternary": ["error", "always-multiline"],
-			"@stylistic/space-before-function-paren": ["error", "never"],
-			"@stylistic/arrow-spacing": "error",
-			"@stylistic/space-before-blocks": ["error", "always"],
-			"@stylistic/no-multiple-empty-lines": ["error", {
-				max: 2,
-				maxBOF: 0,
-			}],
-			"@stylistic/space-infix-ops": "error",
-			"@stylistic/space-unary-ops": ["error", {
-				words: true,
-				nonwords: false,
-				overrides: {
-					"!": false,
-					"!!": false,
-					"+": true,
-					"-": true,
-				},
-			}],
-			"@stylistic/comma-spacing": ["error", {
-				before: false,
-				after: true,
-			}],
-			"@stylistic/no-multi-spaces": "error",
-			"@stylistic/spaced-comment": ["error", "always", {
-				"line": {
-					"markers": ["/"],
-					"exceptions": ["-", "+"],
-				},
-				"block": {
-					"markers": ["!"],
-					"exceptions": ["*"],
-					"balanced": true,
-				},
-			}],
-			"no-trailing-spaces": ["error", {
-				skipBlankLines: false,
-				ignoreComments: false,
-			}],
-			"no-unused-vars": ["warn", {
-				vars: "all",
-				args: "none",
-			}],
-			"eqeqeq": "error",
-			"no-console": "warn",
-			"eol-last": ["error", "always"],
-			"import/order": ["error", {
-				"groups": [
-					"builtin",
-					"external",
-					"internal",
-					["parent", "sibling"],
-					"index",
-					"object",
-				],
-				"alphabetize": {
-					"order": "asc",
-					"caseInsensitive": true,
-				},
-				"newlines-between": "always",
-			}],
-
-			// "import/no-default-export": "error",
-			"import/newline-after-import": "error",
-			"import/consistent-type-specifier-style": ["error", "prefer-inline"],
-			"semi": ["error", "never"],
-			"@stylistic/quotes": ["error", "double", {
-				avoidEscape: true,
-				allowTemplateLiterals: true,
-			}],
-			"@stylistic/jsx-quotes": ["error", "prefer-double"],
-			...reactHooksPlugin.configs.recommended.rules,
+			...stylistic.configs['recommended-flat'].rules,
+			'react-refresh/only-export-components': 'warn',
+			'react-hooks/rules-of-hooks': 'error',
+			'react-hooks/exhaustive-deps': 'warn',
+			'import/order': ['error', {
+				'groups': ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
+				'newlines-between': 'always',
+				'alphabetize': { order: 'asc' }
+			}]
 		},
+		settings: {
+			'import/resolver': {
+				typescript: {
+					project: ['./tsconfig.json', './packages/*/tsconfig.json']
+				}
+			}
+		}
 	},
 	// Typescript declaration files
 	{
