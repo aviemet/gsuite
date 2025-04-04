@@ -4,7 +4,7 @@ import { Outlet } from "@tanstack/react-router"
 import { AppHeader } from "./AppHeader"
 import { AppNavbar } from "./AppNavbar"
 
-export function RootLayout() {
+const AppLayout = () => {
 	return (
 		<AppShell
 			header={ { height: 60 } }
@@ -25,3 +25,5 @@ export function RootLayout() {
 		</AppShell>
 	)
 }
+
+export { AppLayout }

@@ -2,7 +2,7 @@ import { NavLink, Stack } from "@mantine/core"
 import { IconDashboard, IconSettings, IconSignature } from "@tabler/icons-react"
 import { Link, useRouter } from "@tanstack/react-router"
 
-export function AppNavbar() {
+const AppNavbar = () => {
 	const router = useRouter()
 
 	return (
@@ -33,3 +33,5 @@ export function AppNavbar() {
 		</Stack>
 	)
 }
+
+export { AppNavbar }

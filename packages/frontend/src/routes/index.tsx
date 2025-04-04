@@ -1,10 +1,10 @@
 import { createRootRoute, createRoute, createRouter } from "@tanstack/react-router"
 
-import { RootLayout } from "../components/layout/RootLayout"
+import { AppLayout } from "@/frontend/layouts"
 
 // Define our root layout component that will wrap all routes
 const rootRoute = createRootRoute({
-	component: RootLayout,
+	component: AppLayout,
 })
 
 // Define our routes with type-safe parameters
