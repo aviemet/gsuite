@@ -11,37 +11,37 @@ const rootRoute = createRootRoute({
 const indexRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: "/",
-	component: () => import("../pages/DashboardPage").then(m => <m.DashboardPage />),
+	component: () => import("../pages/Dashboard").then(m => <m.DashboardPage />),
 })
 
 const settingsRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: "/settings",
-	component: () => import("../pages/SettingsPage").then(m => <m.SettingsPage />),
+	component: () => import("../pages/Settings").then(m => <m.SettingsPage />),
 })
 
 const signaturesRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: "/signatures",
-	component: () => import("../pages/signatures/SignaturesListPage").then(m => <m.SignaturesListPage />),
+	component: () => import("../pages/Signatures/Index").then(m => <m.SignaturesListPage />),
 })
 
 const signatureNewRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: "/signatures/new",
-	component: () => import("../pages/signatures/SignatureEditPage").then(m => <m.SignatureEditPage />),
+	component: () => import("../pages/Signatures/Edit").then(m => <m.SignatureEditPage />),
 })
 
 const signatureEditRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: "/signatures/$signatureId/edit",
-	component: () => import("../pages/signatures/SignatureEditPage").then(m => <m.SignatureEditPage />),
+	component: () => import("../pages/Signatures/Edit").then(m => <m.SignatureEditPage />),
 })
 
 const signatureViewRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: "/signatures/$signatureId",
-	component: () => import("../pages/signatures/SignatureViewPage").then(m => <m.SignatureViewPage />),
+	component: () => import("../pages/Signatures/Show").then(m => <m.SignatureViewPage />),
 })
 
 // Create and export the router instance

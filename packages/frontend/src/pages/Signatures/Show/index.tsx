@@ -1,9 +1,11 @@
 import { Container, Title } from "@mantine/core"
 
-export function SignatureViewPage() {
+const SignatureViewPage = () => {
 	return (
 		<Container>
 			<Title>View Signature</Title>
 		</Container>
 	)
 }
+
+export { SignatureViewPage }

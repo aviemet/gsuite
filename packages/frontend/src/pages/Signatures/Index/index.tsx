@@ -1,7 +1,7 @@
 import { Button, Container, Group, Title } from "@mantine/core"
-import { Link } from "@tanstack/router"
+import { Link } from "@tanstack/react-router"
 
-export function SignaturesListPage() {
+const SignaturesListPage = () => {
 	return (
 		<Container>
 			<Group justify="space-between" mb="xl">
@@ -13,3 +13,5 @@ export function SignaturesListPage() {
 		</Container>
 	)
 }
+
+export { SignaturesListPage }

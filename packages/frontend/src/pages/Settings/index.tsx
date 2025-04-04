@@ -1,9 +1,11 @@
 import { Container, Title } from "@mantine/core"
 
-export function SettingsPage() {
+const SettingsPage = () => {
 	return (
 		<Container>
 			<Title>Settings</Title>
 		</Container>
 	)
 }
+
+export { SettingsPage }
