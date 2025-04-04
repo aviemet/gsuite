@@ -7,7 +7,9 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "yarn workspace @gsuite/frontend dev",
+    "dev": "concurrently \"yarn dev:vite\" \"yarn emulators\"",
+    "emulators": "firebase emulators:start",
+    "dev:vite": "yarn workspace @gsuite/frontend dev",
     "build": "yarn workspaces foreach --all -p run build",
     "lint": "yarn workspaces foreach --all -p run lint",
     "test": "yarn workspaces foreach --all -p run test",
@@ -18,6 +20,7 @@
     "@commitlint/cli": "^19.8.0",
     "@commitlint/config-conventional": "^19.8.0",
     "commitizen": "^4.3.1",
+    "concurrently": "^9.1.2",
     "cz-conventional-changelog": "^3.3.0",
     "eslint-config-google": "^0.14.0",
     "eslint-import-resolver-typescript": "^4.3.1",

@@ -2,7 +2,7 @@ import { AppShell, Burger, Group, NavLink, Stack } from "@mantine/core"
 import { useDisclosure } from "@mantine/hooks"
 
 import { IconDashboard, IconSettings, IconSignature } from "@tabler/icons-react"
-import { Link } from "@tanstack/react-router"
+import { Link, Outlet } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
 
 import { router } from "@/frontend/routes"
@@ -73,7 +73,9 @@ const AppLayout = () => {
 					/>
 				</Stack>
 			</AppShell.Navbar>
-			<AppShell.Main>Main</AppShell.Main>
+			<AppShell.Main>
+				<Outlet />
+			</AppShell.Main>
 		</AppShell>
 	)
 }

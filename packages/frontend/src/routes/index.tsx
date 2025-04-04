@@ -1,6 +1,11 @@
 import { createRootRoute, createRoute, createRouter } from "@tanstack/react-router"
 
 import { AppLayout } from "@/frontend/layouts"
+import { DashboardPage } from "../pages/Dashboard"
+import { SettingsPage } from "../pages/Settings"
+import { SignatureEditPage } from "../pages/Signatures/Edit"
+import { SignaturesListPage } from "../pages/Signatures/Index"
+import { SignatureViewPage } from "../pages/Signatures/Show"
 
 // Define our root layout component that will wrap all routes
 const rootRoute = createRootRoute({
@@ -11,37 +16,37 @@ const rootRoute = createRootRoute({
 const indexRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: "/",
-	component: () => import("../pages/Dashboard").then(m => <m.DashboardPage />),
+	component: DashboardPage,
 })
 
 const settingsRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: "/settings",
-	component: () => import("../pages/Settings").then(m => <m.SettingsPage />),
+	component: SettingsPage,
 })
 
 const signaturesRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: "/signatures",
-	component: () => import("../pages/Signatures/Index").then(m => <m.SignaturesListPage />),
+	component: SignaturesListPage,
 })
 
 const signatureNewRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: "/signatures/new",
-	component: () => import("../pages/Signatures/Edit").then(m => <m.SignatureEditPage />),
+	component: SignatureEditPage,
 })
 
 const signatureEditRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: "/signatures/$signatureId/edit",
-	component: () => import("../pages/Signatures/Edit").then(m => <m.SignatureEditPage />),
+	component: SignatureEditPage,
 })
 
 const signatureViewRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: "/signatures/$signatureId",
-	component: () => import("../pages/Signatures/Show").then(m => <m.SignatureViewPage />),
+	component: SignatureViewPage,
 })
 
 // Create and export the router instance
@@ -55,9 +60,3 @@ export const router = createRouter({
 		signatureViewRoute,
 	]),
 })
-
-declare module "@tanstack/react-router" {
-	interface Register {
-		router: typeof router
-	}
-}

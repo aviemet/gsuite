@@ -6,6 +6,7 @@ import { router } from "./routes"
 
 import "./reset.css"
 import "@mantine/core/styles.css"
+import "mantine-datatable/styles.layer.css"
 
 const App = () => {
 	return (

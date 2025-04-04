@@ -1,6 +1,6 @@
 import { initializeApp, getApps, FirebaseApp } from "firebase/app"
-import { getAuth, Auth } from "firebase/auth"
-import { getFirestore, Firestore } from "firebase/firestore"
+import { getAuth, Auth, connectAuthEmulator } from "firebase/auth"
+import { getFirestore, Firestore, connectFirestoreEmulator } from "firebase/firestore"
 
 import { FirebaseConfig } from "../types/firebase"
 
@@ -22,6 +22,12 @@ export const initializeFirebase = (): void => {
 		app = initializeApp(firebaseConfig)
 		db = getFirestore(app)
 		auth = getAuth(app)
+
+		// Connect to emulators in development mode
+		if(import.meta.env.DEV) {
+			connectAuthEmulator(auth, "http://localhost:9099")
+			connectFirestoreEmulator(db, "localhost", 8080)
+		}
 	}
 }
 
