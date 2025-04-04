@@ -19,7 +19,7 @@ const SignaturesListPage = () => {
 		<Container>
 			<Group justify="space-between" mb="xl">
 				<Title>Signatures</Title>
-				<Button component={ Link } to="/signatures/new">
+				<Button component={ Link } to="/signatures/edit">
 					Create New Signature
 				</Button>
 			</Group>

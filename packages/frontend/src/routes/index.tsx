@@ -31,15 +31,15 @@ const signaturesRoute = createRoute({
 	component: SignaturesListPage,
 })
 
-const signatureNewRoute = createRoute({
+const signatureEditRoute = createRoute({
 	getParentRoute: () => rootRoute,
-	path: "/signatures/new",
+	path: "/signatures/edit",
 	component: SignatureEditPage,
 })
 
-const signatureEditRoute = createRoute({
+const signatureEditWithIdRoute = createRoute({
 	getParentRoute: () => rootRoute,
-	path: "/signatures/$signatureId/edit",
+	path: "/signatures/edit/$id",
 	component: SignatureEditPage,
 })
 
@@ -55,8 +55,8 @@ export const router = createRouter({
 		indexRoute,
 		settingsRoute,
 		signaturesRoute,
-		signatureNewRoute,
 		signatureEditRoute,
+		signatureEditWithIdRoute,
 		signatureViewRoute,
 	]),
 })
