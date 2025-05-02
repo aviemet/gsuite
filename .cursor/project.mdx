@@ -1,0 +1,51 @@
+# GSuite Signature Management Application
+
+## Project Overview
+A Firebase-based application for managing email signatures with support for multiple templates and views.
+
+## Tech Stack
+- Frontend: TypeScript
+- UI Components: React
+- Data Fetching: TanStack Query
+- Icons: @tabler/icons-react
+- Backend: Firebase (Firestore)
+- Authentication: Firebase Auth
+
+## Architecture
+
+### Frontend Components
+- SignaturesListPage: Main page for displaying signatures
+  - Supports both grid and list view modes
+  - View toggle implemented with Tabler icons
+
+### Data Models
+
+#### Templates
+- Professional Template
+- Simple Template
+- Marketing Template
+
+### Authentication
+- Uses Firebase Auth Emulator for testing
+- Test admin user: test@test.com
+- Security rules require admin privileges for template management
+
+### Development Tools
+
+#### Test Data Seeding
+Location: `packages/frontend/scripts/seed-firestore.ts`
+Purpose: Seeds test templates into Firestore
+Features:
+- Proper Firebase app cleanup
+- Authenticated admin user simulation
+- Uses Firebase Auth Emulator
+
+## Data Fetching Patterns
+- TanStack Query implementation for data fetching
+- Query client configuration and provider setup
+- Templates query implementation
+
+## Security
+- Firestore security rules enforce admin authentication
+- Test environment uses Firebase Auth Emulator
+- No security rule weakening for testing - proper auth simulation used instead 

@@ -1,0 +1,22 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# REQUIRED FOR EVERY INTERACTION:
+
+1. Read .cursor/project.mdx at the start of each interaction
+2. Before ending ANY response, if you've learned ANYTHING about:
+   - Project structure
+   - Code patterns
+   - Implementation details
+   - Conventions
+   - Dependencies
+   - Configuration
+   You MUST update .cursor/project.mdx with this information
+3. When updating .cursor/project.mdx:
+   - Only add new information not already documented
+   - Place information in the appropriate section
+   - If no appropriate section exists, create one
+   - Include specific details (versions, patterns, types) rather than general descriptions
+4. After updating .cursor/project.mdx, explicitly note in your response what new information was added

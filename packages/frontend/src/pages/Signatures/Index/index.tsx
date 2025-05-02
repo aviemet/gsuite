@@ -1,12 +1,16 @@
-import { Button, Container, Group, Title } from "@mantine/core"
+import { Button, Container, Group, SegmentedControl, Title } from "@mantine/core"
+import { IconLayoutGrid, IconList } from "@tabler/icons-react"
 import { Link } from "@tanstack/react-router"
+import { useState } from "react"
 
+import { SignatureGrid } from "@/frontend/components/SignatureGrid"
 import { SignaturesTable } from "@/frontend/components/SignaturesTable"
-import { useTemplates } from "@/frontend/hooks/useTemplates"
+import { useTemplatesQuery } from "@/frontend/queries/templates"
 
 const SignaturesListPage = () => {
-	const { templates, loading, error } = useTemplates()
-
+	const { data: templates = [], isLoading, error } = useTemplatesQuery()
+	const [viewMode, setViewMode] = useState<"table" | "grid">("grid")
+	console.log({ templates })
 	if(error) {
 		return (
 			<Container>
@@ -23,7 +27,38 @@ const SignaturesListPage = () => {
 					Create New Signature
 				</Button>
 			</Group>
-			<SignaturesTable templates={ templates } loading={ loading } />
+			<Group justify="flex-end" mb="md">
+				<SegmentedControl
+					size="xs"
+					value={ viewMode }
+					onChange={ (value) => setViewMode(value as "table" | "grid") }
+					data={ [
+						{
+							value: "grid",
+							label: <IconLayoutGrid size="1rem" />,
+						},
+						{
+							value: "table",
+							label: <IconList size="1rem" />,
+						},
+					] }
+					styles={ {
+						root: {
+							border: "1px solid var(--mantine-color-gray-3)",
+						},
+						label: {
+							lineHeight: 1,
+						},
+					} }
+				/>
+			</Group>
+			{ viewMode === "table"
+				? (
+					<SignaturesTable templates={ templates } loading={ isLoading } />
+				)
+				: (
+					<SignatureGrid templates={ templates } loading={ isLoading } />
+				) }
 		</Container>
 	)
 }
