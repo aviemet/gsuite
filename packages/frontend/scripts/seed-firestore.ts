@@ -1,6 +1,6 @@
 import { initializeApp, deleteApp } from "firebase/app"
 import { getAuth, connectAuthEmulator, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth"
-import { connectFirestoreEmulator, getFirestore, collection, doc, setDoc, Timestamp, getDoc } from "firebase/firestore"
+import { connectFirestoreEmulator, getFirestore, collection, doc, setDoc, Timestamp } from "firebase/firestore"
 
 const firebaseConfig = {
 	apiKey: "fake-api-key",
@@ -14,13 +14,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig)
 const auth = getAuth(app)
 const db = getFirestore(app)
-
-// Log the configuration we're using
-console.log("Using Firebase config:", {
-	projectId: firebaseConfig.projectId,
-	emulatorHost: "localhost",
-	emulatorPort: 8080,
-})
 
 connectAuthEmulator(auth, "http://localhost:9099")
 connectFirestoreEmulator(db, "localhost", 8080)
@@ -83,7 +76,6 @@ const templates = [
 
 async function verifyAdminClaim() {
 	const idTokenResult = await auth.currentUser?.getIdTokenResult(true)
-
 	if(!idTokenResult?.claims.admin) {
 		throw new Error("Please set admin claim manually in the Firebase Auth Emulator UI (http://localhost:9099)")
 	}
@@ -104,45 +96,16 @@ async function seedData() {
 		await verifyAdminClaim()
 
 		const templatesRef = collection(db, "templates")
-		const template = templates[0]
-		const docRef = doc(templatesRef, template.id)
-
-		try {
-			// Try to read first to see if we can access Firestore
-			const testRead = await getDoc(docRef)
-			console.log("Can read from Firestore:", testRead.exists())
-
-			// Try to write with error details
-			const writeResult = await setDoc(docRef, {
-				...template,
-				_test: "Write test",
-			}, { merge: true })
-
-			console.log("Write result:", writeResult)
-
-			// Verify the write immediately
-			const verifyDoc = await getDoc(docRef)
-			if(!verifyDoc.exists()) {
-				throw new Error("Document was not created")
+		for(const template of templates) {
+			try {
+				await setDoc(doc(templatesRef, template.id), template)
+			} catch(err) {
+				throw err
 			}
-			console.log("Document was created successfully:", verifyDoc.data())
-
-		} catch(err) {
-			// Log the full error details
-			console.error("Firestore operation failed:", {
-				error: err,
-				errorCode: err.code,
-				errorMessage: err.message,
-				errorDetails: err.details,
-				stack: err.stack,
-			})
-			throw err
 		}
 	} catch(error) {
-		console.error("Error seeding data:", error)
 		process.exit(1)
 	} finally {
-		// Clean up Firebase app
 		await deleteApp(app)
 		process.exit(0)
 	}

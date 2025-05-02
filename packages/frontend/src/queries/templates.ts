@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { collection, getDocs, onSnapshot, query } from "firebase/firestore"
+import { collection, getDocs, query } from "firebase/firestore"
 
 import { getFirebaseDb } from "@/frontend/lib/firebase"
 import { Template } from "@/frontend/types/firebase"

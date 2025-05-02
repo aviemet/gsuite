@@ -10,7 +10,7 @@ import { useTemplatesQuery } from "@/frontend/queries/templates"
 const SignaturesListPage = () => {
 	const { data: templates = [], isLoading, error } = useTemplatesQuery()
 	const [viewMode, setViewMode] = useState<"table" | "grid">("grid")
-	console.log({ templates })
+
 	if(error) {
 		return (
 			<Container>
