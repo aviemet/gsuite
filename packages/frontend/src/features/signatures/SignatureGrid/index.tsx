@@ -1,6 +1,6 @@
 import { SimpleGrid } from "@mantine/core"
 
-import { SignatureCard } from "@/frontend/components/SignatureCard"
+import { SignatureCard } from "@/frontend/features/signatures/SignatureCard"
 import { Template } from "@/frontend/types/firebase"
 
 interface SignatureGridProps {

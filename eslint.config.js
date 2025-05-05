@@ -181,6 +181,7 @@ export default [
 			}],
 			"@stylistic/jsx-quotes": ["error", "prefer-double"],
 			...reactHooksPlugin.configs.recommended.rules,
+			"import/no-named-as-default-member": "off",
 		},
 	},
 	// Typescript declaration files

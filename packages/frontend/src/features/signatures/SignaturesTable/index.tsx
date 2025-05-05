@@ -1,4 +1,5 @@
-import { Badge, Group } from "@mantine/core"
+import { Badge, Group, Button } from "@mantine/core"
+import { IconPencil, IconTrash } from "@tabler/icons-react"
 import { Link } from "@tanstack/react-router"
 import { DataTable } from "mantine-datatable"
 
@@ -12,6 +13,7 @@ interface SignaturesTableProps {
 export const SignaturesTable = ({ templates, loading }: SignaturesTableProps) => {
 	return (
 		<DataTable
+			withTableBorder={ false }
 			borderRadius="sm"
 			withColumnBorders
 			striped
@@ -29,32 +31,6 @@ export const SignaturesTable = ({ templates, loading }: SignaturesTableProps) =>
 						>
 							{ record.name }
 						</Link>
-					),
-				},
-				{
-					accessor: "variables",
-					title: "Variables",
-					render: ({ variables }) => (
-						<Group gap="xs">
-							{ variables.map((variable) => (
-								<Badge key={ variable } size="sm" variant="light">
-									{ variable }
-								</Badge>
-							)) }
-						</Group>
-					),
-				},
-				{
-					accessor: "conditions",
-					title: "Conditions",
-					render: ({ conditions }) => (
-						<Group gap="xs">
-							{ conditions.map((condition) => (
-								<Badge key={ condition } size="sm" variant="light" color="blue">
-									{ condition }
-								</Badge>
-							)) }
-						</Group>
 					),
 				},
 				{
@@ -79,6 +55,33 @@ export const SignaturesTable = ({ templates, loading }: SignaturesTableProps) =>
 					accessor: "updatedAt",
 					title: "Last Updated",
 					render: ({ updatedAt }) => updatedAt.toDate().toLocaleDateString(),
+				},
+				{
+					accessor: "actions",
+					title: "Actions",
+					render: (record) => (
+						<Group gap="xs">
+							<Link
+								to="/signatures/edit/$id"
+								params={ { id: record.id } }
+								style={ { textDecoration: "none" } }
+							>
+								<Button
+									variant="subtle"
+									size="xs"
+								>
+									<IconPencil size={ 16 } />
+								</Button>
+							</Link>
+							<Button
+								variant="subtle"
+								size="xs"
+								color="red"
+							>
+								<IconTrash size={ 16 } />
+							</Button>
+						</Group>
+					),
 				},
 			] }
 		/>

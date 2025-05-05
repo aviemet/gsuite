@@ -7,8 +7,9 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "concurrently \"yarn dev:vite\" \"yarn emulators\"",
-    "emulators": "firebase emulators:start",
+    "dev": "yarn workspace @gsuite/frontend dev",
+    "dev:no-seed": "yarn workspace @gsuite/frontend dev:no-seed",
+    "dev:all": "yarn workspace @gsuite/frontend dev:all",
     "dev:vite": "yarn workspace @gsuite/frontend dev",
     "build": "yarn workspaces foreach --all -p run build",
     "lint": "yarn workspaces foreach --all -p run lint",
@@ -17,6 +18,7 @@
     "prepare": "husky"
   },
   "devDependencies": {
+    "@babel/preset-react": "^7.27.1",
     "@commitlint/cli": "^19.8.0",
     "@commitlint/config-conventional": "^19.8.0",
     "@tanstack/router-plugin": "^1.119.0",

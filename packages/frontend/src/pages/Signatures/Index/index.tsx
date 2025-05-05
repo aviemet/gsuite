@@ -1,15 +1,18 @@
 import { Button, Container, Group, SegmentedControl, Title } from "@mantine/core"
+import { useLocalStorage } from "@mantine/hooks"
 import { IconLayoutGrid, IconList } from "@tabler/icons-react"
 import { Link } from "@tanstack/react-router"
-import { useState } from "react"
 
-import { SignatureGrid } from "@/frontend/components/SignatureGrid"
-import { SignaturesTable } from "@/frontend/components/SignaturesTable"
+import { SignatureGrid } from "@/frontend/features/signatures/SignatureGrid"
+import { SignaturesTable } from "@/frontend/features/signatures/SignaturesTable"
 import { useTemplatesQuery } from "@/frontend/queries/templates"
 
 const SignaturesListPage = () => {
 	const { data: templates = [], isLoading, error } = useTemplatesQuery()
-	const [viewMode, setViewMode] = useState<"table" | "grid">("grid")
+	const [viewMode, setViewMode] = useLocalStorage<"table" | "grid">({
+		key: "signatures-view-mode",
+		defaultValue: "grid",
+	})
 
 	if(error) {
 		return (

@@ -13,6 +13,11 @@ A Firebase-based application for managing email signatures with support for mult
 
 ## Architecture
 
+### Frontend Folder Structure
+- All page and feature-specific implementations are placed in the `features` folder, organized by feature or page.
+- The `components` folder is reserved exclusively for highly reusable UI elements that are not specific to any single page or feature.
+- Page entry points remain in the `pages` folder, delegating implementation to the appropriate feature modules.
+
 ### Frontend Components
 - SignaturesListPage: Main page for displaying signatures
   - Supports both grid and list view modes
@@ -55,3 +60,16 @@ Features:
 ### Person Test Data
 - Location: `packages/shared/src/person.testdata.ts`
 - Exports a `Person` interface and a `samplePerson` object with fields for id, names, emails, phone numbers, job title, department, organization, and location.
+
+## UI Component Requirements
+- The DataTable component from mantine-datatable requires the withTableBorder prop to be set explicitly (true or false), as it is a required prop in its type definition.
+- The SignaturesTable now has an Actions column with edit and delete buttons. The edit button links to the edit page for the signature using a Link from @tanstack/react-router wrapping a Mantine Button. The variables and conditions columns have been removed from the table.
+- The SignaturesListPage uses useLocalStorage from @mantine/hooks to persist the user's table/grid view choice under the key 'signatures-view-mode'.
+- The SignatureCard now has a subtle edit button in the top right corner, which links to the edit page for the signature. The edit button uses IconPencil and gets higher contrast on hover. The Card's Link now uses to={`/signatures/${template.id}`} for navigation.
+
+## Styling and CSS-in-JS Conventions
+- Each component's styles are colocated in a file named `ComponentName.css.ts` (e.g., `SignatureCard.css.ts`).
+- All theme values (colors, spacing, etc.) must use the `vars` object from `theme.ts` (e.g., `color: ${vars.colors.blue[7]}`) in CSS modules.
+- Styles are imported in the component as `import * as classes from "./ComponentName.css"` and always applied using `clsx` for the `className` prop.
+- Never use inline theme styles or a generic `index.css.ts` for component styles.
+- Always use tagged template literals with Linaria's `css` function for style definitions.
