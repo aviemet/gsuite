@@ -11,6 +11,13 @@ A Firebase-based application for managing email signatures with support for mult
 - Backend: Firebase (Firestore)
 - Authentication: Firebase Auth
 
+## Project Structure
+- The project utilizes a monorepo-like structure with a `packages` directory at the root.
+- Key packages include:
+    - `packages/frontend`: Contains the React frontend application.
+    - `packages/shared`: Contains shared code/types/data used across different parts of the project.
+    - `packages/functions`: Contains Firebase Cloud Functions (or similar backend logic).
+
 ## Architecture
 
 ### Frontend Folder Structure
@@ -35,41 +42,20 @@ A Firebase-based application for managing email signatures with support for mult
 - Test admin user: test@test.com
 - Security rules require admin privileges for template management
 
-### Development Tools
+## Build and Configuration
 
-#### Test Data Seeding
-Location: `packages/frontend/scripts/seed-firestore.ts`
-Purpose: Seeds test templates into Firestore
-Features:
-- Proper Firebase app cleanup
-- Authenticated admin user simulation
-- Uses Firebase Auth Emulator
+### Vite
+- The project uses Vite for frontend development and bundling.
+- There are separate Vite configuration files:
+    - `vite.config.ts` at the project root.
+    - `packages/frontend/vite.config.ts` specific to the frontend package.
+- **Path Aliases**: 
+    - Aliases like `@/frontend`, `@/shared`, and `@/functions` are used to simplify import paths.
+    - Root `vite.config.ts` defines these aliases pointing to `packages/frontend/src`, `packages/shared/src`, etc.
+    - The `packages/frontend/vite.config.ts` also defines these aliases. It's crucial that its relative paths correctly point to the shared directories (e.g., `../../packages/shared/src` from `packages/frontend`). Misconfiguration here can lead to module resolution errors.
+    - Always use the @/ prefixed alias for imports rather than relative import paths
+- **CSS-in-JS**:
+    - The frontend uses Linaria (`@wyw-in-js/vite`) for zero-runtime CSS-in-JS, as configured in `packages/frontend/vite.config.ts`. This plugin handles the transformation of CSS defined in TypeScript/JavaScript files.
 
-## Data Fetching Patterns
-- TanStack Query implementation for data fetching
-- Query client configuration and provider setup
-- Templates query implementation
-
-## Security
-- Firestore security rules enforce admin authentication
-- Test environment uses Firebase Auth Emulator
-- No security rule weakening for testing - proper auth simulation used instead
-
-## Test Data and Types
-
-### Person Test Data
-- Location: `packages/shared/src/person.testdata.ts`
-- Exports a `Person` interface and a `samplePerson` object with fields for id, names, emails, phone numbers, job title, department, organization, and location.
-
-## UI Component Requirements
-- The DataTable component from mantine-datatable requires the withTableBorder prop to be set explicitly (true or false), as it is a required prop in its type definition.
-- The SignaturesTable now has an Actions column with edit and delete buttons. The edit button links to the edit page for the signature using a Link from @tanstack/react-router wrapping a Mantine Button. The variables and conditions columns have been removed from the table.
-- The SignaturesListPage uses useLocalStorage from @mantine/hooks to persist the user's table/grid view choice under the key 'signatures-view-mode'.
-- The SignatureCard now has a subtle edit button in the top right corner, which links to the edit page for the signature. The edit button uses IconPencil and gets higher contrast on hover. The Card's Link now uses to={`/signatures/${template.id}`} for navigation.
-
-## Styling and CSS-in-JS Conventions
-- Each component's styles are colocated in a file named `ComponentName.css.ts` (e.g., `SignatureCard.css.ts`).
-- All theme values (colors, spacing, etc.) must use the `vars` object from `theme.ts` (e.g., `color: ${vars.colors.blue[7]}`) in CSS modules.
-- Styles are imported in the component as `import * as classes from "./ComponentName.css"` and always applied using `clsx` for the `className` prop.
-- Never use inline theme styles or a generic `index.css.ts` for component styles.
-- Always use tagged template literals with Linaria's `css` function for style definitions.
+### TypeScript
+- A root `tsconfig.json`

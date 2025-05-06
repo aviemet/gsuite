@@ -8,6 +8,10 @@
     "jsx": "react-jsx"
   },
   "rootDir": "./src",  
-  "include": ["src"],
+  "include": [
+    "src",
+    "../../shared/src",
+    "../../functions/src"
+  ],
   "references": [{ "path": "./tsconfig.node.json" }]
 } 

@@ -1,21 +1,30 @@
 import { escape } from "@f0c1s/escape-html"
-import { Button, Group, Stack, Text, TextInput, Grid, Paper, Title } from "@mantine/core"
+import {
+	Button,
+	Group,
+	Stack,
+	Text,
+	TextInput,
+	Grid,
+	Paper,
+	SegmentedControl,
+} from "@mantine/core"
 import { useForm } from "@mantine/form"
+import { useLocalStorage } from "@mantine/hooks"
 import { useState, useEffect } from "react"
-import { HtmlHighlight } from "@/frontend/components/HtmlHighlight"
+import { HtmlEditor } from "@/frontend/components/HtmlEditor"
+import { HtmlPreview } from "@/frontend/components/HtmlPreview"
 import { RichTextEditor } from "@/frontend/components/RichTextEditor"
 
 import { formatHtmlWithDirectives } from "@/frontend/lib"
 import { Template } from "@/frontend/types/firebase"
-import { samplePerson } from "../../../../../shared/src/person.testdata"
+import { samplePerson } from "@/shared/person.testdata"
 
 interface SignatureTemplateFormProps {
 	template?: Template
 	onSubmit: (values: { name: string, content: string }) => void
 	onCancel: () => void
 }
-
-type Context = Record<string, any>;
 
 function safeTemplateParse(template: string, context: Record<string, any>): string {
 	// Replace all {{#if var}} ... {{/if}} blocks (tolerant of whitespace and newlines)
@@ -52,16 +61,18 @@ export const SignatureTemplateForm = ({
 		},
 	})
 
-	const [showHtml, setShowHtml] = useState(false)
-	const [formattedHtml, setFormattedHtml] = useState("")
-
-	useEffect(() => {
-		setFormattedHtml(formatHtmlWithDirectives(form.values.content))
-	}, [template, form.values.content])
+	const [editorMode, setEditorMode] = useLocalStorage<"visual" | "code">({
+		key: "signature-template-editor-mode",
+		defaultValue: "visual",
+	})
 
 	function handleSubmit(values: { name: string, content: string }) {
-		setFormattedHtml(formatHtmlWithDirectives(values.content))
-		onSubmit(values)
+		const prettyContent = formatHtmlWithDirectives(values.content)
+		// Update form state as well, in case of submission failure and user stays on form
+		if(form.values.content !== prettyContent) {
+			form.setFieldValue("content", prettyContent)
+		}
+		onSubmit({ ...values, content: prettyContent })
 	}
 
 	const previewContext = {
@@ -85,16 +96,32 @@ export const SignatureTemplateForm = ({
 				</Grid.Col>
 
 				<Grid.Col span={ { sm: 12, md: 6 } }>
-					<Stack gap="xs">
+					<Stack>
 						<Group justify="space-between">
 							<Text fw={ 500 } size="sm">Signature Content</Text>
-							<Button size="xs" variant="default" onClick={ () => setShowHtml((v) => !v) } type="button">
-								{ showHtml ? "Show Editor" : "Show HTML" }
-							</Button>
+							<SegmentedControl
+								size="xs"
+								value={ editorMode }
+								onChange={ (newMode) => {
+									const currentContent = form.values.content
+									const prettyContent = formatHtmlWithDirectives(currentContent)
+									if(currentContent !== prettyContent) {
+										form.setFieldValue("content", prettyContent)
+									}
+									setEditorMode(newMode as "visual" | "code")
+								} }
+								data={ [
+									{ value: "visual", label: "Visual Editor" },
+									{ value: "code", label: "Code Editor" },
+								] }
+							/>
 						</Group>
-						{ showHtml
+						{ editorMode === "code"
 							? (
-								<HtmlHighlight code={ formattedHtml } radius="md" withCopyButton={ false } />
+								<HtmlEditor
+									value={ form.values.content }
+									onChange={ (newContent) => form.setFieldValue("content", newContent) }
+								/>
 							)
 							: (
 								<RichTextEditor
@@ -102,14 +129,17 @@ export const SignatureTemplateForm = ({
 									onChange={ (val) => form.setFieldValue("content", val) }
 								/>
 							) }
-					</Stack>
 
+					</Stack>
 				</Grid.Col>
 
 				<Grid.Col span={ { sm: 12, md: 6 } }>
-					<Paper p="md" withBorder>
-						<div dangerouslySetInnerHTML={ { __html: previewHtml } } />
-					</Paper>
+					<Stack>
+						<Text fw={ 500 } size="sm">Live Preview</Text>
+						<Paper p="md" withBorder>
+							<HtmlPreview html={ previewHtml } />
+						</Paper>
+					</Stack>
 				</Grid.Col>
 
 				<Grid.Col>

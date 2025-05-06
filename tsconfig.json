@@ -23,7 +23,9 @@
     "noEmit": true,  
     "baseUrl": ".",
     "paths": {
-      "@/frontend/*": ["packages/frontend/src/*"]
+      "@/frontend/*": ["packages/frontend/src/*"],
+      "@/shared/*": ["packages/shared/src/*"],
+      "@/functions/*": ["packages/functions/src/*"]
     },
     "noUnusedLocals": true,
     "noUnusedParameters": true,

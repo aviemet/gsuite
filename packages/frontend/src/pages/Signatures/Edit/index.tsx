@@ -1,4 +1,4 @@
-import { Container, Title, Loader, Center, Box } from "@mantine/core"
+import { Title, Loader, Center, Box } from "@mantine/core"
 import { useNavigate, useRouter } from "@tanstack/react-router"
 
 import { SignatureTemplateForm } from "@/frontend/features/signatures/SignatureTemplateForm"
@@ -12,7 +12,6 @@ const SignatureEditPage = () => {
 	const { data: template, isLoading } = useTemplateQuery(isEdit ? id : undefined)
 
 	const handleSubmit = async(values: { name: string, content: string }) => {
-		console.log("Saving template:", values)
 		navigate({ to: "/signatures" })
 	}
 

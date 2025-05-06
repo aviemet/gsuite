@@ -78,5 +78,28 @@ export function formatHtmlWithDirectives(html: string): string {
 		cleaned.push(curr)
 	}
 
-	return cleaned.join("\n")
+	// Step 5: Trim leading/trailing empty lines and ensure one trailing empty line
+	let linesToProcess = [...cleaned] // Use a copy of cleaned
+
+	// Trim leading empty lines (lines that are empty or only whitespace)
+	while(linesToProcess.length > 0 && linesToProcess[0].trim() === "") {
+		linesToProcess.shift()
+	}
+
+	// Trim all trailing lines that are empty or only whitespace
+	while(linesToProcess.length > 0 && linesToProcess[linesToProcess.length - 1].trim() === "") {
+		linesToProcess.pop()
+	}
+
+	// If the input was all empty lines or became empty after trimming leading/trailing empty lines
+	if(linesToProcess.length === 0) {
+		return "\n" // Return a single empty line represented by a newline character
+	}
+
+	// Add one actual empty line string to be the last line before joining.
+	// .join("\n") will ensure this results in a string ending with a newline,
+	// making the last line effectively empty.
+	linesToProcess.push("")
+
+	return linesToProcess.join("\n")
 }

@@ -19,6 +19,13 @@ export default defineConfig({
 	resolve: {
 		alias: {
 			"@/frontend": path.resolve(__dirname, "./src"),
+			"@/shared": path.resolve(__dirname, "../shared/src"),
+			"@/functions": path.resolve(__dirname, "../functions/src"),
+		},
+	},
+	server: {
+		watch: {
+			ignored: ["!**/node_modules/**"], // Default, but can be more specific
 		},
 	},
 })
