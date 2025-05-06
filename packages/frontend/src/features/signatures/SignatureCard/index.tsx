@@ -1,6 +1,6 @@
 import { Badge, Card, Group, Stack, Text, Button } from "@mantine/core"
 import { IconPencil } from "@tabler/icons-react"
-import { Link } from "@tanstack/react-router"
+import { Link, useRouter } from "@tanstack/react-router"
 import clsx from "clsx"
 import { Template } from "@/frontend/types/firebase"
 import * as classes from "./SignatureCard.css"
@@ -10,26 +10,23 @@ interface SignatureCardProps {
 }
 
 export const SignatureCard = ({ template }: SignatureCardProps) => {
+	const router = useRouter()
 	return (
 		<Card
-			component={ Link }
-			to={ `/signatures/${template.id}` }
 			withBorder
 			radius="md"
 			padding="lg"
 			className={ clsx(classes.cardRoot) }
 		>
 			<Group justify="space-between" align="flex-start" mb="md">
-				<Text fw={ 700 } size="lg">
+				<Text fw={ 700 } size="lg" component={ Link } to={ `/signatures/${template.id}` } style={ { textDecoration: "none", color: "inherit", cursor: "pointer" } }>
 					{ template.name }
 				</Text>
 				<Button
-					component={ Link }
-					to={ `/signatures/edit/${template.id}` }
 					variant="subtle"
 					size="xs"
 					className={ clsx(classes.editButton) }
-					onClick={ (e) => e.stopPropagation() }
+					onClick={ () => router.navigate({ to: "/signatures/edit/$id", params: { id: template.id } }) }
 				>
 					<IconPencil size={ 16 } />
 				</Button>

@@ -1,4 +1,4 @@
-import { Container, Title, Loader, Center } from "@mantine/core"
+import { Container, Title, Loader, Center, Box } from "@mantine/core"
 import { useNavigate, useRouter } from "@tanstack/react-router"
 
 import { SignatureTemplateForm } from "@/frontend/features/signatures/SignatureTemplateForm"
@@ -29,14 +29,18 @@ const SignatureEditPage = () => {
 	}
 
 	return (
-		<Container>
-			<Title mb="xl">{ isEdit ? "Edit Signature Template" : "Create Signature Template" }</Title>
-			<SignatureTemplateForm
-				template={ template }
-				onSubmit={ handleSubmit }
-				onCancel={ handleCancel }
-			/>
-		</Container>
+		<>
+			<Box>
+				<Title mb="xl">{ isEdit ? "Edit Signature Template" : "Create Signature Template" }</Title>
+			</Box>
+			<Box>
+				<SignatureTemplateForm
+					template={ template }
+					onSubmit={ handleSubmit }
+					onCancel={ handleCancel }
+				/>
+			</Box>
+		</>
 	)
 }
 

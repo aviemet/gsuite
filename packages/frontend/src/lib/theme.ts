@@ -1,22 +1,15 @@
-import { createTheme, DEFAULT_THEME, MantineSpacingValues, mergeMantineTheme, type MantineTheme } from "@mantine/core"
+import { createTheme, DEFAULT_THEME, mergeMantineTheme, type MantineTheme } from "@mantine/core"
 import { themeToVars } from "@mantine/vanilla-extract"
 
 import breakpoints from "./breakpoints.mjs"
 
-type CustomMantineTheme = Omit<MantineTheme, "spacing" | "other"> & {
-	spacing: Partial<MantineSpacingValues & {
-		xxl: string
-		xxs: string
-	}>
-	other: any
-}
-
 export const defaultColor = "blue"
 
-export const themeObject: Partial<CustomMantineTheme> = {
+export const themeObject: Partial<MantineTheme> = {
 	breakpoints,
 	defaultRadius: "sm",
 	spacing: {
+		...DEFAULT_THEME.spacing,
 		xxl: "calc(2.5rem * var(--mantine-scale))",
 		xs: "calc(0.5rem * var(--mantine-scale))",
 		xxs: "calc(0.25rem * var(--mantine-scale))",
