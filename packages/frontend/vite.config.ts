@@ -1,5 +1,6 @@
 import path from "path"
-import react from "@vitejs/plugin-react"
+// import react from "@vitejs/plugin-react" // Old plugin
+import react from "@vitejs/plugin-react-swc" // New SWC-based plugin
 import wyw from "@wyw-in-js/vite"
 import { defineConfig } from "vite"
 
@@ -22,10 +23,20 @@ export default defineConfig({
 			"@/shared": path.resolve(__dirname, "../shared/src"),
 			"@/functions": path.resolve(__dirname, "../functions/src"),
 		},
+		dedupe: [
+			"react",
+			"react-dom",
+		],
 	},
-	server: {
-		watch: {
-			ignored: ["!**/node_modules/**"], // Default, but can be more specific
-		},
+	optimizeDeps: {
+		entries: [
+			"src/main.tsx",
+		],
+		include: [
+			"@codemirror/state",
+			"@codemirror/view",
+			"@codemirror/lang-html",
+			"js-beautify",
+		],
 	},
 })

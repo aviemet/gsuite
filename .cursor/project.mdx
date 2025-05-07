@@ -24,11 +24,21 @@ A Firebase-based application for managing email signatures with support for mult
 - All page and feature-specific implementations are placed in the `features` folder, organized by feature or page.
 - The `components` folder is reserved exclusively for highly reusable UI elements that are not specific to any single page or feature.
 - Page entry points remain in the `pages` folder, delegating implementation to the appropriate feature modules.
+- The `lib` folder contains utility functions and modules used across the frontend.
+    - `formatHtmlWithDirectives.ts`: Provides functions for formatting HTML strings that include template directives.
+    - `parseTemplate.ts`: Contains `safeTemplateParse` for parsing template strings with simple Handlebars-like syntax (variable substitution and conditional blocks).
 
 ### Frontend Components
 - SignaturesListPage: Main page for displaying signatures
   - Supports both grid and list view modes
   - View toggle implemented with Tabler icons
+- RichTextEditor: (`packages/frontend/src/components/RichTextEditor/index.tsx`)
+  - Based on Tiptap and Mantine RichTextEditor.
+  - Supports standard formatting options (bold, italic, lists, headings, etc.).
+  - Includes font selection capabilities using Tiptap's `FontFamily` and `TextStyle` extensions.
+  - A Mantine `Select` component is used in the toolbar for choosing from a predefined list of web-safe fonts (with fallbacks) and dynamically loaded system fonts.
+  - System fonts can be loaded via a button using the Local Font Access API (browser/permission dependent).
+  - Includes a color picker for text color selection.
 
 ### Data Models
 
@@ -46,6 +56,7 @@ A Firebase-based application for managing email signatures with support for mult
 
 ### Vite
 - The project uses Vite for frontend development and bundling.
+- The frontend React plugin has been switched from `@vitejs/plugin-react` (Babel-based) to `@vitejs/plugin-react-swc` (SWC-based) for potentially faster compilation and HMR. [[Reference](https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react-swc)]
 - There are separate Vite configuration files:
     - `vite.config.ts` at the project root.
     - `packages/frontend/vite.config.ts` specific to the frontend package.
@@ -56,6 +67,50 @@ A Firebase-based application for managing email signatures with support for mult
     - Always use the @/ prefixed alias for imports rather than relative import paths
 - **CSS-in-JS**:
     - The frontend uses Linaria (`@wyw-in-js/vite`) for zero-runtime CSS-in-JS, as configured in `packages/frontend/vite.config.ts`. This plugin handles the transformation of CSS defined in TypeScript/JavaScript files.
+- **Dependency Pre-bundling**:
+    - To stabilize Hot Module Replacement (HMR) and prevent frequent re-optimization of CodeMirror-related dependencies (`@codemirror/state`, `@codemirror/view`, `@codemirror/lang-html`), these are explicitly included in `optimizeDeps.include` within `packages/frontend/vite.config.ts`.
+    - `js-beautify` is also included in `optimizeDeps.include` for the same reasons.
+    - To focus Vite's dependency pre-bundling process and potentially speed it up, `optimizeDeps.entries` is set to `['src/main.tsx']` in `packages/frontend/vite.config.ts`.
+- **Dependency Deduplication**:
+    - To ensure a single instance of core libraries like React and React DOM across the frontend and shared packages (especially in a monorepo context), `react` and `react-dom` are added to `resolve.dedupe` in `packages/frontend/vite.config.ts`. This can help stabilize Vite's dependency graph and reduce unnecessary re-optimizations.
 
 ### TypeScript
 - A root `tsconfig.json`
+
+## Dependencies
+
+-   `@mantine/core`: UI component library.
+-   `@mantine/tiptap`: Mantine integration for Tiptap.
+-   `@tiptap/core`: Core Tiptap library.
+-   `@tiptap/extension-font-family`: Tiptap extension for font family.
+-   `@tiptap/extension-highlight`: Tiptap extension for text highlighting.
+-   `@tiptap/extension-subscript`: Tiptap extension for subscript.
+-   `@tiptap/extension-superscript`: Tiptap extension for superscript.
+-   `@tiptap/extension-text-align`: Tiptap extension for text alignment.
+-   `@tiptap/extension-text-style`: Tiptap extension for text styling (used by FontFamily and Color).
+-   `@tiptap/extension-underline`: Tiptap extension for underline.
+-   `@tiptap/extension-link`: Tiptap extension for links.
+-   `@tiptap/extension-color`: Tiptap extension for text color.
+-   `@tiptap/react`: React components for Tiptap.
+-   `@tiptap/starter-kit`: A collection of common Tiptap extensions.
+
+## Code Patterns and Conventions
+
+-   **TypeScript**: Used for all JavaScript code. Interfaces are preferred over types.
+-   **React**: Functional components are used.
+-   **Styling**: Mantine components and CSS Modules (Linaria) are used.
+-   **State Management**: Zustand for global state. Server state is managed via React Query.
+
+## Implementation Details
+
+### RichTextEditor Component
+
+-   Located at `packages/frontend/src/components/RichTextEditor/index.tsx`.
+-   Based on Tiptap and Mantine's RichTextEditor.
+-   Supports standard rich text features (bold, italic, underline, lists, etc.).
+-   Includes font family selection with an option to load system fonts.
+-   Includes a color picker for text color selection.
+
+## Configuration
+
+(Details about project configuration, build tools, etc.)

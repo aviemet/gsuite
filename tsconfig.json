@@ -1,36 +1,8 @@
 {
-  "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "node",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "experimentalDecorators": true, 
-    "useDefineForClassFields": true,  
-    "resolveJsonModule": true,       
-    "allowJs": true,
-    "checkJs": false,  
-    "forceConsistentCasingInFileNames": true,
-    "allowImportingTsExtensions": true,
-    "isolatedModules": true,
-    "moduleDetection": "force",
-    "sourceMap": true,     
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "allowSyntheticDefaultImports": true,
-    "noImplicitAny": true,
-    "noEmit": true,  
-    "baseUrl": ".",
-    "paths": {
-      "@/frontend/*": ["packages/frontend/src/*"],
-      "@/shared/*": ["packages/shared/src/*"],
-      "@/functions/*": ["packages/functions/src/*"]
-    },
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-  },
-  "include": ["vite.config.ts", "eslint.config.js", "postcss.config.js", "eslint.config.js"],
-  "compileOnSave": false,
-}
+  "files": [], // No individual files to compile at this level
+  "references": [
+    { "path": "./packages/frontend" },
+    { "path": "./packages/shared" },
+    { "path": "./packages/functions" }
+  ]
+} 

@@ -11,12 +11,12 @@ import {
 } from "@mantine/core"
 import { useForm } from "@mantine/form"
 import { useLocalStorage } from "@mantine/hooks"
-import { useState, useEffect } from "react"
 import { HtmlEditor } from "@/frontend/components/HtmlEditor"
 import { HtmlPreview } from "@/frontend/components/HtmlPreview"
 import { RichTextEditor } from "@/frontend/components/RichTextEditor"
 
 import { formatHtmlWithDirectives } from "@/frontend/lib"
+import { safeTemplateParse } from "@/frontend/lib/parseTemplate"
 import { Template } from "@/frontend/types/firebase"
 import { samplePerson } from "@/shared/person.testdata"
 
@@ -24,25 +24,6 @@ interface SignatureTemplateFormProps {
 	template?: Template
 	onSubmit: (values: { name: string, content: string }) => void
 	onCancel: () => void
-}
-
-function safeTemplateParse(template: string, context: Record<string, any>): string {
-	// Replace all {{#if var}} ... {{/if}} blocks (tolerant of whitespace and newlines)
-	template = template.replace(/\{\{#if\s+(\w+)\s*\}\}([\s\S]*?)\{\{\/if\}\}/g, (_, key, content) => {
-		return context[key] ? content : ""
-	})
-	// Remove any unmatched {{#if ...}} or {{/if}}
-	template = template.replace(/\{\{#if\s+\w+\s*\}\}/g, "")
-	template = template.replace(/\{\{\/if\}\}/g, "")
-	// Replace all {{{var}}} with values or blank (tolerant of whitespace)
-	template = template.replace(/\{\{\{\s*(\w+)\s*\}\}\}/g, (_, key) => {
-		return context[key] ?? ""
-	})
-	// Replace all {{var}} with values or blank (tolerant of whitespace)
-	template = template.replace(/\{\{\s*(\w+)\s*\}\}/g, (_, key) => {
-		return context[key] ?? ""
-	})
-	return template
 }
 
 export const SignatureTemplateForm = ({
@@ -53,7 +34,7 @@ export const SignatureTemplateForm = ({
 	const form = useForm({
 		initialValues: {
 			name: template?.name ?? "",
-			content: template?.content ?? "",
+			content: formatHtmlWithDirectives(template?.content ?? ""),
 		},
 		validate: {
 			name: (value) => (!value ? "Name is required" : null),

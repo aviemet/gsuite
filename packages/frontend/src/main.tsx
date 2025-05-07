@@ -6,7 +6,7 @@ import "@mantine/tiptap/styles.css"
 import "@mantine/code-highlight/styles.css"
 import "mantine-datatable/styles.layer.css"
 
-import App from "./App.tsx"
+import App from "./App"
 
 createRoot(document.getElementById("root")!).render(
 	<StrictMode>

@@ -1,6 +1,8 @@
 import { html } from "@codemirror/lang-html"
-import { okaidia } from "@uiw/codemirror-themes-all" // A popular dark theme, can be changed
+import { EditorView } from "@codemirror/view"
+import { okaidia, basicLight } from "@uiw/codemirror-themes-all" // A popular dark theme, can be changed
 import CodeMirror from "@uiw/react-codemirror"
+import { handlebarsLanguage } from "@xiechao/codemirror-lang-handlebars"
 
 interface HtmlEditorProps {
 	value: string
@@ -8,18 +10,21 @@ interface HtmlEditorProps {
 	// We can add other CodeMirror options as props if needed, e.g., height, theme
 }
 
+const editorFontSize = EditorView.theme({
+	"&": {
+		fontSize: "0.9em",
+	},
+})
+
 export function HtmlEditor({ value, onChange }: HtmlEditorProps) {
 	return (
 		<CodeMirror
 			value={ value }
-			height="300px" // Default height, can be customized via props
-			extensions={ [html()] } // Enable HTML language support
+			extensions={ [html(), handlebarsLanguage, editorFontSize] } // Enable HTML language support and add handlebarsLanguage directly
 			onChange={ (newValue) => {
 				onChange(newValue)
 			} }
-			theme={ okaidia } // Using okaidia theme as a starting point
-			// You can explore other themes or create a custom one that matches Mantine
-			// For example, a light theme: import { sublime } from "@uiw/codemirror-theme-sublime";
+			theme={ basicLight }
 		/>
 	)
 }
