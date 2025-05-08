@@ -1,5 +1,6 @@
 import path from "path"
-import react from "@vitejs/plugin-react"
+// import react from "@vitejs/plugin-react" // Old plugin
+import react from "@vitejs/plugin-react-swc" // New SWC-based plugin
 import { defineConfig } from "vite"
 
 // https://vitejs.dev/config/

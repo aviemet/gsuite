@@ -11,7 +11,8 @@ import Underline from "@tiptap/extension-underline"
 import { useEditor } from "@tiptap/react"
 import StarterKit from "@tiptap/starter-kit"
 import { ReactNode, useEffect, useState } from "react"
-import { DirectiveNode } from "./DirectiveNode"
+import { BracketsExtension } from "@/frontend/lib/tiptapBracketsExtension/BracketsExtension"
+// import { DirectiveNode } from "./DirectiveNode"
 
 interface LocalFontData {
 	family: string
@@ -62,7 +63,8 @@ export function RichTextEditor({ value, onChange, content, className, children }
 			TextStyle,
 			FontFamily.configure({ types: ["textStyle"] }),
 			Color.configure({ types: ["textStyle"] }),
-			DirectiveNode,
+			// DirectiveNode,
+			BracketsExtension,
 		],
 		content: content ?? value,
 		onUpdate: ({ editor }) => {

@@ -10,7 +10,8 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "seed": "tsx scripts/seed-firestore.ts",
-    "emulators": "(cd ../.. && firebase emulators:start --import=./packages/frontend/seed --export-on-exit=./packages/frontend/seed)"
+    "emulators": "(cd ../.. && firebase emulators:start --import=./packages/frontend/seed --export-on-exit=./packages/frontend/seed/current)",
+    "cleanup": "rm -rf seed/* && mkdir -p seed/current"
   },
   "dependencies": {
     "@codemirror/lang-html": "^6.4.9",

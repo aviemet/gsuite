@@ -10,7 +10,6 @@
     "dev": "yarn workspace @gsuite/frontend dev",
     "dev:no-seed": "yarn workspace @gsuite/frontend dev:no-seed",
     "dev:all": "yarn workspace @gsuite/frontend dev:all",
-    "dev:vite": "yarn workspace @gsuite/frontend dev",
     "build": "yarn workspaces foreach --all -p run build",
     "lint": "yarn workspaces foreach --all -p run lint",
     "test": "yarn workspaces foreach --all -p run test",
@@ -37,9 +36,5 @@
       "path": "cz-conventional-changelog"
     }
   },
-  "packageManager": "yarn@4.8.1",
-  "dependencies": {
-    "@tiptap/extension-font-family": "^2.12.0",
-    "@tiptap/extension-text-style": "^2.12.0"
-  }
+  "packageManager": "yarn@4.8.1"
 }

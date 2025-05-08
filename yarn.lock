@@ -8511,8 +8511,6 @@ __metadata:
     "@commitlint/cli": "npm:^19.8.0"
     "@commitlint/config-conventional": "npm:^19.8.0"
     "@tanstack/router-plugin": "npm:^1.119.0"
-    "@tiptap/extension-font-family": "npm:^2.12.0"
-    "@tiptap/extension-text-style": "npm:^2.12.0"
     "@types/add": "npm:^2.0.3"
     add: "npm:^2.0.6"
     commitizen: "npm:^4.3.1"

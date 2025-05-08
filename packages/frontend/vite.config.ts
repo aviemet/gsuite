@@ -28,15 +28,15 @@ export default defineConfig({
 			"react-dom",
 		],
 	},
-	optimizeDeps: {
-		entries: [
-			"src/main.tsx",
-		],
-		include: [
-			"@codemirror/state",
-			"@codemirror/view",
-			"@codemirror/lang-html",
-			"js-beautify",
-		],
+	cacheDir: ".vite-cache",
+	build: {
+		rollupOptions: {
+			output: {
+				manualChunks: {
+					vendor: ["react", "react-dom"],
+					mantine: ["@mantine/core", "@mantine/hooks"],
+				},
+			},
+		},
 	},
 })
