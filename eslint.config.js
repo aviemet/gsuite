@@ -1,7 +1,7 @@
 import { fixupPluginRules } from "@eslint/compat"
 import json from "@eslint/json"
 import stylistic from "@stylistic/eslint-plugin"
-import tsParser from "@typescript-eslint/parser"
+import * as tsParser from "@typescript-eslint/parser"
 import importPlugin from "eslint-plugin-import"
 import jsoncPlugin from "eslint-plugin-jsonc"
 import jsxA11yPlugin from "eslint-plugin-jsx-a11y"
@@ -32,6 +32,9 @@ export default [
 				ecmaFeatures: {
 					jsx: true,
 				},
+				project: ["./tsconfig.json", "./packages/*/tsconfig.json", "./packages/*/*/tsconfig.json"],
+				tsconfigRootDir: ".",
+				experimentalDecorators: true,
 			},
 		},
 		settings: {
@@ -43,7 +46,7 @@ export default [
 			},
 			"import/resolver": {
 				typescript: {
-					project: ["./tsconfig.json", "./packages/*/tsconfig.json"],
+					project: ["./tsconfig.json", "./packages/*/tsconfig.json", "./packages/*/*/tsconfig.json"],
 					alwaysTryTypes: true,
 					extensions: [".ts", ".tsx", ".js", ".jsx"],
 				},
@@ -202,14 +205,27 @@ export default [
 		plugins: {
 			jsonc: jsoncPlugin,
 			json,
+			"@stylistic": stylistic,
 		},
 		languageOptions: {
 			parser: jsoncParser,
+			parserOptions: {
+				allowComments: true,
+			},
 		},
 		rules: {
 			"json/no-duplicate-keys": "error",
-			"jsonc/indent": ["error", 2, { ignoredNodes: ["Property"] }],
+			"jsonc/indent": ["error", 2],
+			"jsonc/object-curly-spacing": ["error", "always"],
+			"jsonc/comma-dangle": ["error", "never"],
+			"jsonc/quotes": ["error", "double"],
 			"@stylistic/no-multi-spaces": "off",
+		},
+		formatter: {
+			indent: 2,
+			quotes: "double",
+			objectCurlySpacing: true,
+			commaDangle: "never",
 		},
 	},
 	// CSS-in-TS files

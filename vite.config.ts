@@ -13,7 +13,8 @@ export default defineConfig({
 			"@": path.resolve(__dirname, "./"),
 			"@/shared": path.resolve(__dirname, "./packages/shared/src"),
 			"@/frontend": path.resolve(__dirname, "./packages/frontend/src"),
-			"@/functions": path.resolve(__dirname, "./packages/functions/src"),
+			"@/firebase": path.resolve(__dirname, "./packages/firebase"),
+			"@/functions": path.resolve(__dirname, "./packages/firebase/functions/src"),
 		},
 	},
 	server: {

@@ -22,11 +22,12 @@
     "paths": {
       "@/frontend/*": ["packages/frontend/src/*"],
       "@/shared/*": ["packages/shared/src/*"],
-      "@/functions/*": ["packages/functions/src/*"]
+      "@/firebase/*": ["packages/firebase/*"],
+      "@/functions/*": ["packages/firebase/functions/src/*"]
     },
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
   "compileOnSave": false
-} 
+}
