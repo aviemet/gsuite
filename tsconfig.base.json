@@ -18,12 +18,11 @@
     "declaration": true,
     "allowSyntheticDefaultImports": true,
     "noImplicitAny": true,
-    "baseUrl": ".",
     "paths": {
-      "@/frontend/*": ["packages/frontend/src/*"],
-      "@/shared/*": ["packages/shared/src/*"],
-      "@/firebase/*": ["packages/firebase/*"],
-      "@/functions/*": ["packages/firebase/functions/src/*"]
+      "@/frontend/*": ["./packages/frontend/src/*"],
+      "@/shared/*": ["./packages/shared/src/*"],
+      "@/firebase/*": ["./packages/firebase/*"],
+      "@/functions/*": ["./packages/functions/src/*"]
     },
     "noUnusedLocals": true,
     "noUnusedParameters": true,

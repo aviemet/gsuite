@@ -33,12 +33,12 @@ A Firebase-based application for managing email signatures with support for mult
   - Supports both grid and list view modes
   - View toggle implemented with Tabler icons
 - RichTextEditor: (`packages/frontend/src/components/RichTextEditor/index.tsx`)
-  - Based on Tiptap and Mantine RichTextEditor.
+  - Based on Tiptap 3 and Mantine 9 RichTextEditor, with extensions registered individually (no StarterKit).
   - Supports standard formatting options (bold, italic, lists, headings, etc.).
   - Includes font selection capabilities using Tiptap's `FontFamily` and `TextStyle` extensions.
   - A Mantine `Select` component is used in the toolbar for choosing from a predefined list of web-safe fonts (with fallbacks) and dynamically loaded system fonts.
   - System fonts can be loaded via a button using the Local Font Access API (browser/permission dependent).
-  - Includes a color picker for text color selection.
+  - Text color uses Mantine `RichTextEditor.ColorPicker`.
 
 ### Data Models
 
@@ -52,6 +52,41 @@ A Firebase-based application for managing email signatures with support for mult
 - Test admin user: test@test.com
 - Security rules require admin privileges for template management
 
+## Development Scripts
+
+Root `package.json` proxies all `dev*` scripts into `@gsuite/frontend`:
+
+- `yarn dev` → `yarn workspace @gsuite/frontend dev`
+- `yarn dev:no-seed` → `yarn workspace @gsuite/frontend dev:no-seed`
+- `yarn dev:all` → `yarn workspace @gsuite/frontend dev:all`
+
+Frontend scripts:
+
+- `dev`: Firebase emulators with `--import=./seed --export-on-exit=./seed` (Auth 9099, Functions 5001, Firestore 8080, Emulator UI 4000), then Vite once those ports are up. Session writes are persisted back into `packages/firebase/seed` on emulator exit.
+- `dev:no-seed`: same Vite + emulator stack, but `firebase emulators:start` with no import/export. Empty Auth/Firestore.
+- `dev:all`: `dev` plus watch compilers for `@gsuite/shared` (`tsc --build --watch`) and `@gsuite/functions` (`tsc --build --watch`). Needed because Functions load compiled `lib/` and `@gsuite/shared` via `dist/`, while Vite itself aliases `@/shared` to source.
+
+`wait-on tcp:127.0.0.1:8080 tcp:127.0.0.1:9099 tcp:127.0.0.1:4000` delays Vite until Firestore, Auth, and the Emulator UI are listening. Functions port 5001 is not waited on (functions may fail to load if `lib/` is stale).
+
+Related scripts:
+
+- `@gsuite/frontend seed`: `tsx scripts/seed-firestore.ts` — programmatically writes templates/users into already-running Auth + Firestore emulators. Not used by the `dev*` scripts.
+- `@gsuite/frontend emulators` → `@gsuite/firebase emulators` (`--import=./seed --export-on-exit=./seed`)
+- `@gsuite/frontend emulators:no-seed` → `@gsuite/firebase emulators:no-seed` (`firebase emulators:start`)
+
+Workspaces: `packages/frontend`, `packages/shared`, `packages/firebase`, `packages/functions`.
+
+### Yarn
+- Package manager is Yarn 4.8.1 (`packageManager` in root `package.json`; Corepack).
+- `.yarnrc.yml` must set `nodeLinker: node-modules`. Yarn 4 defaults to Plug'n'Play. PnP removes `node_modules`, which breaks Vite resolution and the Firebase Functions emulator (it looks for `node_modules/.bin/firebase-functions` via `require.resolve('firebase-functions', { paths: [functionsSourceDir] })`).
+- Direct imports and peer deps must be declared on `@gsuite/frontend`. Yarn will not install undeclared peers. Required because they are imported in source:
+  - `@codemirror/view` (peer of `@uiw/react-codemirror`; used by `HtmlEditor`)
+  - `@tiptap/core` (peer of Tiptap extensions; used by RichTextEditor and `tiptapBracketsExtension`)
+  - `@tiptap/pm` (`tiptapBracketsExtension` imports from `@tiptap/pm/state` and `@tiptap/pm/model`)
+  - `tippy.js` (used by `tiptapBracketsExtension`)
+- `firebase.json` lives in `packages/firebase`. Functions source is `../functions` (`packages/functions`). `firebase-functions` 6.3.2 is a dependency of both `@gsuite/firebase` and `@gsuite/functions`. Global CLI in use: `firebase-tools@14.1.0`.
+- After a long absence: `yarn install` from the repo root, then `yarn dev`. If you previously installed under PnP, the node-modules linker plus a reinstall is required.
+
 ## Build and Configuration
 
 ### Vite
@@ -59,7 +94,8 @@ A Firebase-based application for managing email signatures with support for mult
 - The frontend React plugin has been switched from `@vitejs/plugin-react` (Babel-based) to `@vitejs/plugin-react-swc` (SWC-based) for potentially faster compilation and HMR. [[Reference](https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react-swc)]
 - There are separate Vite configuration files:
     - `vite.config.ts` at the project root.
-    - `packages/frontend/vite.config.ts` specific to the frontend package.
+    - `packages/frontend/vite.config.ts` specific to the frontend package. `yarn dev` loads this one.
+- Path aliases in both configs use `path.resolve(import.meta.dirname, ...)` rather than `__dirname`. Vite 8's native config loader (future default) does not support `__dirname`. Node 22 provides `import.meta.dirname`.
 - **Path Aliases**: 
     - Aliases like `@/frontend`, `@/shared`, and `@/functions` are used to simplify import paths.
     - Root `vite.config.ts` defines these aliases pointing to `packages/frontend/src`, `packages/shared/src`, etc.
@@ -73,26 +109,35 @@ A Firebase-based application for managing email signatures with support for mult
     - To focus Vite's dependency pre-bundling process and potentially speed it up, `optimizeDeps.entries` is set to `['src/main.tsx']` in `packages/frontend/vite.config.ts`.
 - **Dependency Deduplication**:
     - To ensure a single instance of core libraries like React and React DOM across the frontend and shared packages (especially in a monorepo context), `react` and `react-dom` are added to `resolve.dedupe` in `packages/frontend/vite.config.ts`. This can help stabilize Vite's dependency graph and reduce unnecessary re-optimizations.
+    - TipTap 3 needs one ProseMirror copy. Root `package.json` `resolutions` pin `prosemirror-state@1.4.4`, `prosemirror-model@1.25.11`, `prosemirror-view@1.42.4`, and `prosemirror-transform@1.12.0`. Frontend Vite `resolve.dedupe` also lists `@tiptap/core`, `@tiptap/pm`, and those `prosemirror-*` packages. Duplicate copies throw `Adding different instances of a keyed plugin (plugin$N)` when the editor mounts.
 
 ### TypeScript
-- A root `tsconfig.json`
+- A root `tsconfig.json` plus `tsconfig.base.json` extended by package configs.
+- TypeScript 6/7: do not set `baseUrl`. `paths` values must be relative (`./` or `../`) to the tsconfig file that defines them.
+- `tsconfig.base.json` maps `@/frontend/*`, `@/shared/*`, `@/firebase/*`, `@/functions/*` from the repo root (`./packages/...`). `@/functions/*` points at `packages/functions/src`, not `packages/firebase/functions`.
+- `packages/frontend/tsconfig.json` overrides those `paths` to be relative to the frontend package (`./src/*`, `../shared/src/*`, etc.). `rootDir` belongs in `compilerOptions`. `noEmit` is true because Vite emits; `tsc -b` is typecheck only. `vite.config.ts` lives in `tsconfig.node.json`, not the app `include`.
 
 ## Dependencies
 
 -   `@mantine/core`: UI component library.
--   `@mantine/tiptap`: Mantine integration for Tiptap.
+-   `@mantine/tiptap`: Mantine 9 integration for Tiptap 3. Import `Link` from this package so `Ctrl+K` works.
 -   `@tiptap/core`: Core Tiptap library.
+-   `@tiptap/extensions`: `UndoRedo`.
+-   `@tiptap/extension-document`, `paragraph`, `text`, `hard-break`: required schema nodes.
+-   `@tiptap/extension-bold`, `italic`, `underline`, `strike`, `code`: inline marks used by the toolbar.
+-   `@tiptap/extension-heading`, `blockquote`, `horizontal-rule`: block nodes used by the toolbar.
+-   `@tiptap/extension-list`: `BulletList`, `OrderedList`, `ListItem`, `ListKeymap`.
 -   `@tiptap/extension-font-family`: Tiptap extension for font family.
 -   `@tiptap/extension-highlight`: Tiptap extension for text highlighting.
 -   `@tiptap/extension-subscript`: Tiptap extension for subscript.
 -   `@tiptap/extension-superscript`: Tiptap extension for superscript.
 -   `@tiptap/extension-text-align`: Tiptap extension for text alignment.
--   `@tiptap/extension-text-style`: Tiptap extension for text styling (used by FontFamily and Color).
--   `@tiptap/extension-underline`: Tiptap extension for underline.
--   `@tiptap/extension-link`: Tiptap extension for links.
+-   `@tiptap/extension-text-style`: Named export `TextStyle` in v3 (no default). Required by FontFamily and Color.
 -   `@tiptap/extension-color`: Tiptap extension for text color.
--   `@tiptap/react`: React components for Tiptap.
--   `@tiptap/starter-kit`: A collection of common Tiptap extensions.
+-   `@tiptap/react`: `useEditor` needs `shouldRerenderOnTransaction: true` for Mantine toolbar state, and `immediatelyRender: false` with React 19.
+-   `@tiptap/pm`: ProseMirror wrapper used by Tiptap 3.
+-   `@codemirror/view`: Direct frontend dependency (`^6.36.7`); also a peer of `@uiw/react-codemirror`.
+-   `tippy.js`: Direct frontend dependency (`^6.3.7`) for brackets suggestion popovers.
 
 ## Code Patterns and Conventions
 
@@ -106,7 +151,9 @@ A Firebase-based application for managing email signatures with support for mult
 ### RichTextEditor Component
 
 -   Located at `packages/frontend/src/components/RichTextEditor/index.tsx`.
--   Based on Tiptap and Mantine's RichTextEditor.
+-   Tiptap 3 + Mantine 9 `@mantine/tiptap`. Extensions are registered individually; `@tiptap/starter-kit` is not used.
+-   `setContent` takes `{ emitUpdate: false }` (v3 options object, not a boolean).
+-   Color uses `RichTextEditor.ColorPicker` / `UnsetColor`.
 -   Supports standard rich text features (bold, italic, underline, lists, etc.).
 -   Includes font family selection with an option to load system fonts.
 -   Includes a color picker for text color selection.

@@ -1,12 +1,21 @@
 import { Node } from "@tiptap/core"
-import { Node as ProseMirrorNode } from "prosemirror-model"
+import { ReactRenderer } from "@tiptap/react"
+import { Node as ProseMirrorNode } from "@tiptap/pm/model"
+import { Plugin, PluginKey } from "@tiptap/pm/state"
+import tippy from "tippy.js"
+import { BracketsFallback } from "./BracketsFallback"
 
 declare module "@tiptap/core" {
 	interface Commands<ReturnType> {
 		brackets: {
-			insertBrackets: (content: string) => ReturnType
+			insertBrackets: (content: string, fallback?: string) => ReturnType
 		}
 	}
+}
+
+interface BracketsAttributes {
+	content: string
+	fallback: string | null
 }
 
 export interface BracketsNodeOptions {}
@@ -18,7 +27,7 @@ export const BracketsNode = Node.create<BracketsNodeOptions>({
 
 	inline: true,
 
-	selectable: false,
+	selectable: true,
 
 	atom: true,
 
@@ -27,11 +36,14 @@ export const BracketsNode = Node.create<BracketsNodeOptions>({
 			content: {
 				default: "",
 			},
+			fallback: {
+				default: null,
+			},
 		}
 	},
+
 	parseHTML() {
 		return [
-			// This is only for parsing back from HTML
 			{
 				tag: "span[data-brackets-content]",
 				getAttrs: (node) => {
@@ -39,36 +51,84 @@ export const BracketsNode = Node.create<BracketsNodeOptions>({
 					const element = node as HTMLElement
 					return {
 						content: element.getAttribute("data-brackets-content"),
+						fallback: element.getAttribute("data-brackets-fallback"),
 					}
 				},
 			},
 		]
 	},
 
-	// We're not using renderHTML - instead we'll override toDOM
-	renderHTML() {
-		// This won't actually be used but is required
-		return ["span", { "data-brackets-content": "" }, ""]
-	},
-
-	// Custom DOM serialization
-	toDOM(node: ProseMirrorNode) {
-		// Create a text node instead of an element
-		return document.createTextNode(`{{${node.attrs.content}}}`)
+	renderHTML({ node }) {
+		return [
+			"span",
+			{
+				"data-brackets-content": node.attrs.content,
+				"data-brackets-fallback": node.attrs.fallback,
+				class: "brackets-node",
+			},
+			node.attrs.fallback ? `{{${node.attrs.content}|"${node.attrs.fallback}"}}` : `{{${node.attrs.content}}}`,
+		]
 	},
 
 	renderText({ node }) {
-		return `{{${node.attrs.content}}}`
+		return node.attrs.fallback
+			? `{{${node.attrs.content}|"${node.attrs.fallback}"}}`
+			: `{{${node.attrs.content}}}`
 	},
 
 	addCommands() {
 		return {
-			insertBrackets: (content: string) => ({ commands }) => {
+			insertBrackets: (content: string, fallback?: string) => ({ commands }) => {
 				return commands.insertContent({
 					type: this.name,
-					attrs: { content },
+					attrs: { content, fallback },
 				})
 			},
 		}
+	},
+
+	addProseMirrorPlugins() {
+		const pluginKey = new PluginKey("bracketsFallback")
+
+		return [
+			new Plugin({
+				key: pluginKey,
+				props: {
+					handleClickOn: (view, pos, node, nodePos, event, direct) => {
+						if(node.type !== this.type) return false
+
+						let popup: any = null
+						const component = new ReactRenderer(BracketsFallback, {
+							props: {
+								editor: this.editor,
+								node,
+								updateAttributes: (attrs: Partial<BracketsAttributes>) => {
+									const transaction = view.state.tr.setNodeMarkup(nodePos, undefined, {
+										...node.attrs,
+										...attrs,
+									})
+									view.dispatch(transaction)
+									popup[0].destroy()
+								},
+							},
+							editor: this.editor,
+						})
+
+						popup = tippy(event.target as HTMLElement, {
+							content: component.element,
+							showOnCreate: true,
+							interactive: true,
+							trigger: "manual",
+							placement: "bottom",
+							onDestroy: () => {
+								component.destroy()
+							},
+						})
+
+						return true
+					},
+				},
+			}),
+		]
 	},
 })

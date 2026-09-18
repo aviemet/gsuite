@@ -19,13 +19,19 @@ export default defineConfig({
 	],
 	resolve: {
 		alias: {
-			"@/frontend": path.resolve(__dirname, "./src"),
-			"@/shared": path.resolve(__dirname, "../shared/src"),
-			"@/functions": path.resolve(__dirname, "../functions/src"),
+			"@/frontend": path.resolve(import.meta.dirname, "./src"),
+			"@/shared": path.resolve(import.meta.dirname, "../shared/src"),
+			"@/functions": path.resolve(import.meta.dirname, "../functions/src"),
 		},
 		dedupe: [
 			"react",
 			"react-dom",
+			"@tiptap/core",
+			"@tiptap/pm",
+			"prosemirror-model",
+			"prosemirror-state",
+			"prosemirror-view",
+			"prosemirror-transform",
 		],
 	},
 	cacheDir: ".vite-cache",

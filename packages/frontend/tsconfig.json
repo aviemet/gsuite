@@ -7,10 +7,17 @@
     "resolveJsonModule": true,
     "jsx": "react-jsx",
     "declaration": true,
-    "declarationMap": true
+    "declarationMap": true,
+    "rootDir": "./src",
+    "noEmit": true,
+    "paths": {
+      "@/frontend/*": ["./src/*"],
+      "@/shared/*": ["../shared/src/*"],
+      "@/firebase/*": ["../firebase/*"],
+      "@/functions/*": ["../functions/src/*"]
+    }
   },
-  "rootDir": "./src",
-  "include": ["src", "vite.config.ts"],
+  "include": ["src"],
   "exclude": ["node_modules", "dist"],
   "references": [
     { "path": "../shared" },

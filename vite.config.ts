@@ -10,11 +10,11 @@ export default defineConfig({
 	],
 	resolve: {
 		alias: {
-			"@": path.resolve(__dirname, "./"),
-			"@/shared": path.resolve(__dirname, "./packages/shared/src"),
-			"@/frontend": path.resolve(__dirname, "./packages/frontend/src"),
-			"@/firebase": path.resolve(__dirname, "./packages/firebase"),
-			"@/functions": path.resolve(__dirname, "./packages/firebase/functions/src"),
+			"@": path.resolve(import.meta.dirname, "./"),
+			"@/shared": path.resolve(import.meta.dirname, "./packages/shared/src"),
+			"@/frontend": path.resolve(import.meta.dirname, "./packages/frontend/src"),
+			"@/firebase": path.resolve(import.meta.dirname, "./packages/firebase"),
+			"@/functions": path.resolve(import.meta.dirname, "./packages/firebase/functions/src"),
 		},
 	},
 	server: {

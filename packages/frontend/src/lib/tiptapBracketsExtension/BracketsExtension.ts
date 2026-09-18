@@ -1,10 +1,24 @@
-import { Extension } from "@tiptap/core"
-import { Plugin, PluginKey } from "prosemirror-state"
+import { Extension, Editor, Range } from "@tiptap/core"
+import { Plugin, PluginKey } from "@tiptap/pm/state"
 import { BracketsNode } from "./BracketsNode"
+import { BracketsSuggestion } from "./BracketsSuggestion"
 
 interface TextWithPos {
 	text: string
 	pos: number
+}
+
+interface SuggestionProps {
+	editor: Editor
+	range: Range
+	props: {
+		title: string
+	}
+	clientRect: () => DOMRect | null
+}
+
+interface SuggestionQuery {
+	query: string
 }
 
 export const BracketsExtension = Extension.create<{}>({
@@ -82,6 +96,56 @@ export const BracketsExtension = Extension.create<{}>({
 	},
 
 	addExtensions() {
-		return [BracketsNode]
+		return [
+			BracketsNode.configure({
+				suggestion: {
+					char: "{{",
+					command: ({ editor, range, props }: SuggestionProps) => {
+						editor
+							.chain()
+							.focus()
+							.insertContentAt(range, [
+								{
+									type: "brackets",
+									attrs: { content: props.title },
+								},
+							])
+							.run()
+					},
+					allow: () => {
+						return true
+					},
+					items: ({ query }: SuggestionQuery) => {
+						return [
+							{ title: "first_name", description: "User's first name" },
+							{ title: "last_name", description: "User's last name" },
+							{ title: "email", description: "User's email address" },
+							{ title: "company", description: "User's company name" },
+						].filter((item) => {
+							return item.title.toLowerCase().startsWith(query.toLowerCase())
+						})
+					},
+					render: () => {
+						let component: ReturnType<typeof BracketsSuggestion.create>
+
+						return {
+							onStart: (props: SuggestionProps) => {
+								component = BracketsSuggestion.create()
+								component.onStart(props)
+							},
+							onUpdate: (props: SuggestionProps) => {
+								component.onUpdate(props)
+							},
+							onKeyDown: (props: SuggestionProps) => {
+								return component.onKeyDown(props)
+							},
+							onExit: () => {
+								component.onExit()
+							},
+						}
+					},
+				},
+			}),
+		]
 	},
 })
