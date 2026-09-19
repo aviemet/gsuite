@@ -1,6 +1,7 @@
-import { escape } from "@f0c1s/escape-html"
+import { samplePerson } from "@/shared/person.testdata"
+import { getTemplatePreviewContext } from "@/shared/templatePlaceholders"
 import {
-	Button,
+	Alert,
 	Group,
 	Stack,
 	Text,
@@ -9,129 +10,176 @@ import {
 	Paper,
 	SegmentedControl,
 } from "@mantine/core"
-import { useForm } from "@mantine/form"
 import { useLocalStorage } from "@mantine/hooks"
-import { HtmlEditor } from "@/frontend/components/HtmlEditor"
+import { IconAlertTriangle, IconLayoutColumns, IconLayoutRows } from "@tabler/icons-react"
+import clsx from "clsx"
+import { ChangeEvent, useRef, useState } from "react"
+
+import { HtmlEditor, type HtmlEditorHandle } from "@/frontend/components/HtmlEditor"
 import { HtmlPreview } from "@/frontend/components/HtmlPreview"
-import { RichTextEditor } from "@/frontend/components/RichTextEditor"
-
-import { formatHtmlWithDirectives } from "@/frontend/lib"
+import { RichTextEditor, type RichTextEditorHandle } from "@/frontend/components/RichTextEditor"
+import { PlaceholderPicker } from "@/frontend/features/signatures/PlaceholderPicker"
 import { safeTemplateParse } from "@/frontend/lib/parseTemplate"
-import { Template } from "@/frontend/types/firebase"
-import { samplePerson } from "@/shared/person.testdata"
 
-interface SignatureTemplateFormProps {
-	template?: Template
-	onSubmit: (values: { name: string, content: string }) => void
-	onCancel: () => void
+import * as classes from "./SignatureTemplateForm.css"
+
+type EditorPreviewLayout = "side-by-side" | "stacked"
+
+const editorPreviewLayoutControlStyles = {
+	root: {
+		border: "1px solid var(--mantine-color-gray-3)",
+	},
+	label: {
+		lineHeight: 1,
+	},
 }
 
-export const SignatureTemplateForm = ({
-	template,
-	onSubmit,
-	onCancel,
-}: SignatureTemplateFormProps) => {
-	const form = useForm({
-		initialValues: {
-			name: template?.name ?? "",
-			content: formatHtmlWithDirectives(template?.content ?? ""),
-		},
-		validate: {
-			name: (value) => (!value ? "Name is required" : null),
-			content: (value) => (!value ? "Content is required" : null),
-		},
-	})
+interface SignatureTemplateFormProps {
+	name: string
+	nameError?: string
+	onNameChange: (name: string) => void
+	content: string
+	contentError?: string
+	onContentChange: (content: string) => void
+}
 
-	const [editorMode, setEditorMode] = useLocalStorage<"visual" | "code">({
-		key: "signature-template-editor-mode",
-		defaultValue: "visual",
+export function SignatureTemplateForm({
+	name,
+	nameError,
+	onNameChange,
+	content,
+	contentError,
+	onContentChange,
+}: SignatureTemplateFormProps) {
+	const [editorMode, setEditorMode] = useState<"visual" | "code">("visual")
+	const [editorPreviewLayout, setEditorPreviewLayout] = useLocalStorage<EditorPreviewLayout>({
+		key: "signature-editor-preview-layout",
+		defaultValue: "side-by-side",
 	})
+	const htmlEditorRef = useRef<HtmlEditorHandle>(null)
+	const richTextEditorRef = useRef<RichTextEditorHandle>(null)
+	const editorPreviewColumnSpan = editorPreviewLayout === "stacked"
+		? 12
+		: { sm: 12, md: 6 }
 
-	function handleSubmit(values: { name: string, content: string }) {
-		const prettyContent = formatHtmlWithDirectives(values.content)
-		// Update form state as well, in case of submission failure and user stays on form
-		if(form.values.content !== prettyContent) {
-			form.setFieldValue("content", prettyContent)
+	function handleEditorPreviewLayoutChange(value: string) {
+		if(value === "side-by-side" || value === "stacked") {
+			setEditorPreviewLayout(value)
 		}
-		onSubmit({ ...values, content: prettyContent })
 	}
 
-	const previewContext = {
-		...samplePerson,
-		name: samplePerson.displayName,
-		email: samplePerson.primaryEmail,
-		phone: samplePerson.phoneNumbers?.[0]?.number ?? "",
+	function handleEditorModeChange(newMode: string) {
+		if(newMode === "visual" || newMode === "code") {
+			setEditorMode(newMode)
+		}
 	}
-	const previewHtml = safeTemplateParse(form.values.content, previewContext)
+
+	function handleNameChange(event: ChangeEvent<HTMLInputElement>) {
+		onNameChange(event.currentTarget.value)
+	}
+
+	function insertPlaceholder(value: string) {
+		if(editorMode === "code") {
+			htmlEditorRef.current?.insertAtCursor(value)
+			return
+		}
+
+		richTextEditorRef.current?.insertAtCursor(value)
+	}
+
+	const previewHtml = safeTemplateParse(content, getTemplatePreviewContext(samplePerson))
 
 	return (
-		<form onSubmit={ form.onSubmit(handleSubmit) }>
-			<Grid gutter="xl">
-				<Grid.Col>
-					<TextInput
-						label="Template Name"
-						placeholder="Enter template name"
-						required
-						{ ...form.getInputProps("name") }
+		<Grid mt="md">
+			<Grid.Col>
+				<TextInput
+					label="Template Name"
+					placeholder="Enter template name"
+					required
+					value={ name }
+					onChange={ handleNameChange }
+					error={ nameError }
+				/>
+			</Grid.Col>
+
+			<Grid.Col>
+				<PlaceholderPicker onInsert={ insertPlaceholder } />
+			</Grid.Col>
+
+			<Grid.Col visibleFrom="md">
+				<Group justify="flex-end">
+					<SegmentedControl
+						size="xs"
+						aria-label="Editor and preview layout"
+						value={ editorPreviewLayout }
+						onChange={ handleEditorPreviewLayoutChange }
+						data={ [
+							{
+								value: "side-by-side",
+								label: <IconLayoutColumns size="1rem" title="Side by side" />,
+							},
+							{
+								value: "stacked",
+								label: <IconLayoutRows size="1rem" title="Stacked" />,
+							},
+						] }
+						styles={ editorPreviewLayoutControlStyles }
 					/>
-				</Grid.Col>
+				</Group>
+			</Grid.Col>
 
-				<Grid.Col span={ { sm: 12, md: 6 } }>
-					<Stack>
-						<Group justify="space-between">
-							<Text fw={ 500 } size="sm">Signature Content</Text>
-							<SegmentedControl
-								size="xs"
-								value={ editorMode }
-								onChange={ (newMode) => {
-									const currentContent = form.values.content
-									const prettyContent = formatHtmlWithDirectives(currentContent)
-									if(currentContent !== prettyContent) {
-										form.setFieldValue("content", prettyContent)
-									}
-									setEditorMode(newMode as "visual" | "code")
-								} }
-								data={ [
-									{ value: "visual", label: "Visual Editor" },
-									{ value: "code", label: "Code Editor" },
-								] }
-							/>
-						</Group>
-						{ editorMode === "code"
-							? (
-								<HtmlEditor
-									value={ form.values.content }
-									onChange={ (newContent) => form.setFieldValue("content", newContent) }
-								/>
-							)
-							: (
-								<RichTextEditor
-									value={ form.values.content }
-									onChange={ (val) => form.setFieldValue("content", val) }
-								/>
-							) }
-
-					</Stack>
-				</Grid.Col>
-
-				<Grid.Col span={ { sm: 12, md: 6 } }>
-					<Stack>
-						<Text fw={ 500 } size="sm">Live Preview</Text>
-						<Paper p="md" withBorder>
-							<HtmlPreview html={ previewHtml } />
-						</Paper>
-					</Stack>
-				</Grid.Col>
-
-				<Grid.Col>
-					<Group justify="flex-end">
-						<Button variant="light" onClick={ onCancel }>
-							Cancel
-						</Button>
-						<Button type="submit">Save Template</Button>
+			<Grid.Col span={ editorPreviewColumnSpan }>
+				<Stack>
+					<Group justify="space-between" align="center" wrap="nowrap" className={ clsx(classes.paneHeader) }>
+						<Text fw={ 500 } size="sm">Signature Content</Text>
+						<SegmentedControl
+							size="xs"
+							value={ editorMode }
+							onChange={ handleEditorModeChange }
+							data={ [
+								{ value: "visual", label: "Visual Editor" },
+								{ value: "code", label: "Code Editor" },
+							] }
+						/>
 					</Group>
-				</Grid.Col>
-			</Grid>
-		</form>
+					{ editorMode === "code"
+						? (
+							<Stack gap="xs">
+
+								<HtmlEditor
+									ref={ htmlEditorRef }
+									value={ content }
+									onChange={ onContentChange }
+								/>
+								<Alert icon={ <IconAlertTriangle size={ 16 } /> } color="yellow">
+									Switching back to the Visual editor and making any edit will rewrite this custom markup.
+								</Alert>
+							</Stack>
+						)
+						: (
+							<RichTextEditor
+								ref={ richTextEditorRef }
+								value={ content }
+								onChange={ onContentChange }
+							/>
+						) }
+					{ contentError && (
+						<Text c="red" size="sm">{ contentError }</Text>
+					) }
+
+				</Stack>
+			</Grid.Col>
+
+			<Grid.Col span={ editorPreviewColumnSpan }>
+				<Stack>
+					<Group justify="space-between" align="center" wrap="nowrap" className={ clsx(classes.paneHeader) }>
+						<Text fw={ 500 } size="sm">Live Preview</Text>
+					</Group>
+					<Paper p="md" withBorder bg="white" c="black" mih="16rem">
+						<HtmlPreview html={ previewHtml } />
+					</Paper>
+				</Stack>
+			</Grid.Col>
+		</Grid>
 	)
 }

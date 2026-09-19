@@ -1,5 +1,6 @@
 import { Extension, Editor, Range } from "@tiptap/core"
 import { Plugin, PluginKey } from "@tiptap/pm/state"
+
 import { BracketsNode } from "./BracketsNode"
 import { BracketsSuggestion } from "./BracketsSuggestion"
 
@@ -49,44 +50,50 @@ export const BracketsExtension = Extension.create<{}>({
 								return true
 							})
 
-							// Process all found text nodes
 							let transaction = state.tr
 							let modified = false
 
-							// Important: Process nodes in reverse order to avoid position shifts
-							for(let i = textNodes.length - 1; i >= 0; i--) {
-								const { text, pos } = textNodes[i]
-								const regex = /\{\{([^{}]+)\}\}/g
-								let match
+							for(let textNodeIndex = textNodes.length - 1; textNodeIndex >= 0; textNodeIndex--) {
+								const { text, pos } = textNodes[textNodeIndex]
+								const regex = /\{\{(\w+)(?:\|"([^"]*)")?\}\}/g
+								const matches: RegExpExecArray[] = []
+								let match = regex.exec(text)
+								while(match !== null) {
+									matches.push(match)
+									match = regex.exec(text)
+								}
 
-								// Reset regex
-								regex.lastIndex = 0
+								for(let matchIndex = matches.length - 1; matchIndex >= 0; matchIndex--) {
+									const tokenMatch = matches[matchIndex]
+									const from = pos + tokenMatch.index
+									const to = from + tokenMatch[0].length
+									const token = tokenMatch[1]
+									const fallback = tokenMatch[2] ?? null
 
-								while((match = regex.exec(text)) !== null) {
-									const from = pos + match.index
-									const to = from + match[0].length
-
-									// Check if this position is valid and not already a brackets node
 									try {
 										const nodeAtPos = state.doc.nodeAt(from)
 										if(nodeAtPos && nodeAtPos.isText) {
 											transaction = transaction.replaceWith(
 												from,
 												to,
-												brackets.create({ content: match[1] })
+												brackets.create({ content: token, fallback }, null, nodeAtPos.marks),
 											)
 											modified = true
 										}
-									} catch(e) {
+									} catch (e) {
+										// eslint-disable-next-line no-console
 										console.warn("Position error when processing brackets:", e)
-										// Skip this match if position is invalid
 										continue
 									}
 								}
 							}
 
 							if(modified) {
-								view.dispatch(transaction)
+								view.dispatch(
+									transaction
+										.setMeta("addToHistory", false)
+										.setMeta("bracketsAutoConvert", true),
+								)
 							}
 						},
 					}

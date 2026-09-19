@@ -1,16 +1,26 @@
-import { Badge, Card, Group, Stack, Text, Button } from "@mantine/core"
-import { IconPencil } from "@tabler/icons-react"
+import { Badge, Card, Group, Text, Button, Box } from "@mantine/core"
+import { IconCalendarEvent, IconPencil, IconUsers } from "@tabler/icons-react"
 import { Link, useRouter } from "@tanstack/react-router"
 import clsx from "clsx"
+import { HtmlPreview } from "@/frontend/components/HtmlPreview"
+import { safeTemplateParse } from "@/frontend/lib/parseTemplate"
 import { Template } from "@/frontend/types/firebase"
+import { samplePerson } from "@/shared/person.testdata"
+import { getTemplatePreviewContext } from "@/shared/templatePlaceholders"
 import * as classes from "./SignatureCard.css"
 
 interface SignatureCardProps {
 	template: Template
 }
 
-export const SignatureCard = ({ template }: SignatureCardProps) => {
+const previewContext = getTemplatePreviewContext(samplePerson)
+
+export function SignatureCard({ template }: SignatureCardProps) {
 	const router = useRouter()
+	const assignedGroup = template.assignedGroup?.trim() || "Unassigned"
+	const isScheduled = template.isScheduled === true
+	const previewHtml = safeTemplateParse(template.content, previewContext)
+
 	return (
 		<Card
 			withBorder
@@ -18,10 +28,16 @@ export const SignatureCard = ({ template }: SignatureCardProps) => {
 			padding="lg"
 			className={ clsx(classes.cardRoot) }
 		>
-			<Group justify="space-between" align="flex-start" mb="md">
-				<Text fw={ 700 } size="lg" component={ Link } to={ `/signatures/${template.id}` } style={ { textDecoration: "none", color: "inherit", cursor: "pointer" } }>
-					{ template.name }
-				</Text>
+			<Group justify="space-between" align="flex-start" mb="sm">
+				<Link
+					to="/signatures/edit/$id"
+					params={ { id: template.id } }
+					style={ { textDecoration: "none", color: "inherit" } }
+				>
+					<Text fw={ 700 } size="lg">
+						{ template.name }
+					</Text>
+				</Link>
 				<Button
 					variant="subtle"
 					size="xs"
@@ -31,43 +47,29 @@ export const SignatureCard = ({ template }: SignatureCardProps) => {
 					<IconPencil size={ 16 } />
 				</Button>
 			</Group>
-			<Stack gap="md">
-				<Stack gap="xs">
-					<Text size="sm" fw={ 500 }>Variables</Text>
-					<Group gap="xs">
-						{ template.variables.map((variable) => (
-							<Badge key={ variable } size="sm" variant="light">
-								{ variable }
-							</Badge>
-						)) }
-					</Group>
-				</Stack>
-
-				<Stack gap="xs">
-					<Text size="sm" fw={ 500 }>Conditions</Text>
-					<Group gap="xs">
-						{ template.conditions.map((condition) => (
-							<Badge key={ condition } size="sm" variant="light" color="blue">
-								{ condition }
-							</Badge>
-						)) }
-					</Group>
-				</Stack>
-
-				<Group gap="md">
-					<Badge
-						size="sm"
-						variant="light"
-						color={ template.isActive ? "green" : "red" }
-					>
-						{ template.isActive ? "Active" : "Inactive" }
-					</Badge>
-
-					<Text size="sm" c="dimmed">
-						Updated: { template.updatedAt.toDate().toLocaleDateString() }
-					</Text>
-				</Group>
-			</Stack>
+			<Group gap="xs" mb="md">
+				<Badge
+					size="sm"
+					variant="light"
+					color={ assignedGroup === "Unassigned" ? "gray" : "blue" }
+					leftSection={ <IconUsers size={ 12 } /> }
+				>
+					{ assignedGroup }
+				</Badge>
+				<Badge
+					size="sm"
+					variant="light"
+					color={ isScheduled ? "violet" : "gray" }
+					leftSection={ <IconCalendarEvent size={ 12 } /> }
+				>
+					{ isScheduled ? "Scheduled" : "Not scheduled" }
+				</Badge>
+			</Group>
+			<Box className={ classes.previewFrame }>
+				<Box className={ classes.previewContent }>
+					<HtmlPreview html={ previewHtml } />
+				</Box>
+			</Box>
 		</Card>
 	)
 }

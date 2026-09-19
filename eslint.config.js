@@ -1,21 +1,46 @@
-import { fixupPluginRules } from "@eslint/compat"
-import json from "@eslint/json"
+import { fixupConfigRules } from "@eslint/compat"
 import stylistic from "@stylistic/eslint-plugin"
 import * as tsParser from "@typescript-eslint/parser"
 import importPlugin from "eslint-plugin-import"
 import jsoncPlugin from "eslint-plugin-jsonc"
 import jsxA11yPlugin from "eslint-plugin-jsx-a11y"
 import reactHooksPlugin from "eslint-plugin-react-hooks"
-import jsoncParser from "jsonc-eslint-parser"
 
 const ignores = [
 	".vscode/**/*",
 	".yarn/**/*",
 ]
 
+const importLintGlobs = ["**/*.{js,jsx,mjs,cjs,ts,tsx}"]
+
 export default [
-	importPlugin.flatConfigs.recommended,
-	importPlugin.flatConfigs.typescript,
+	{
+		ignores,
+	},
+	{
+		files: ["**/*.mjs"],
+		languageOptions: {
+			parser: tsParser,
+			parserOptions: {
+				ecmaVersion: "latest",
+				sourceType: "module",
+			},
+		},
+		settings: {
+			"import/resolver": {
+				typescript: {
+					project: "./tsconfig.json",
+				},
+			},
+		},
+	},
+	...fixupConfigRules([
+		importPlugin.flatConfigs.recommended,
+		importPlugin.flatConfigs.typescript,
+	]).map((config) => ({
+		...config,
+		files: importLintGlobs,
+	})),
 	// Typescript/Javascript files
 	{
 		...stylistic.configs.customize({
@@ -23,7 +48,6 @@ export default [
 		}),
 
 		files: ["**/*.{js,jsx,ts,tsx}"],
-		ignores,
 		languageOptions: {
 			ecmaVersion: "latest",
 			sourceType: "module",
@@ -32,26 +56,15 @@ export default [
 				ecmaFeatures: {
 					jsx: true,
 				},
-				project: ["./tsconfig.json", "./packages/*/tsconfig.json", "./packages/*/*/tsconfig.json"],
-				tsconfigRootDir: ".",
-				experimentalDecorators: true,
 			},
 		},
 		settings: {
 			"react": {
 				version: "detect",
 			},
-			"import/parsers": {
-				"@typescript-eslint/parser": [".ts", ".tsx"],
-			},
 			"import/resolver": {
 				typescript: {
-					project: ["./tsconfig.json", "./packages/*/tsconfig.json", "./packages/*/*/tsconfig.json"],
-					alwaysTryTypes: true,
-					extensions: [".ts", ".tsx", ".js", ".jsx"],
-				},
-				node: {
-					extensions: [".ts", ".tsx", ".js", ".jsx"],
+					project: "./tsconfig.json",
 				},
 			},
 			"jsx-a11y": {
@@ -59,7 +72,7 @@ export default [
 			},
 		},
 		plugins: {
-			"react-hooks": fixupPluginRules(reactHooksPlugin),
+			"react-hooks": reactHooksPlugin,
 			"jsx-a11y": jsxA11yPlugin,
 			"@stylistic": stylistic,
 		},
@@ -71,6 +84,10 @@ export default [
 				ArrayExpression: 1,
 				ignoredNodes: [
 					"TSTypeParameterInstantiation",
+					"TemplateLiteral",
+					"TemplateElement",
+					"JSXExpressionContainer > TemplateLiteral",
+					"JSXExpressionContainer > TemplateElement",
 				],
 			}],
 			"@stylistic/brace-style": ["error", "1tbs", {
@@ -112,7 +129,11 @@ export default [
 				functions: "only-multiline",
 			}],
 			"@stylistic/multiline-ternary": ["error", "always-multiline"],
-			"@stylistic/space-before-function-paren": ["error", "never"],
+			"@stylistic/space-before-function-paren": ["error", {
+				anonymous: "never",
+				named: "never",
+				asyncArrow: "always",
+			}],
 			"@stylistic/arrow-spacing": "error",
 			"@stylistic/space-before-blocks": ["error", "always"],
 			"@stylistic/no-multiple-empty-lines": ["error", {
@@ -127,7 +148,7 @@ export default [
 					"!": false,
 					"!!": false,
 					"+": true,
-					"-": true,
+					"-": false,
 				},
 			}],
 			"@stylistic/comma-spacing": ["error", {
@@ -146,7 +167,7 @@ export default [
 					"balanced": true,
 				},
 			}],
-			"no-trailing-spaces": ["error", {
+			"@stylistic/no-trailing-spaces": ["error", {
 				skipBlankLines: false,
 				ignoreComments: false,
 			}],
@@ -156,82 +177,82 @@ export default [
 			}],
 			"eqeqeq": "error",
 			"no-console": "warn",
-			"eol-last": ["error", "always"],
+			"@stylistic/eol-last": ["error", "always"],
 			"import/order": ["error", {
-				"groups": ["builtin", "external", "internal", "parent", "sibling", "index"],
-				"pathGroups": [
-					{
-						"pattern": "@/**",
-						"group": "internal",
-						"position": "before",
-					},
+				"groups": [
+					"builtin",
+					"external",
+					"internal",
+					["parent", "sibling"],
+					"index",
+					"object",
 				],
-				"pathGroupsExcludedImportTypes": ["builtin"],
 				"alphabetize": {
 					"order": "asc",
 					"caseInsensitive": true,
 				},
+				"newlines-between": "always",
 			}],
-			"import/no-unresolved": ["error", {
-				"ignore": ["^@/"],
-			}],
+
+			// "import/no-default-export": "error",
 			"import/newline-after-import": "error",
 			"import/consistent-type-specifier-style": ["error", "prefer-inline"],
-			"semi": ["error", "never"],
+			"import/no-named-as-default": "off",
+			"@stylistic/semi": ["error", "never"],
 			"@stylistic/quotes": ["error", "double", {
 				avoidEscape: true,
-				allowTemplateLiterals: true,
+				allowTemplateLiterals: "always",
 			}],
 			"@stylistic/jsx-quotes": ["error", "prefer-double"],
 			...reactHooksPlugin.configs.recommended.rules,
-			"import/no-named-as-default-member": "off",
 		},
 	},
 	// Typescript declaration files
 	{
 		files: ["**/*.d.ts"],
-		ignores,
+		languageOptions: {
+			parser: tsParser,
+			parserOptions: {
+				ecmaVersion: "latest",
+				sourceType: "module",
+			},
+		},
 		rules: {
 			"no-unused-vars": "off",
 			"@typescript-eslint/member-delimiter-style": "off",
 			"@stylistic/ts/indent": "off",
 		},
 	},
-	// Json files
+	// JSONC files (tsconfig, etc.)
 	{
-		files: ["**/*.json", "**/*.jsonc", "**/*.json5"],
-		language: "json/json",
-		ignores,
+		files: ["**/tsconfig.json", "**/tsconfig.*.json", "**/*.jsonc", "**/*.json5"],
 		plugins: {
 			jsonc: jsoncPlugin,
-			json,
-			"@stylistic": stylistic,
 		},
-		languageOptions: {
-			parser: jsoncParser,
-			parserOptions: {
-				allowComments: true,
-			},
-		},
+		language: "jsonc/jsonc",
 		rules: {
-			"json/no-duplicate-keys": "error",
-			"jsonc/indent": ["error", 2],
-			"jsonc/object-curly-spacing": ["error", "always"],
-			"jsonc/comma-dangle": ["error", "never"],
-			"jsonc/quotes": ["error", "double"],
+			"jsonc/no-dupe-keys": "error",
+			"jsonc/indent": ["error", 2, { ignoredNodes: ["Property"] }],
 			"@stylistic/no-multi-spaces": "off",
 		},
-		formatter: {
-			indent: 2,
-			quotes: "double",
-			objectCurlySpacing: true,
-			commaDangle: "never",
+	},
+	// Strict JSON files
+	{
+		files: ["**/*.json"],
+		ignores: ["**/tsconfig.json", "**/tsconfig.*.json"],
+		plugins: {
+			jsonc: jsoncPlugin,
+		},
+		language: "jsonc/json",
+		rules: {
+			"jsonc/no-dupe-keys": "error",
+			"jsonc/indent": ["error", 2, { ignoredNodes: ["Property"] }],
+			"@stylistic/no-multi-spaces": "off",
 		},
 	},
 	// CSS-in-TS files
 	{
 		files: ["**/*.css.ts"],
-		ignores,
 		languageOptions: {
 			parser: tsParser,
 		},
@@ -248,19 +269,13 @@ export default [
 				},
 			],
 			"import/order": ["error", {
-				"groups": ["builtin", "external", "internal", "parent", "sibling", "index"],
+				"groups": ["builtin", "external", ["parent", "sibling"], "internal", "index"],
 				"pathGroups": [
-					{
-						"pattern": "@/**",
-						"group": "internal",
-						"position": "before",
-					},
+					{ "pattern": "@linaria/core", "group": "external", "position": "before" },
+					{ "pattern": "@mantine/**", "group": "external", "position": "after" },
+					{ "pattern": "@/lib*", "group": "internal" },
 				],
-				"pathGroupsExcludedImportTypes": ["builtin"],
-				"alphabetize": {
-					"order": "asc",
-					"caseInsensitive": true,
-				},
+				"newlines-between": "always",
 			}],
 		},
 	},

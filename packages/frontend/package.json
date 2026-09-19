@@ -16,8 +16,6 @@
     "cleanup": "rm -rf ./seed/temp/*firebase-export-*"
   },
   "dependencies": {
-    "@codemirror/lang-html": "^6.4.12",
-    "@codemirror/view": "^6.43.12",
     "@f0c1s/escape-html": "^2025.4.12",
     "@gsuite/shared": "workspace:*",
     "@linaria/core": "^8.2.0",
@@ -65,9 +63,6 @@
     "@tiptap/extensions": "^3.31.3",
     "@tiptap/pm": "^3.31.3",
     "@tiptap/react": "^3.31.3",
-    "@uiw/codemirror-themes-all": "^4.25.11",
-    "@uiw/react-codemirror": "^4.25.11",
-    "@xiechao/codemirror-lang-handlebars": "^1.0.4",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.23",
     "embla-carousel": "^8.6.0",

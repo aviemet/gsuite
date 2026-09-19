@@ -1,9 +1,13 @@
-import React from "react"
+import { Box } from "@mantine/core"
+
+import * as classes from "./HtmlPreview.css"
 
 interface HtmlPreviewProps {
 	html: string
 }
 
-export const HtmlPreview: React.FC<HtmlPreviewProps> = ({ html }) => (
-	<div dangerouslySetInnerHTML={ { __html: html } } />
-)
+export function HtmlPreview({ html }: HtmlPreviewProps) {
+	return (
+		<Box className={ classes.previewSurface } dangerouslySetInnerHTML={ { __html: html } } />
+	)
+}

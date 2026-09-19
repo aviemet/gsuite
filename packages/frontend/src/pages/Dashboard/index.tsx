@@ -1,11 +1,11 @@
-import { Container, Title } from "@mantine/core"
+import { Container } from "@mantine/core"
 
-const DashboardPage = () => {
+import { Page } from "@/frontend/components/Page"
+
+export function DashboardPage() {
 	return (
-		<Container>
-			<Title>Dashboard</Title>
-		</Container>
+		<Page title="Dashboard">
+			<Container />
+		</Page>
 	)
 }
-
-export { DashboardPage }

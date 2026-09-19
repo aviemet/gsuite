@@ -3,7 +3,8 @@ description: Typescript Rules
 globs: *.ts,*.tsx
 alwaysApply: false
 ---
-You are an expert in TypeScript, Node.js, Vite, Vitest, Inertia.js, React, Mantine, TanStack Query, CSS, HTML, UI and UX.
+
+# Typescript Rules
 
 ## Code Style and Structure
 
@@ -12,14 +13,14 @@ You are an expert in TypeScript, Node.js, Vite, Vitest, Inertia.js, React, Manti
 - Prefer iteration and modularization over code duplication.
 - Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError).
 - Consider edge cases and error scenarios, for simple edge cases, use the "return early" pattern to avoid nesting.
-- Properly structure files, all frontend code goes in /app/frontend
-    - /app/frontend/Components for all general purpose, highly reusable components.
-    - /app/frontend/Features for all feature specific components.
-    - /app/frontend/Layouts for all layout components.
-    - /app/frontend/lib for all non-react code.
-    - /app/frontend/Pages for all top-level Inertia pages. These components are the entry point for each route from the server.
-    - /app/frontend/queries for all async react-query methods, following the convention and type definitions in /app/frontend/queries/index.ts.
-    - /app/frontend/types for any globally used types or interfaces, or any custom types used in serializers. (Do no modify anything in types/serializers as it is all auto generated)
+- Properly structure files, all frontend code goes in /packages/frontend
+  - /packages/frontend/src/components for all general purpose, highly reusable components.
+  - /packages/frontend/src/features for all feature specific components.
+  - /packages/frontend/src/layouts for all layout components.
+  - /packages/frontend/src/lib for all non-react code.
+  - /packages/frontend/src/pages for all top-level pages. These components are the entry point for each routed endpoint.
+  - /packages/frontend/src/queries for all async react-query methods, following the convention and type definitions in /packages/frontend/src/queries/index.ts.
+  - /packages/frontend/src/types for any globally used types or interfaces, or any custom types used in serializers. (Do no modify anything in types/serializers as it is all auto generated)
 
   ### TypeScript Usage
 
@@ -36,7 +37,7 @@ You are an expert in TypeScript, Node.js, Vite, Vitest, Inertia.js, React, Manti
   ### React Component Architecture
 
   - Use functional components with TypeScript interfaces.
-  - Define components using `const`.
+  - Define components using `export function ComponentName()`
   - Extract reusable logic into custom hooks.
   - Implement proper component composition.
   - Implement proper cleanup in useEffect hooks.
@@ -50,6 +51,7 @@ You are an expert in TypeScript, Node.js, Vite, Vitest, Inertia.js, React, Manti
   - Implement proper key props in lists (avoid using index as key).
   
   ### Variable and Function Naming Patterns
+
   - Prefix event handlers with 'handle': handleClick, handleSubmit
   - Prefix boolean variables with verbs: isLoading, hasError, canSubmit
   - Prefix custom hooks with 'use': useAuth, useForm
@@ -106,7 +108,7 @@ You are an expert in TypeScript, Node.js, Vite, Vitest, Inertia.js, React, Manti
 - Follow a logical heading hierarchy.
 - Make all interactive elements accessible.
 - Provide clear and accessible error feedback.
- 
+
 ## Internationalization (i18n)
 
 - Use next-i18next to load translations in components.
@@ -135,5 +137,3 @@ You are an expert in TypeScript, Node.js, Vite, Vitest, Inertia.js, React, Manti
 - Minimize 'useEffect', and 'setState'.
 - Wrap client components in Suspense with fallback.
 - Optimize images: use WebP format, include size data, implement lazy loading.
-
-

@@ -3,7 +3,7 @@ description:
 globs: 
 alwaysApply: true
 ---
-# REQUIRED FOR EVERY INTERACTION:
+# REQUIRED FOR EVERY INTERACTION
 
 1. Read .cursor/project.mdx at the start of each interaction
 2. Before ending ANY response, if you've learned ANYTHING about:

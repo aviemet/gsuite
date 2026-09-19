@@ -1,20 +1,14 @@
-import path from "path"
-// import react from "@vitejs/plugin-react" // Old plugin
-import react from "@vitejs/plugin-react-swc" // New SWC-based plugin
+import path from "node:path"
+import react from "@vitejs/plugin-react-swc"
 import wyw from "@wyw-in-js/vite"
 import { defineConfig } from "vite"
 
 export default defineConfig({
+	envDir: path.resolve(import.meta.dirname, ".."),
 	plugins: [
 		react(),
 		wyw({
 			include: ["src/**/*.{ts,tsx}"],
-			babelOptions: {
-				presets: [
-					"@babel/preset-typescript",
-					"@babel/preset-react",
-				],
-			},
 		}),
 	],
 	resolve: {
@@ -36,11 +30,19 @@ export default defineConfig({
 	},
 	cacheDir: ".vite-cache",
 	build: {
-		rollupOptions: {
+		rolldownOptions: {
 			output: {
-				manualChunks: {
-					vendor: ["react", "react-dom"],
-					mantine: ["@mantine/core", "@mantine/hooks"],
+				codeSplitting: {
+					groups: [
+						{
+							name: "vendor",
+							test: /node_modules[\\/](?:react|react-dom)(?:[\\/]|$)/,
+						},
+						{
+							name: "mantine",
+							test: /node_modules[\\/]@mantine[\\/](?:core|hooks)(?:[\\/]|$)/,
+						},
+					],
 				},
 			},
 		},

@@ -1,10 +1,11 @@
-import { AppShell, Burger, Group, NavLink, Stack } from "@mantine/core"
+import { AppShell, Box, Burger, Group, NavLink, Stack } from "@mantine/core"
 import { useDisclosure } from "@mantine/hooks"
-
 import { IconDashboard, IconSettings, IconSignature } from "@tabler/icons-react"
 import { Link, Outlet } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
 
+import { PAGE_TITLE_PORTAL_ID } from "@/frontend/components/Page"
+import { UserMenu } from "@/frontend/components/UserMenu"
 import { router } from "@/frontend/routes"
 
 // Custom hook to track the current path
@@ -24,12 +25,13 @@ const useCurrentPath = () => {
 	return currentPath
 }
 
-const AppLayout = () => {
+export function AppLayout() {
 	const [opened, { toggle }] = useDisclosure()
 	const currentPath = useCurrentPath()
 
 	return (
 		<AppShell
+			layout="alt"
 			header={ { height: { base: 60, md: 70, lg: 80 } } }
 			navbar={ {
 				width: { base: 200, md: 250, lg: 300 },
@@ -39,9 +41,12 @@ const AppLayout = () => {
 			padding="sm"
 		>
 			<AppShell.Header>
-				<Group h="100%" px="sm">
-					<Burger opened={ opened } onClick={ toggle } hiddenFrom="sm" size="sm" />
-					Signatures
+				<Group h="100%" px="sm" justify="space-between" wrap="nowrap">
+					<Group wrap="nowrap">
+						<Burger opened={ opened } onClick={ toggle } hiddenFrom="sm" size="sm" />
+						<Box id={ PAGE_TITLE_PORTAL_ID } />
+					</Group>
+					<UserMenu />
 				</Group>
 			</AppShell.Header>
 
@@ -79,5 +84,3 @@ const AppLayout = () => {
 		</AppShell>
 	)
 }
-
-export { AppLayout }

@@ -28,24 +28,87 @@ A Firebase-based application for managing email signatures with support for mult
     - `formatHtmlWithDirectives.ts`: Provides functions for formatting HTML strings that include template directives.
     - `parseTemplate.ts`: Contains `safeTemplateParse` for parsing template strings with simple Handlebars-like syntax (variable substitution and conditional blocks).
 
+### Frontend Routing
+- TanStack Router is defined in `packages/frontend/src/routes/index.tsx`.
+- Signature routes:
+  - `/signatures` — list (grid or table)
+  - `/signatures/edit` — create (4-step `SignatureWizard`)
+  - `/signatures/edit/$id` — edit (same wizard; starts on Design)
+- There is no view/show signature route. Signature names in `SignatureCard` and `SignaturesTable` link to `/signatures/edit/$id`.
+
+### Frontend Layout
+- `AppLayout` (`packages/frontend/src/layouts/App/index.tsx`) uses Mantine `AppShell` with `layout="alt"`: navbar is full viewport height, header starts to the right of the sidebar.
+- Page titles render in the header via a Mantine `Portal` targeting `#page-title-portal`.
+- `Page` (`packages/frontend/src/components/Page/index.tsx`) is the wrapper for every main page entry point. It accepts `title: string` and portals an `h1` into the header. Export: `PAGE_TITLE_PORTAL_ID`.
+- Header right side: `UserMenu` (`packages/frontend/src/components/UserMenu/index.tsx`) — placeholder `Avatar` that opens a Mantine `Menu`. Current item: Light/Dark mode via `useMantineColorScheme` / `useComputedColorScheme`. `MantineProvider` uses `defaultColorScheme="light"`; scheme persists in localStorage.
+
 ### Frontend Components
 - SignaturesListPage: Main page for displaying signatures
   - Supports both grid and list view modes
   - View toggle implemented with Tabler icons
+  - Signature name links go to the edit page, not a separate view page
+  - Client-side search filters by template name (case-insensitive)
+  - Status `Select` filter: Active / Inactive, clearable (cleared = all)
+- Page (`packages/frontend/src/components/Page/index.tsx`)
+  - Shared page shell used by Dashboard, Settings, Signatures list, and Signature create/edit
+  - Renders `title` into `AppShell.Header` through `Portal`
+- SignatureCard (`packages/frontend/src/features/signatures/SignatureCard/index.tsx`)
+  - Name is a TanStack `Link` to `/signatures/edit/$id`
+  - Pencil button also navigates to the same edit route
+  - Shows assigned group and scheduled badges, plus an `HtmlPreview` of parsed template content
+  - Preview frame is a fixed email canvas: `#ffffff` background, `#000000` text, `color-scheme: light`, so dark mode does not invert it
+- HtmlPreview (`packages/frontend/src/components/HtmlPreview/index.tsx`)
+  - Renders template HTML. Root uses `previewSurface` (`HtmlPreview.css.ts`): white background, black text, `color-scheme: light`.
 - RichTextEditor: (`packages/frontend/src/components/RichTextEditor/index.tsx`)
-  - Based on Tiptap 3 and Mantine 9 RichTextEditor, with extensions registered individually (no StarterKit).
+  - Based on Tiptap 3 and Mantine 9 RichTextEditor, with extensions registered individually (no StarterKit). TipTap is the API we use (`useEditor`, extensions, commands). It runs on ProseMirror (`@tiptap/pm`); the contenteditable is a `.ProseMirror` view. Undo is TipTap's `UndoRedo` extension wrapping ProseMirror's `history` plugin (`@tiptap/pm/history`).
+  - Signature HTML is email-oriented: `EmailParagraph` (`EmailParagraph.ts`) keeps the schema name `paragraph` but parses leaf `div`/`p` and renders `div`. Wrapper `div`s that contain other blocks are flattened in `normalizePastedSignatureHtml` before parse: inheritable styles (`font-size`, `line-height`, `letter-spacing`, font/color) copy onto every child; box styles (`margin`, `padding`, `border`) copy onto the first child. That is why Formal Letterhead's `border-top` divider and `margin-top`/`padding-top` show in the Visual Editor. `EmailParagraph` stores those as `blockStyle` and `serializeEmailSignatureHtml` writes them back onto each line `div`. Bold/italic render as `<b>`/`<i>`. Visual serialize is a compiler, not a source-preserving round-trip.
+  - Persisted HTML comes from `serializeEmailSignatureHtml`, not `editor.getHTML()`. One `div` per line; whole-line font/color/background hoist onto that `div`; mixed inline styles stay as `span style`; placeholders serialize as `{{token}}` text (the editor view still uses `span.brackets-node`). Empty lines are `<div><br></div>`. Headings keep `h1`–`h4` with `margin: 0`.
+  - `onChange` records the serialized HTML in `lastEmittedHtmlRef`. The `value` sync effect skips `setContent` when `value` is that emitted HTML (or already matches `serializeEmailSignatureHtml`). External loads use `setMeta("addToHistory", false)` on `setContent` and `setTextSelection` so ProseMirror history is not replaced. Without that, undo/redo appear dead because every form update rewrites the document. `useEditor` options are stable (`EDITOR_EXTENSIONS`, `EDITOR_PROPS`, initial content ref only) so TipTap 3 does not `setOptions`/`view.updateState` on every keystroke. Cmd+Z / Shift-Cmd+Z / Cmd+Y are handled in a capturing `window` listener for the editor, toolbar, and the color popover (`data-text-color-popover`; it is portaled so it is not under the editor DOM). `UndoRedo` is last in the extensions list. `BracketsExtension` auto-converts only `{{word}}` / `{{word|"fallback"}}` (not `{{#if}}` / `{{/if}}`) with `addToHistory: false` and `bracketsAutoConvert: true` so undo does not immediately reconvert and `onUpdate` does not persist that conversion.
   - Supports standard formatting options (bold, italic, lists, headings, etc.).
   - Includes font selection capabilities using Tiptap's `FontFamily` and `TextStyle` extensions.
-  - A Mantine `Select` component is used in the toolbar for choosing from a predefined list of web-safe fonts (with fallbacks) and dynamically loaded system fonts.
-  - System fonts can be loaded via a button using the Local Font Access API (browser/permission dependent).
-  - Text color uses Mantine `RichTextEditor.ColorPicker`.
+  - A Mantine `Select` (searchable) lists web-safe fonts plus any `font-family` detected in the document (from paste or existing HTML). There is no Load System Fonts / Local Font Access API button. Hosting a webfont is not a signature solution: a Gmail signature is an HTML fragment injected into compose, not a full document with `<head>`, so `@font-face` / Google Fonts `<link>` have nowhere to live and Gmail/Outlook strip them anyway (remote font fetches are a tracking vector; Outlook desktop is Word and has no webfonts). Apple Mail is the rare exception. The in-app preview is a website, so loading the font there would lie to the author. Inline `font-family` with a system fallback stack (e.g. `Arial, Helvetica, sans-serif`) is the reliable approach; a typed custom name is best-effort for authors who have that font installed.
+  - Text transform toolbar group (`TextTransformControls.tsx`) after font family: Uppercase, Lowercase, Capitalize. `TextTransform` extension stores `text-transform` on the `textStyle` mark (not by rewriting characters, so `{{fullName}}` still substitutes). Clicking an active transform unsets it. Serialized HTML hoists a whole-line transform onto the `div`.
+  - Paste goes through `normalizePastedSignatureHtml` (`editorProps.transformPastedHTML`): converts `<font face/color>`, inlines `font-family`/`color`/`background-color` from pasted `<style>` rules, and wraps text in spans so TextStyle can parse them.
+  - Text color is `TextColorControl` (`packages/frontend/src/components/RichTextEditor/TextColorControl.tsx`): Mantine `Popover` + `ColorPicker` (`format="hex"`, saturation/hue sliders plus `swatches`, `swatchesPerRow={7}`) on `RichTextEditor.Control` with a `ColorSwatch`, plus a `TextInput` hex field with a non-editable `#` `leftSection` (`leftSectionPointerEvents="none"`, default section width). Digits are typed without `#`; a leading hash is stripped (`stripLeadingHashes`). A live `ColorSwatch` sits in `rightSection`; the input border uses `--input-bd` / `--input-bd-focus` set to `pickerValue`. **Save as swatch** uses the same live color for `--button-bd` / `borderColor`. The field keeps a draft while focused so incomplete values like `f` are not snapped back; it applies when `normalizeHex(\`#${digits}\`)` succeeds and does not `focus()` the editor (that would steal the caret). The picker is always visible (no palette/wheel toggle). Custom swatches are saved with **Save as swatch** (appended after the defaults) and persist in `localStorage` key `rich-text-custom-swatches` via `useLocalStorage`. Selecting a custom swatch swaps the button to **Remove swatch**. Save is disabled when no color is applied or the color is already a default/custom swatch. Tooltip uses `target={controlElement}` and is only mounted after the Control ref is set — a childless Tooltip with `target={null}` throws, and wrapping Tooltip inside `Popover.Target` fails because Tooltip renders a fragment. Native `title=""` suppresses the delayed browser tooltip. `BackgroundColor` from `@tiptap/extension-text-style` retains pasted background colors.
+  - Toolbar controls are wrapped in `ToolbarTooltip` (`Tooltip` + `openDelay={250}` + `title=""` on the control). Tooltip returns a fragment so grouped control borders stay intact. Labels are full English titles (Bold, Heading 1, Clear formatting, Font family, Unset color, etc.).
+  - Editor content (`.ProseMirror` / `classNames.content` in `RichTextEditor.css.ts`) is a fixed email canvas: white background, black text, `min-height: 16rem` to match HtmlEditor and the form preview Paper. Toolbar still follows the app color scheme.
+- HtmlEditor: (`packages/frontend/src/components/HtmlEditor/index.tsx`)
+  - Transparent textarea over a Prism-highlighted `<pre>` (`prismjs` `languages.markup` / `prism-markup`). Token colors live in Linaria (`HtmlEditor.css.ts`), not global Prism CSS (that would restyle Mantine `pre`/`code`).
+  - Framed with Linaria using theme `vars`: gray border, `radius.sm`, `gray[0]` background, `cursor: text`, blue border on `:focus-within`, `min-height: 16rem`.
+  - `react-simple-code-editor` is declared but unused: its CJS `exports.default` arrives as a nested object under Vite 8, so React rejects it (`element type is invalid ... got: object`).
+- SignatureWizard (`packages/frontend/src/features/signatures/SignatureWizard/`): create/edit uses Mantine `Stepper` (`allowNextStepsSelect={false}`, visited steps clickable). Steps: Setup, Design, Targets & Schedule, Confirm. Create starts at Setup; edit starts at Design with the existing template loaded. Wizard form type is `SignatureWizardValues` in `types.ts`. Save still navigates to `/signatures` and does not persist targeting to Firestore yet.
+  - Setup: `Radio.Card` group — blank canvas (first, default on create), from template, or copy from an existing account. Edit prefills **From template** with the loaded signature. **From template** opens `TemplatePickerModal`: search, collapsible Saved Templates (Firestore `templates`) and Predefined Templates (`startTemplates.ts`, ids prefixed `predefined:`), live `HtmlPreview`, Cancel / Insert. Insert copies HTML into Design and prefills name if empty. Cancel leaves the prior selection (draft id is local to the modal). Reopening the already-selected card or **Change template** brings the modal back. Each open clears search and re-expands both groups via a `wasOpenedRef`-gated `useEffect` (false→true only). Unguarded `setSearchQuery("")` in that effect trips `react-hooks/set-state-in-effect`; the rule allows setState when the call is dominated by a ref check (`enableAllowSetStateFromRefsInEffects` defaults true). Existing account copies that user's mock signature HTML the same way. Accounts/groups/OUs are mock Directory data in `directoryTestdata.ts` (Jane Doe, Sam Lee, Alex Kim, Morgan Patel; Engineering / All Employees / Marketing / Sales / Product; OU paths under Example Corp).
+  - Design: `SignatureTemplateForm` (no inner `<form>` or Save/Cancel; parent owns name/content).
+  - Targets: Default switch hides people/groups/OU pickers (`Collapse keepMounted={false}`) and clears those selections. Otherwise searchable `MultiSelect`s can mix people, groups, and OUs; at least one is required. Schedule is a single switch, **Apply every 24 hours** (`isScheduled`): on = re-apply once a day; off = apply only on save. No start/end dates. Mantine 9 `Collapse` uses `expanded`, not `in`. Switches use `form.getInputProps(..., { type: "checkbox" })`.
+  - Confirm: summary of setup/name/targets/schedule plus `HtmlPreview` of parsed content.
+- SignatureTemplateForm: (`packages/frontend/src/features/signatures/SignatureTemplateForm/index.tsx`)
+  - Presentational Design-step editor. Props: `name`, `onNameChange`, `content`, `onContentChange`, optional `nameError` / `contentError`. Beautify happens on wizard Save, not while typing.
+  - Visual vs Code editor is local `useState<"visual" | "code">("visual")`, not localStorage. Every visit to create/edit opens on Visual Editor. Switching modes does not beautify or rewrite content. The visual editor does not `onChange` on mount or when `BracketsExtension` auto-converts `{{token}}` (`bracketsAutoConvert` meta), so Code-editor HTML (including `{{#if}}` / `{{/if}}`) is not replaced until the user actually edits in Visual. A yellow `Alert` above the Code editor warns that switching back to Visual and making any edit rewrites custom markup. Brackets chips are only `{{word}}` / `{{word|"fallback"}}`; block directives stay as text.
+  - Editor/preview layout toggle: icon `SegmentedControl` (`IconLayoutColumns` / `IconLayoutRows`) in its own `Grid.Col` between PlaceholderPicker and the editor/preview columns, right-aligned via `Group justify="flex-end"`. Values `side-by-side` | `stacked` persist in localStorage key `signature-editor-preview-layout` (default side-by-side). Side-by-side uses `Grid.Col span={{ sm: 12, md: 6 }}`; stacked uses `span={12}`. The layout row is `visibleFrom="md"` because the grid already stacks below that breakpoint.
+  - Editor and preview pane titles ("Signature Content" / "Live Preview") share `paneHeader` (`SignatureTemplateForm.css.ts`): `Group` with `align="center"` and `min-height: 2rem` so the Visual/Code control does not push the editor canvas below the preview Paper.
+  - Placeholders picker sits full-width between template name and the editor/preview. Preview context is `getTemplatePreviewContext(samplePerson)` from `@/shared/templatePlaceholders`.
+  - `PlaceholderPicker onInsert` goes to `HtmlEditorHandle.insertAtCursor` or `RichTextEditorHandle.insertAtCursor` for the active editor mode. Card `onMouseDown` calls `preventDefault` so the editor keeps its selection.
+- PlaceholderPicker (`packages/frontend/src/features/signatures/PlaceholderPicker/index.tsx`)
+  - Tabs: Details, Company, Conditional, Social. Cards insert `{{token}}` (or `{{#if token}}{{token}}{{/if}}` on Conditional) at the cursor. They do not copy to the clipboard.
+  - Tokens are Google Workspace Admin SDK Directory user fields only (no LinkedIn/QR — those are not Directory fields). Catalog lives in `packages/shared/src/templatePlaceholders.ts`.
 
 ### Data Models
 
 #### Templates
-- Professional Template
-- Simple Template
-- Marketing Template
+Firestore `templates` documents are typed as `Template` in `packages/frontend/src/types/firebase.ts`.
+- `assignedGroup?: string | null` — group name shown on list cards/table. Empty/null renders as "Unassigned".
+- `isScheduled?: boolean` — whether the template is re-applied every 24 hours. Missing/false renders as "Not scheduled" on the list.
+- Seed templates (`packages/frontend/scripts/seed-firestore.ts`): Professional → Engineering + scheduled; Simple → All Employees, not scheduled; Marketing → unassigned + scheduled.
+- `TemplateAssignment` is a separate collection type (`user` | `group` | `domain` | `schedule`) with Firestore rules on `templateAssignments`. List UI currently reads the denormalized fields on `Template`, not that collection.
+- Wizard targeting (`SignatureWizardValues`) is UI-only for now: `isDefault`, `userEmails`, `groupIds`, `organizationalUnitPaths`, `isScheduled` (apply every 24 hours). Edit prefills `groupIds` by matching `Template.assignedGroup` to mock `directoryGroups` names. Default means "anyone not matched by another signature"; it is not stored on `Template` yet.
+
+#### Template placeholders
+`packages/shared/src/templatePlaceholders.ts` is the catalog of Handlebars tokens mapped to Admin SDK Directory `users` fields (`name.fullName`, `primaryEmail`, `organizations[primary].title`, `phones[type=work]`, `locations[].buildingId`, `websites[type=blog]`, etc.). Categories: details, company, social. Conditional snippets are derived (`{{#if token}}{{token}}{{/if}}`). `Person` in `person.testdata.ts` holds sample Directory values used by `getTemplatePreviewContext`.
+
+#### Signature list display
+- `SignatureCard` shows name, group badge, schedule badge, and an `HtmlPreview` of `safeTemplateParse(template.content, getTemplatePreviewContext(samplePerson))`.
+- Preview context maps Directory-aligned tokens via `getTemplatePreviewContext` in `packages/shared/src/templatePlaceholders.ts`. Aliases `name`/`title`/`phone` keep existing seed templates working.
+- `SignaturesTable` columns: Name, Group, Schedule, Actions. No preview in table view.
 
 ### Authentication
 - Uses Firebase Auth Emulator for testing
@@ -68,6 +131,8 @@ Frontend scripts:
 
 `wait-on tcp:127.0.0.1:8080 tcp:127.0.0.1:9099 tcp:127.0.0.1:4000` delays Vite until Firestore, Auth, and the Emulator UI are listening. Functions port 5001 is not waited on (functions may fail to load if `lib/` is stale).
 
+Do not start `yarn vite` by itself. Vite must come up through `yarn dev` from the repo root so `VITE_FIREBASE_*` from the root `.env` are in the process environment. Killing only the Vite child of `concurrently` leaves emulators running and a Vite started outside that script has no API keys (`auth/invalid-api-key`). Restart the whole `yarn dev` stack instead.
+
 Related scripts:
 
 - `@gsuite/frontend seed`: `tsx scripts/seed-firestore.ts` — programmatically writes templates/users into already-running Auth + Firestore emulators. Not used by the `dev*` scripts.
@@ -80,36 +145,31 @@ Workspaces: `packages/frontend`, `packages/shared`, `packages/firebase`, `packag
 - Package manager is Yarn 4.8.1 (`packageManager` in root `package.json`; Corepack).
 - `.yarnrc.yml` must set `nodeLinker: node-modules`. Yarn 4 defaults to Plug'n'Play. PnP removes `node_modules`, which breaks Vite resolution and the Firebase Functions emulator (it looks for `node_modules/.bin/firebase-functions` via `require.resolve('firebase-functions', { paths: [functionsSourceDir] })`).
 - Direct imports and peer deps must be declared on `@gsuite/frontend`. Yarn will not install undeclared peers. Required because they are imported in source:
-  - `@codemirror/view` (peer of `@uiw/react-codemirror`; used by `HtmlEditor`)
+  - `prismjs` (used by `HtmlEditor`). `react-simple-code-editor` is declared but unused.
   - `@tiptap/core` (peer of Tiptap extensions; used by RichTextEditor and `tiptapBracketsExtension`)
   - `@tiptap/pm` (`tiptapBracketsExtension` imports from `@tiptap/pm/state` and `@tiptap/pm/model`)
   - `tippy.js` (used by `tiptapBracketsExtension`)
+  - Brackets plugin (`BracketsExtension.ts`) turns `{{word}}` / `{{word|"fallback"}}` text into atom nodes (not `{{#if}}` / `{{/if}}`) and copies the text node's marks onto the atom so font/color survive round-trip. Multiple tokens in one text node are converted last-to-first so later replacements do not shift earlier match positions (left-to-right conversion was eating into following blocks, e.g. `{{email}} | {{phone}}` next to a `{{#if}}` paragraph). Auto-convert transactions set `bracketsAutoConvert` so RichTextEditor does not write them into the form.
 - `firebase.json` lives in `packages/firebase`. Functions source is `../functions` (`packages/functions`). `firebase-functions` 6.3.2 is a dependency of both `@gsuite/firebase` and `@gsuite/functions`. Global CLI in use: `firebase-tools@14.1.0`.
 - After a long absence: `yarn install` from the repo root, then `yarn dev`. If you previously installed under PnP, the node-modules linker plus a reinstall is required.
 
 ## Build and Configuration
 
 ### Vite
-- The project uses Vite for frontend development and bundling.
-- The frontend React plugin has been switched from `@vitejs/plugin-react` (Babel-based) to `@vitejs/plugin-react-swc` (SWC-based) for potentially faster compilation and HMR. [[Reference](https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react-swc)]
-- There are separate Vite configuration files:
-    - `vite.config.ts` at the project root.
-    - `packages/frontend/vite.config.ts` specific to the frontend package. `yarn dev` loads this one.
-- Path aliases in both configs use `path.resolve(import.meta.dirname, ...)` rather than `__dirname`. Vite 8's native config loader (future default) does not support `__dirname`. Node 22 provides `import.meta.dirname`.
-- **Path Aliases**: 
-    - Aliases like `@/frontend`, `@/shared`, and `@/functions` are used to simplify import paths.
-    - Root `vite.config.ts` defines these aliases pointing to `packages/frontend/src`, `packages/shared/src`, etc.
-    - The `packages/frontend/vite.config.ts` also defines these aliases. It's crucial that its relative paths correctly point to the shared directories (e.g., `../../packages/shared/src` from `packages/frontend`). Misconfiguration here can lead to module resolution errors.
-    - Always use the @/ prefixed alias for imports rather than relative import paths
+- Frontend uses Vite 8.3 (`packages/frontend`). Vite 8 bundles with Rolldown, not Rollup.
+- `packages/frontend/vite.config.ts` is the config `yarn dev` loads. Root `vite.config.ts` is leftover and not used by the frontend scripts.
+- Vite 8 config keys: `build.rolldownOptions` (not `build.rollupOptions`). Object-form `output.manualChunks` is a type error; use `output.codeSplitting.groups` (Rolldown). Function-form `manualChunks` still exists but is deprecated.
+- Current vendor split: `vendor` = `react`/`react-dom`, `mantine` = `@mantine/core`/`@mantine/hooks`, via `codeSplitting.groups[].test` regexes.
+- React plugin is still `@vitejs/plugin-react-swc`. Vite 8 warns to switch to `@vitejs/plugin-react` v6 (Oxc) when no SWC plugins are used; `@vitejs/plugin-react` is already in frontend `devDependencies`.
+- `envDir` is `path.resolve(import.meta.dirname, "..")` which is `packages/`, not the repo root. Repo root would be `../..`. Default envDir is the frontend package directory, which has no `.env`.
+- Path aliases use `path.resolve(import.meta.dirname, ...)` rather than `__dirname`. Vite 8's native config loader (future default) does not support `__dirname`. Node 22 provides `import.meta.dirname`. Frontend aliases: `@/frontend` → `./src`, `@/shared` → `../shared/src`, `@/functions` → `../functions/src`.
+- Always use the `@/` prefixed alias for imports rather than relative import paths.
 - **CSS-in-JS**:
     - The frontend uses Linaria (`@wyw-in-js/vite`) for zero-runtime CSS-in-JS, as configured in `packages/frontend/vite.config.ts`. This plugin handles the transformation of CSS defined in TypeScript/JavaScript files.
-- **Dependency Pre-bundling**:
-    - To stabilize Hot Module Replacement (HMR) and prevent frequent re-optimization of CodeMirror-related dependencies (`@codemirror/state`, `@codemirror/view`, `@codemirror/lang-html`), these are explicitly included in `optimizeDeps.include` within `packages/frontend/vite.config.ts`.
-    - `js-beautify` is also included in `optimizeDeps.include` for the same reasons.
-    - To focus Vite's dependency pre-bundling process and potentially speed it up, `optimizeDeps.entries` is set to `['src/main.tsx']` in `packages/frontend/vite.config.ts`.
 - **Dependency Deduplication**:
-    - To ensure a single instance of core libraries like React and React DOM across the frontend and shared packages (especially in a monorepo context), `react` and `react-dom` are added to `resolve.dedupe` in `packages/frontend/vite.config.ts`. This can help stabilize Vite's dependency graph and reduce unnecessary re-optimizations.
-    - TipTap 3 needs one ProseMirror copy. Root `package.json` `resolutions` pin `prosemirror-state@1.4.4`, `prosemirror-model@1.25.11`, `prosemirror-view@1.42.4`, and `prosemirror-transform@1.12.0`. Frontend Vite `resolve.dedupe` also lists `@tiptap/core`, `@tiptap/pm`, and those `prosemirror-*` packages. Duplicate copies throw `Adding different instances of a keyed plugin (plugin$N)` when the editor mounts.
+    - `resolve.dedupe` forces Vite to resolve those packages from one place. Needed because React and ProseMirror/Tiptap use module identity / `instanceof`; two copies break the editor.
+    - `@gsuite/shared` does not depend on React. Duplicates come from Yarn's node-modules linker plus Vite's optimizer graph — not because shared redeclares those deps.
+    - TipTap 3 needs one ProseMirror copy. Root `package.json` `resolutions` pin `prosemirror-state@1.4.4`, `prosemirror-model@1.25.11`, `prosemirror-view@1.42.4`, and `prosemirror-transform@1.12.0`. Frontend Vite `resolve.dedupe` lists `react`, `react-dom`, `@tiptap/core`, `@tiptap/pm`, and those `prosemirror-*` packages. Duplicate copies throw `Adding different instances of a keyed plugin (plugin$N)` when the editor mounts.
 
 ### TypeScript
 - A root `tsconfig.json` plus `tsconfig.base.json` extended by package configs.
@@ -136,13 +196,12 @@ Workspaces: `packages/frontend`, `packages/shared`, `packages/firebase`, `packag
 -   `@tiptap/extension-color`: Tiptap extension for text color.
 -   `@tiptap/react`: `useEditor` needs `shouldRerenderOnTransaction: true` for Mantine toolbar state, and `immediatelyRender: false` with React 19.
 -   `@tiptap/pm`: ProseMirror wrapper used by Tiptap 3.
--   `@codemirror/view`: Direct frontend dependency (`^6.36.7`); also a peer of `@uiw/react-codemirror`.
 -   `tippy.js`: Direct frontend dependency (`^6.3.7`) for brackets suggestion popovers.
 
 ## Code Patterns and Conventions
 
 -   **TypeScript**: Used for all JavaScript code. Interfaces are preferred over types.
--   **React**: Functional components are used.
+-   **React**: Functional components use `export function ComponentName()` at the declaration. Local helper components use `function ComponentName()`. Hooks may stay as `const useX = () =>`. `App` is a named export; `main.tsx` imports `{ App }`.
 -   **Styling**: Mantine components and CSS Modules (Linaria) are used.
 -   **State Management**: Zustand for global state. Server state is managed via React Query.
 
@@ -153,11 +212,26 @@ Workspaces: `packages/frontend`, `packages/shared`, `packages/firebase`, `packag
 -   Located at `packages/frontend/src/components/RichTextEditor/index.tsx`.
 -   Tiptap 3 + Mantine 9 `@mantine/tiptap`. Extensions are registered individually; `@tiptap/starter-kit` is not used.
 -   `setContent` takes `{ emitUpdate: false }` (v3 options object, not a boolean).
--   Color uses `RichTextEditor.ColorPicker` / `UnsetColor`.
+-   `EmailParagraph` / `EmailBold` / `EmailItalic` in `EmailParagraph.ts`. `serializeEmailSignatureHtml.ts` walks the ProseMirror doc for Firestore/code-editor HTML (one `div` per line after a Visual edit).
+-   `insertAtCursor` (imperative handle): `{{token}}` uses `insertBrackets`; anything else (conditionals) uses `insertContent`. Selection is stored in `lastSelectionRef` on `selectionUpdate`/`blur`, skipped while `isSyncingContentRef` is true (`setContent` would otherwise reset the caret). After insert, selection is collapsed to `selection.to` so the next click appends.
+-   Color uses `TextColorControl` / `UnsetColor`.
 -   Supports standard rich text features (bold, italic, underline, lists, etc.).
--   Includes font family selection with an option to load system fonts.
+-   Includes font family selection. Pasted fonts/colors are normalized and kept; detected families are added to the font Select.
 -   Includes a color picker for text color selection.
+
+### HtmlEditor Component
+
+-   Located at `packages/frontend/src/components/HtmlEditor/index.tsx`.
+-   Transparent textarea stacked over a `<pre>` of Prism HTML. Border/focus styles belong on the wrapper (`HtmlEditor.css.ts`). The extra `\n` in the pre keeps a trailing blank line visible.
+-   Highlight function: `Prism.highlight(code, Prism.languages.markup, "markup")` after importing `prismjs/components/prism-markup`. If `languages.markup` is missing, return the raw string.
+-   `insertAtCursor` (imperative handle) splices text at the textarea selection. Selection is remembered on select/keyup/click/blur and `selectionchange`; after insert, the caret is restored just after the new text. If the editor was never focused, insert is at the end.
 
 ## Configuration
 
-(Details about project configuration, build tools, etc.)
+### ESLint
+- Flat config is root `eslint.config.js`. ESLint 10 (`^10.10.0`) is a workspace dep; plugins (`@eslint/compat`, `@stylistic/eslint-plugin`, `eslint-plugin-import`, `eslint-plugin-jsonc`, `eslint-plugin-jsx-a11y`, `eslint-plugin-react-hooks`) live on `@gsuite/frontend`.
+- Config evaluation must succeed or the VS Code ESLint server reports `textDocument/diagnostic failed` for every file. Do not reference undeclared identifiers in `eslint.config.js`.
+- `eslint-plugin-import` recommended/typescript configs are wrapped with `fixupConfigRules` from `@eslint/compat` and scoped to `importLintGlobs` (`**/*.{js,jsx,mjs,cjs,ts,tsx}`).
+- `@typescript-eslint/parser` is CJS with named exports (`parseForESLint`). Import it as `import * as tsParser`. A default import is Node-synthesized and flaky.
+- Do not default-import `jsonc-eslint-parser` v3 (ESM, named exports only). JSON/JSONC uses `eslint-plugin-jsonc` languages instead: `language: "jsonc/jsonc"` for tsconfig/`*.jsonc`/`*.json5`, `language: "jsonc/json"` for other `*.json`. `@eslint/json` is still a frontend dep but is unused by the config.
+- `eslint-plugin-react-hooks` 7.1.1 `recommended` includes React Compiler rules. `react-hooks/set-state-in-effect` errors on synchronous `setState` in a `useEffect` body (`if (!opened) return; setState(...)` still counts). Gating on a ref-derived condition is allowed. `react-hooks/set-state-in-render` errors on `setState` during render except the documented previous-prop adjustment pattern. `react-hooks/refs` errors on `ref.current` during render, including inside `useEditor({ ... })` option objects.

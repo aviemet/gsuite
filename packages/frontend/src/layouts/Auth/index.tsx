@@ -1,7 +1,5 @@
-const AuthLayout = () => {
+export function AuthLayout() {
 	return (
 		<div>AuthLayout</div>
 	)
 }
-
-export { AuthLayout }

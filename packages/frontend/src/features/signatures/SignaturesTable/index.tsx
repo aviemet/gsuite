@@ -10,7 +10,7 @@ interface SignaturesTableProps {
 	loading: boolean
 }
 
-export const SignaturesTable = ({ templates, loading }: SignaturesTableProps) => {
+export function SignaturesTable({ templates }: SignaturesTableProps) {
 	return (
 		<DataTable
 			withTableBorder={ false }
@@ -25,8 +25,8 @@ export const SignaturesTable = ({ templates, loading }: SignaturesTableProps) =>
 					title: "Name",
 					render: (record) => (
 						<Link
-							to="/signatures/$signatureId"
-							params={ { signatureId: record.id } }
+							to="/signatures/edit/$id"
+							params={ { id: record.id } }
 							style={ { textDecoration: "none", color: "inherit" } }
 						>
 							{ record.name }
@@ -34,27 +34,33 @@ export const SignaturesTable = ({ templates, loading }: SignaturesTableProps) =>
 					),
 				},
 				{
-					accessor: "isActive",
-					title: "Status",
-					render: ({ isActive }) => (
+					accessor: "assignedGroup",
+					title: "Group",
+					render: ({ assignedGroup }) => {
+						const groupName = assignedGroup?.trim() || "Unassigned"
+						return (
+							<Badge
+								size="sm"
+								variant="light"
+								color={ groupName === "Unassigned" ? "gray" : "blue" }
+							>
+								{ groupName }
+							</Badge>
+						)
+					},
+				},
+				{
+					accessor: "isScheduled",
+					title: "Schedule",
+					render: ({ isScheduled }) => (
 						<Badge
 							size="sm"
 							variant="light"
-							color={ isActive ? "green" : "red" }
+							color={ isScheduled ? "violet" : "gray" }
 						>
-							{ isActive ? "Active" : "Inactive" }
+							{ isScheduled ? "Scheduled" : "Not scheduled" }
 						</Badge>
 					),
-				},
-				{
-					accessor: "createdAt",
-					title: "Created",
-					render: ({ createdAt }) => createdAt.toDate().toLocaleDateString(),
-				},
-				{
-					accessor: "updatedAt",
-					title: "Last Updated",
-					render: ({ updatedAt }) => updatedAt.toDate().toLocaleDateString(),
 				},
 				{
 					accessor: "actions",

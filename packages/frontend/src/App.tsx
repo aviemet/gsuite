@@ -20,10 +20,10 @@ async function loadShiki() {
 
 const shikiAdapter = createShikiAdapter(loadShiki)
 
-const App = () => {
+export function App() {
 	return (
 		<QueryClientProvider client={ queryClient }>
-			<MantineProvider theme={ theme }>
+			<MantineProvider theme={ theme } defaultColorScheme="light">
 				<CodeHighlightAdapterProvider adapter={ shikiAdapter }>
 					<RouterProvider router={ router } />
 					<TanStackRouterDevtools router={ router } />
@@ -32,5 +32,3 @@ const App = () => {
 		</QueryClientProvider>
 	)
 }
-
-export default App

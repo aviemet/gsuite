@@ -5,7 +5,6 @@ import { DashboardPage } from "../pages/Dashboard"
 import { SettingsPage } from "../pages/Settings"
 import { SignatureEditPage } from "../pages/Signatures/Edit"
 import { SignaturesListPage } from "../pages/Signatures/Index"
-import { SignatureViewPage } from "../pages/Signatures/Show"
 
 // Define our root layout component that will wrap all routes
 const rootRoute = createRootRoute({
@@ -43,12 +42,6 @@ const signatureEditWithIdRoute = createRoute({
 	component: SignatureEditPage,
 })
 
-const signatureViewRoute = createRoute({
-	getParentRoute: () => rootRoute,
-	path: "/signatures/$signatureId",
-	component: SignatureViewPage,
-})
-
 // Create and export the router instance
 export const router = createRouter({
 	routeTree: rootRoute.addChildren([
@@ -57,6 +50,5 @@ export const router = createRouter({
 		signaturesRoute,
 		signatureEditRoute,
 		signatureEditWithIdRoute,
-		signatureViewRoute,
 	]),
 })
