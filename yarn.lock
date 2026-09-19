@@ -9507,7 +9507,6 @@ __metadata:
     eslint-config-google: "npm:^0.14.0"
     eslint-import-resolver-typescript: "npm:^4.4.5"
     husky: "npm:^9.1.7"
-    tinymce: "npm:^8.9.1"
     typescript-eslint: "npm:^8.70.0"
   languageName: unknown
   linkType: soft
@@ -14422,13 +14421,6 @@ __metadata:
     fdir: "npm:^6.5.0"
     picomatch: "npm:^4.0.4"
   checksum: 10c0/7f7bb0f197c88bc4b20c231e0deca4240ca3bf313a88f5a7fee93a872b84966a4d50220947c0455ad07a60b3b360961c5b7fd979222aeb716a9f99b412002e4c
-  languageName: node
-  linkType: hard
-
-"tinymce@npm:^8.9.1":
-  version: 8.9.1
-  resolution: "tinymce@npm:8.9.1"
-  checksum: 10c0/f0dcf1767e2777dff6dbc1143061d68eb8cf90b0d2d9b6ce07e9f9f4ea9774ee53be4f834be42d486e29f9e7609166792ee26523ca2e829c1e2c47a336e19fee
   languageName: node
   linkType: hard
 
