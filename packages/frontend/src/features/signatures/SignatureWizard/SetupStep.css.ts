@@ -13,12 +13,12 @@ export const sourceCard = css`
 	transition: border-color 150ms ease, background 150ms ease;
 
 	&[data-checked] {
-		border-color: ${ vars.colors.blue[5] };
-		background: light-dark(${ vars.colors.blue[0] }, ${ vars.colors.dark[5] });
+		border-color: ${ vars.colors.harbor[5] };
+		background: light-dark(${ vars.colors.harbor[0] }, ${ vars.colors.dark[5] });
 	}
 
 	&:hover {
-		border-color: ${ vars.colors.blue[4] };
+		border-color: ${ vars.colors.harbor[4] };
 	}
 `
 

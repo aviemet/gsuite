@@ -6,4 +6,4 @@
  *
  * See a full list of supported triggers at https://firebase.google.com/docs/functions
  */
-export declare const testConnection: import("firebase-functions/v2/https").HttpsFunction;
+export declare const testConnection: import("firebase-functions/v2/https").HttpsFunction

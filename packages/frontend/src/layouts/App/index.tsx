@@ -8,6 +8,8 @@ import { PAGE_TITLE_PORTAL_ID } from "@/frontend/components/Page"
 import { UserMenu } from "@/frontend/components/UserMenu"
 import { router } from "@/frontend/routes"
 
+import * as classes from "./App.css"
+
 // Custom hook to track the current path
 const useCurrentPath = () => {
 	const [currentPath, setCurrentPath] = useState(router.state.location.pathname)
@@ -32,15 +34,15 @@ export function AppLayout() {
 	return (
 		<AppShell
 			layout="alt"
-			header={ { height: { base: 60, md: 70, lg: 80 } } }
+			header={ { height: 56 } }
 			navbar={ {
-				width: { base: 200, md: 250, lg: 300 },
+				width: 232,
 				breakpoint: "sm",
 				collapsed: { mobile: !opened },
 			} }
-			padding="sm"
+			padding="md"
 		>
-			<AppShell.Header>
+			<AppShell.Header className={ classes.header }>
 				<Group h="100%" px="sm" justify="space-between" wrap="nowrap">
 					<Group wrap="nowrap">
 						<Burger opened={ opened } onClick={ toggle } hiddenFrom="sm" size="sm" />
@@ -50,10 +52,17 @@ export function AppLayout() {
 				</Group>
 			</AppShell.Header>
 
-			<AppShell.Navbar>
+			<AppShell.Navbar className={ classes.navbar }>
+				<div className={ classes.brand }>
+					<span className={ classes.brandMark } aria-hidden>
+						<IconSignature size={ 16 } />
+					</span>
+					<span className={ classes.brandName }>Signature Manager</span>
+				</div>
 
-				<Stack gap="xs" p="sm">
+				<Stack gap={ 4 } p="sm" pt={ 4 }>
 					<NavLink
+						className={ classes.navLink }
 						component={ Link }
 						to="/"
 						label="Dashboard"
@@ -62,6 +71,7 @@ export function AppLayout() {
 					/>
 
 					<NavLink
+						className={ classes.navLink }
 						component={ Link }
 						to="/signatures"
 						label="Signatures"
@@ -70,6 +80,7 @@ export function AppLayout() {
 					/>
 
 					<NavLink
+						className={ classes.navLink }
 						component={ Link }
 						to="/settings"
 						label="Settings"
@@ -78,7 +89,7 @@ export function AppLayout() {
 					/>
 				</Stack>
 			</AppShell.Navbar>
-			<AppShell.Main>
+			<AppShell.Main className={ classes.main }>
 				<Outlet />
 			</AppShell.Main>
 		</AppShell>

@@ -1,12 +1,15 @@
-import { Alert, Collapse, MultiSelect, Paper, Stack, Switch, Text } from "@mantine/core"
+import { Alert, Collapse, Paper, Stack, Switch, Text } from "@mantine/core"
 import { UseFormReturnType } from "@mantine/form"
 import { IconInfoCircle } from "@tabler/icons-react"
 import clsx from "clsx"
 import { ChangeEvent } from "react"
 
+import { OrganizationalUnitTree } from "@/frontend/components/OrganizationalUnitTree"
+import { TransferList } from "@/frontend/components/TransferList"
+
 import {
 	directoryGroupSelectData,
-	directoryOrganizationalUnitSelectData,
+	directoryOrganizationalUnitTreeData,
 	directoryUserSelectData,
 } from "./directoryTestdata"
 import * as classes from "./TargetsStep.css"
@@ -19,6 +22,9 @@ interface TargetsStepProps {
 export function TargetsStep({ form }: TargetsStepProps) {
 	const defaultInputProps = form.getInputProps("isDefault", { type: "checkbox" })
 	const scheduledInputProps = form.getInputProps("isScheduled", { type: "checkbox" })
+	const peopleInputProps = form.getInputProps("userEmails")
+	const groupsInputProps = form.getInputProps("groupIds")
+	const organizationalUnitInputProps = form.getInputProps("organizationalUnitPaths")
 
 	function handleDefaultChange(event: ChangeEvent<HTMLInputElement>) {
 		defaultInputProps.onChange(event)
@@ -57,35 +63,40 @@ export function TargetsStep({ form }: TargetsStepProps) {
 					<Text size="sm" c="dimmed">
 						Choose any mix of people, groups, and organizational units. At least one target is required unless this is the default signature.
 					</Text>
-					<MultiSelect
+					<TransferList
 						label="People"
-						placeholder="Choose individuals"
 						data={ directoryUserSelectData }
-						searchable
-						clearable
-						hidePickedOptions
+						value={ peopleInputProps.value }
+						onChange={ peopleInputProps.onChange }
+						error={ peopleInputProps.error }
+						searchPlaceholder="Search people"
 						nothingFoundMessage="No people found"
-						{ ...form.getInputProps("userEmails") }
+						availableSearchLabel="Search available people"
+						selectedSearchLabel="Search selected people"
+						transferToSelectedLabel="Add selected people"
+						transferToAvailableLabel="Remove selected people"
 					/>
-					<MultiSelect
+					<TransferList
 						label="Groups"
-						placeholder="Choose one or more groups"
 						data={ directoryGroupSelectData }
-						searchable
-						clearable
-						hidePickedOptions
+						value={ groupsInputProps.value }
+						onChange={ groupsInputProps.onChange }
+						error={ groupsInputProps.error }
+						searchPlaceholder="Search groups"
 						nothingFoundMessage="No groups found"
-						{ ...form.getInputProps("groupIds") }
+						availableSearchLabel="Search available groups"
+						selectedSearchLabel="Search selected groups"
+						transferToSelectedLabel="Add selected groups"
+						transferToAvailableLabel="Remove selected groups"
 					/>
-					<MultiSelect
+					<OrganizationalUnitTree
 						label="Organizational units"
-						placeholder="Choose one or more OUs"
-						data={ directoryOrganizationalUnitSelectData }
-						searchable
-						clearable
-						hidePickedOptions
-						nothingFoundMessage="No OUs found"
-						{ ...form.getInputProps("organizationalUnitPaths") }
+						data={ directoryOrganizationalUnitTreeData }
+						value={ organizationalUnitInputProps.value }
+						onChange={ organizationalUnitInputProps.onChange }
+						error={ organizationalUnitInputProps.error }
+						searchPlaceholder="Search"
+						nothingFoundMessage="No organizational units found"
 					/>
 				</Stack>
 			</Collapse>

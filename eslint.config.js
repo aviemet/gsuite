@@ -9,6 +9,7 @@ import reactHooksPlugin from "eslint-plugin-react-hooks"
 const ignores = [
 	".vscode/**/*",
 	".yarn/**/*",
+	"packages/functions/lib/**/*",
 ]
 
 const importLintGlobs = ["**/*.{js,jsx,mjs,cjs,ts,tsx}"]

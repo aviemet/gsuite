@@ -1,3 +1,5 @@
+import { buildOrganizationalUnitTree } from "./buildOrganizationalUnitTree"
+
 export interface DirectoryUser {
 	email: string
 	displayName: string
@@ -89,10 +91,7 @@ export const directoryGroupSelectData = directoryGroups.map((group) => ({
 	label: group.name,
 }))
 
-export const directoryOrganizationalUnitSelectData = directoryOrganizationalUnits.map((unit) => ({
-	value: unit.path,
-	label: unit.path === "/" ? unit.name : `${unit.path} (${unit.name})`,
-}))
+export const directoryOrganizationalUnitTreeData = buildOrganizationalUnitTree(directoryOrganizationalUnits)
 
 export function findDirectoryUser(email: string): DirectoryUser | undefined {
 	return directoryUsers.find((user) => user.email === email)

@@ -1,13 +1,15 @@
 import { css } from "@linaria/core"
+
 import { vars } from "@/frontend/lib/theme"
 
 export const editorRoot = css`
 	position: relative;
-	border: 1px solid ${ vars.colors.gray[3] };
-	border-radius: ${ vars.radius.sm };
+	border: 1px solid ${ vars.colors.gray[4] };
+	border-radius: ${ vars.radius.md };
 	overflow: hidden;
 	min-height: 16rem;
-	background: ${ vars.colors.gray[0] };
+	background: ${ vars.colors.white };
+	box-shadow: 0 1px 2px rgba(22, 40, 69, 0.06);
 	cursor: text;
 	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 	font-size: 0.9em;
@@ -15,7 +17,7 @@ export const editorRoot = css`
 	box-sizing: border-box;
 
 	&:focus-within {
-		border-color: ${ vars.colors.blue[5] };
+		border-color: ${ vars.colors.harbor[5] };
 	}
 
 	textarea,
@@ -69,7 +71,7 @@ export const editorRoot = css`
 	.token.boolean,
 	.token.number,
 	.token.constant {
-		color: ${ vars.colors.blue[7] };
+		color: ${ vars.colors.harbor[7] };
 	}
 
 	.token.attr-name {

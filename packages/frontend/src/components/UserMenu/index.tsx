@@ -10,7 +10,7 @@ export function UserMenu() {
 		<Menu position="bottom-end" shadow="md" width={ 200 }>
 			<Menu.Target>
 				<UnstyledButton aria-label="User menu">
-					<Avatar radius="xl" />
+					<Avatar radius="xl" color="harbor" variant="filled" />
 				</UnstyledButton>
 			</Menu.Target>
 			<Menu.Dropdown>

@@ -69,8 +69,8 @@ export const templateButton = css`
 	}
 
 	&[data-selected="true"] {
-		background: light-dark(${ vars.colors.blue[0] }, ${ vars.colors.dark[4] });
-		color: light-dark(${ vars.colors.blue[7] }, ${ vars.colors.blue[3] });
+		background: light-dark(${ vars.colors.harbor[0] }, ${ vars.colors.dark[4] });
+		color: light-dark(${ vars.colors.harbor[8] }, ${ vars.colors.harbor[2] });
 	}
 `
 

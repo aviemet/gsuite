@@ -1,5 +1,3 @@
-import { isLeafEmailDiv } from "./EmailParagraph"
-
 interface InheritedTextStyles {
 	fontFamily: string | null
 	color: string | null
@@ -54,6 +52,47 @@ const BOX_STYLE_PROPERTIES = new Set([
 ])
 
 const SKIP_TAGS = new Set(["SCRIPT", "STYLE", "TEXTAREA"])
+
+const BLOCK_CHILD_TAGS = new Set([
+	"ADDRESS",
+	"ARTICLE",
+	"ASIDE",
+	"BLOCKQUOTE",
+	"DIV",
+	"DL",
+	"FIELDSET",
+	"FIGURE",
+	"FOOTER",
+	"FORM",
+	"H1",
+	"H2",
+	"H3",
+	"H4",
+	"H5",
+	"H6",
+	"HEADER",
+	"HR",
+	"MAIN",
+	"NAV",
+	"OL",
+	"P",
+	"PRE",
+	"SECTION",
+	"TABLE",
+	"UL",
+])
+
+function isHtmlElement(node: Node): node is HTMLElement {
+	return node instanceof HTMLElement
+}
+
+function isLeafEmailDiv(node: Node): boolean {
+	if(!isHtmlElement(node) || node.tagName !== "DIV") {
+		return false
+	}
+
+	return !Array.from(node.children).some((child) => BLOCK_CHILD_TAGS.has(child.tagName))
+}
 
 function readInlineFontFamily(element: HTMLElement): string | null {
 	if(element.style.fontFamily) {

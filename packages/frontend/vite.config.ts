@@ -1,7 +1,8 @@
 import path from "node:path"
+
 import react from "@vitejs/plugin-react-swc"
 import wyw from "@wyw-in-js/vite"
-import { defineConfig } from "vite"
+import { defineConfig } from "vitest/config"
 
 export default defineConfig({
 	envDir: path.resolve(import.meta.dirname, ".."),
@@ -20,12 +21,6 @@ export default defineConfig({
 		dedupe: [
 			"react",
 			"react-dom",
-			"@tiptap/core",
-			"@tiptap/pm",
-			"prosemirror-model",
-			"prosemirror-state",
-			"prosemirror-view",
-			"prosemirror-transform",
 		],
 	},
 	cacheDir: ".vite-cache",
@@ -46,5 +41,10 @@ export default defineConfig({
 				},
 			},
 		},
+	},
+	test: {
+		environment: "jsdom",
+		setupFiles: ["./tests/setup.ts"],
+		include: ["tests/**/*.{test,spec}.{ts,tsx}"],
 	},
 })

@@ -11,7 +11,7 @@
     "dev:no-seed": "yarn workspace @gsuite/frontend dev:no-seed",
     "dev:all": "yarn workspace @gsuite/frontend dev:all",
     "build": "yarn workspaces foreach --all -p run build",
-    "lint": "yarn workspaces foreach --all -p run lint",
+    "lint": "yarn workspaces foreach --all -p run lint --fix",
     "test": "yarn workspaces foreach --all -p run test",
     "commit": "git-cz",
     "prepare": "husky"
@@ -34,12 +34,6 @@
     "commitizen": {
       "path": "cz-conventional-changelog"
     }
-  },
-  "resolutions": {
-    "prosemirror-model": "1.25.11",
-    "prosemirror-state": "1.4.4",
-    "prosemirror-transform": "1.12.0",
-    "prosemirror-view": "1.42.4"
   },
   "packageManager": "yarn@4.8.1"
 }

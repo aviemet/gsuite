@@ -25,7 +25,7 @@ export const initializeFirebase = (): void => {
 
 		// Connect to emulators in development mode
 		if(import.meta.env.DEV) {
-			connectAuthEmulator(auth, "http://localhost:9099")
+			connectAuthEmulator(auth, "http://localhost:9099", { disableWarnings: true })
 			connectFirestoreEmulator(db, "localhost", 8080)
 		}
 	}

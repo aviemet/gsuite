@@ -16,6 +16,7 @@ import { Template } from "@/frontend/types/firebase"
 
 import { ConfirmStep } from "./ConfirmStep"
 import { SetupStep } from "./SetupStep"
+import * as classes from "./SignatureWizard.css"
 import { TargetsStep } from "./TargetsStep"
 import {
 	getInitialWizardValues,
@@ -142,6 +143,7 @@ export function SignatureWizard({
 				allowNextStepsSelect={ false }
 				orientation={ isNarrow ? "vertical" : "horizontal" }
 				size="sm"
+				classNames={ { stepIcon: classes.stepIcon } }
 			>
 				<Stepper.Step
 					label="Setup"
@@ -185,7 +187,7 @@ export function SignatureWizard({
 			</Stepper>
 
 			<Group justify="space-between">
-				<Button type="button" variant="light" onClick={ onCancel }>
+				<Button type="button" variant="default" onClick={ onCancel }>
 					Cancel
 				</Button>
 				<Group>

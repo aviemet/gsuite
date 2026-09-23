@@ -140,7 +140,9 @@ function PlaceholderCard({ placeholder, mode, onInsert }: PlaceholderCardProps) 
 					}, 1500)
 				} }
 			>
-				<Icon size={ 18 } className={ classes.cardIcon } />
+				<span className={ classes.cardIconWell }>
+					<Icon size={ 16 } />
+				</span>
 				<div className={ classes.cardBody }>
 					<Text size="sm" truncate>
 						{ cardLabel(placeholder, mode) }
@@ -165,9 +167,9 @@ export function PlaceholderPicker({ onInsert }: PlaceholderPickerProps) {
 	const [tab, setTab] = useState<PlaceholderTab>("details")
 
 	return (
-		<Paper withBorder p="md" radius="md">
+		<Paper className={ classes.panel } p="md" radius="md">
 			<Group gap="xs" mb="sm">
-				<Text fw={ 600 } size="sm">Placeholders</Text>
+				<Text className={ classes.heading } size="sm">Placeholders</Text>
 				<Tooltip
 					label="These tokens are filled from each user's Google Workspace Directory profile when the signature is applied. Click a card to insert the token at the cursor."
 					multiline
@@ -180,6 +182,8 @@ export function PlaceholderPicker({ onInsert }: PlaceholderPickerProps) {
 				</Tooltip>
 			</Group>
 			<Tabs
+				variant="pills"
+				radius="md"
 				value={ tab }
 				onChange={ (value) => {
 					if(isPlaceholderTab(value)) {

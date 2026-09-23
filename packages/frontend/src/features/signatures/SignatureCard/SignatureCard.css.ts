@@ -1,4 +1,5 @@
 import { css } from "@linaria/core"
+
 import { vars } from "@/frontend/lib/theme"
 
 export const cardRoot = css`
@@ -15,8 +16,8 @@ export const editButton = css`
 	transition: color 0.15s, background 0.15s;
 
 	&:hover {
-		color: ${ vars.colors.blue[7] };
-		background: ${ vars.colors.blue[0] };
+		color: ${ vars.colors.harbor[8] };
+		background: ${ vars.colors.harbor[0] };
 	}
 `
 

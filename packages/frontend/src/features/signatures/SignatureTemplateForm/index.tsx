@@ -1,7 +1,6 @@
 import { samplePerson } from "@/shared/person.testdata"
 import { getTemplatePreviewContext } from "@/shared/templatePlaceholders"
 import {
-	Alert,
 	Group,
 	Stack,
 	Text,
@@ -9,9 +8,10 @@ import {
 	Grid,
 	Paper,
 	SegmentedControl,
+	Box,
 } from "@mantine/core"
 import { useLocalStorage } from "@mantine/hooks"
-import { IconAlertTriangle, IconLayoutColumns, IconLayoutRows } from "@tabler/icons-react"
+import { IconLayoutColumns, IconLayoutRows } from "@tabler/icons-react"
 import clsx from "clsx"
 import { ChangeEvent, useRef, useState } from "react"
 
@@ -27,7 +27,8 @@ type EditorPreviewLayout = "side-by-side" | "stacked"
 
 const editorPreviewLayoutControlStyles = {
 	root: {
-		border: "1px solid var(--mantine-color-gray-3)",
+		border: "1px solid var(--mantine-color-gray-4)",
+		background: "light-dark(var(--mantine-color-white), var(--mantine-color-dark-6))",
 	},
 	label: {
 		lineHeight: 1,
@@ -102,10 +103,6 @@ export function SignatureTemplateForm({
 				/>
 			</Grid.Col>
 
-			<Grid.Col>
-				<PlaceholderPicker onInsert={ insertPlaceholder } />
-			</Grid.Col>
-
 			<Grid.Col visibleFrom="md">
 				<Group justify="flex-end">
 					<SegmentedControl
@@ -131,7 +128,7 @@ export function SignatureTemplateForm({
 			<Grid.Col span={ editorPreviewColumnSpan }>
 				<Stack>
 					<Group justify="space-between" align="center" wrap="nowrap" className={ clsx(classes.paneHeader) }>
-						<Text fw={ 500 } size="sm">Signature Content</Text>
+						<Text className={ classes.paneTitle } size="sm">Signature Content</Text>
 						<SegmentedControl
 							size="xs"
 							value={ editorMode }
@@ -144,17 +141,11 @@ export function SignatureTemplateForm({
 					</Group>
 					{ editorMode === "code"
 						? (
-							<Stack gap="xs">
-
-								<HtmlEditor
-									ref={ htmlEditorRef }
-									value={ content }
-									onChange={ onContentChange }
-								/>
-								<Alert icon={ <IconAlertTriangle size={ 16 } /> } color="yellow">
-									Switching back to the Visual editor and making any edit will rewrite this custom markup.
-								</Alert>
-							</Stack>
+							<HtmlEditor
+								ref={ htmlEditorRef }
+								value={ content }
+								onChange={ onContentChange }
+							/>
 						)
 						: (
 							<RichTextEditor
@@ -173,12 +164,21 @@ export function SignatureTemplateForm({
 			<Grid.Col span={ editorPreviewColumnSpan }>
 				<Stack>
 					<Group justify="space-between" align="center" wrap="nowrap" className={ clsx(classes.paneHeader) }>
-						<Text fw={ 500 } size="sm">Live Preview</Text>
+						<Text className={ classes.paneTitle } size="sm">
+							<span className={ classes.previewMark } aria-hidden />
+							Live Preview
+						</Text>
 					</Group>
-					<Paper p="md" withBorder bg="white" c="black" mih="16rem">
-						<HtmlPreview html={ previewHtml } />
-					</Paper>
+					<Box className={ classes.previewWell }>
+						<Paper className={ classes.previewSheet } radius="sm">
+							<HtmlPreview html={ previewHtml } />
+						</Paper>
+					</Box>
 				</Stack>
+			</Grid.Col>
+
+			<Grid.Col>
+				<PlaceholderPicker onInsert={ insertPlaceholder } />
 			</Grid.Col>
 		</Grid>
 	)
