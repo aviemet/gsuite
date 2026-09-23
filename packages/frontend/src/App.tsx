@@ -1,18 +1,34 @@
+import { CodeHighlightAdapterProvider, createShikiAdapter } from "@mantine/code-highlight"
 import { MantineProvider } from "@mantine/core"
+import { QueryClientProvider } from "@tanstack/react-query"
 import { RouterProvider } from "@tanstack/react-router"
+import { TanStackRouterDevtools } from "@tanstack/react-router-devtools"
 
+import { queryClient } from "@/frontend/lib/query"
 import { theme } from "@/frontend/lib/theme"
 import { router } from "./routes"
 
-import "./reset.css"
-import "@mantine/core/styles.css"
+async function loadShiki() {
+	const { createHighlighter } = await import("shiki")
+	const shiki = await createHighlighter({
+		langs: ["css", "html", "handlebars"],
+		themes: ["catppuccin-latte"],
+	})
 
-const App = () => {
-	return (
-		<MantineProvider theme={ theme }>
-			<RouterProvider router={ router } />
-		</MantineProvider>
-	)
+	return shiki
 }
 
-export default App
+const shikiAdapter = createShikiAdapter(loadShiki)
+
+export function App() {
+	return (
+		<QueryClientProvider client={ queryClient }>
+			<MantineProvider theme={ theme } defaultColorScheme="light">
+				<CodeHighlightAdapterProvider adapter={ shikiAdapter }>
+					<RouterProvider router={ router } />
+					<TanStackRouterDevtools router={ router } />
+				</CodeHighlightAdapterProvider>
+			</MantineProvider>
+		</QueryClientProvider>
+	)
+}

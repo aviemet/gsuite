@@ -1,0 +1,25 @@
+# GSuite Signature Management
+
+## Data
+
+The signature list reads Firestore template documents. Wizard save returns to that list without writing templates or assignments.
+
+Wizard people, groups, and organizational units are local fixtures. The assignments collection in the security rules has no readers in the app.
+
+## Signatures
+
+Signature fonts are inline font stacks. Gmail and Outlook strip `@font-face`.
+
+The rich text editor uses TinyMCE's oxide skin. That skin is what makes the canvas visible after init.
+
+## Runtime
+
+Client Firebase config is the `VITE_*` variables Vite loads from the `packages` directory, via the frontend Vite config. `yarn dev` starts the emulators and Vite together.
+
+The default emulator command imports the firebase package seed and writes it back on exit, so a dev session rewrites that seed.
+
+Cloud Functions and the shared package entry are compiled output. The frontend resolves shared from source, so `dev:all` is what rebuilds both during a session.
+
+Yarn uses the node-modules linker. Plug'n'Play breaks Vite and the Functions emulator.
+
+`yarn dev` loads the frontend Vite config. That config and TypeScript resolve `@/functions` to the functions package; the repo-root Vite config does not.

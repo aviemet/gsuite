@@ -1,22 +1,52 @@
-import { createTheme, DEFAULT_THEME, MantineSpacingValues, mergeMantineTheme, type MantineTheme } from "@mantine/core"
+import { createTheme, DEFAULT_THEME, mergeMantineTheme, type MantineThemeOverride } from "@mantine/core"
 import { themeToVars } from "@mantine/vanilla-extract"
 
 import breakpoints from "./breakpoints.mjs"
 
-type CustomMantineTheme = Omit<MantineTheme, "spacing" | "other"> & {
-	spacing: Partial<MantineSpacingValues & {
-		xxl: string
-		xxs: string
-	}>
-	other: any
-}
+export const defaultColor = "harbor"
 
-export const defaultColor = "blue"
+const harbor = [
+	"#f3f6fb",
+	"#e6edf7",
+	"#c9d8f0",
+	"#a3bde4",
+	"#7599d2",
+	"#4d78be",
+	"#3a62a8",
+	"#2c4f8c",
+	"#203c6c",
+	"#162845",
+] as const
 
-export const themeObject: Partial<CustomMantineTheme> = {
+const copper = [
+	"#fbf6ef",
+	"#f6ead8",
+	"#edd3ad",
+	"#e2b67a",
+	"#d59a4d",
+	"#c4842f",
+	"#a86e24",
+	"#8b5a1e",
+	"#70491c",
+	"#5c3c19",
+] as const
+
+export const themeObject: MantineThemeOverride = {
 	breakpoints,
+	primaryColor: "harbor",
+	primaryShade: { light: 7, dark: 5 },
+	autoContrast: true,
+	black: "#1a2740",
+	colors: {
+		harbor,
+		copper,
+	},
+	headings: {
+		fontWeight: "650",
+	},
 	defaultRadius: "sm",
 	spacing: {
+		...DEFAULT_THEME.spacing,
 		xxl: "calc(2.5rem * var(--mantine-scale))",
 		xs: "calc(0.5rem * var(--mantine-scale))",
 		xxs: "calc(0.25rem * var(--mantine-scale))",

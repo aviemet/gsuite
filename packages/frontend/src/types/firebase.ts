@@ -6,6 +6,8 @@ export interface Template {
 	content: string
 	variables: string[]
 	conditions: string[]
+	assignedGroup?: string | null
+	isScheduled?: boolean
 	createdBy: string
 	createdAt: Timestamp
 	updatedAt: Timestamp

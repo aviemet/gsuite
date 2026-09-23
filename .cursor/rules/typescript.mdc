@@ -1,0 +1,98 @@
+---
+description: Typescript Rules
+globs: **/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Typescript Rules
+
+## Code Style and Structure
+
+- This project uses Yarn and Vite.
+- Use functional and declarative programming patterns; avoid classes.
+- Prefer iteration and modularization over code duplication.
+- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError).
+- For simple edge cases, return early instead of nesting.
+- Frontend code lives in `packages/frontend/src`:
+  - `components` — reusable UI that is not specific to one feature.
+  - `features` — feature-specific components, grouped by domain (`features/signatures/...`).
+  - `layouts` — layout shells.
+  - `pages` — route entry points. They delegate to features.
+  - `routes` — TanStack Router definitions.
+  - `hooks` — shared React hooks.
+  - `lib` — non-React utilities.
+  - `queries` — TanStack Query hooks, following the types in `queries/index.ts`.
+  - `types` — hand-written frontend types (for example `types/firebase.ts`).
+- Types and data shared outside the frontend live in `packages/shared`.
+- Cross-module imports use the `@/frontend`, `@/shared`, and `@/functions` aliases. Same-folder imports stay relative.
+
+### TypeScript Usage
+
+- Use TypeScript for all JavaScript code; prefer interfaces over types.
+- Avoid enums; use maps instead.
+- Use functional components with TypeScript interfaces.
+- Apply generics where a function needs to stay flexible.
+- Use utility types (`Partial`, `Pick`, `Omit`) and mapped types before inventing a parallel shape.
+- Do not use `any`. If a type cannot be derived, use `unknown` as a last resort.
+
+### React Component Architecture
+
+- Define components with `export function ComponentName()`.
+- Props are an interface named after the component (`SignatureCardProps`).
+- Extract reusable logic into custom hooks.
+- Clean up subscriptions in `useEffect`.
+
+### React Performance
+
+- Use `useCallback` for expensive callbacks and `useMemo` for expensive computations.
+- Do not use an array index as a React `key`.
+- Avoid inline function definitions in JSX.
+  
+### Naming
+
+- Prefix event handlers with `handle`: `handleClick`, `handleSubmit`.
+- Prefix booleans with a verb: `isLoading`, `hasError`, `canSubmit`.
+- Prefix custom hooks with `use`.
+- Use complete words except `err`, `req`, `res`, `props`, and `ref`.
+
+### File Naming
+
+- Component directories are PascalCase and match the component: `components/RichTextEditor/index.tsx`, `features/signatures/SignatureCard/index.tsx`.
+- Feature domains are lowercase: `features/signatures`.
+- Page directories are PascalCase: `pages/Dashboard`, `pages/Signatures/Index`.
+- Colocate styles as `ComponentName.css.ts` next to `index.tsx`.
+- Favor named exports.
+
+## Syntax
+
+- Use the `function` keyword for pure functions.
+- Skip curly braces on single-line conditionals.
+- Use declarative JSX.
+
+## Testing
+
+- Unit tests use Vitest and React Testing Library.
+- Put specs in `packages/frontend/tests`, mirroring the path under `src`. A module at `src/components/RichTextEditor/textColorUtils.ts` is tested from `tests/components/RichTextEditor/textColorUtils.test.ts`.
+- Follow Arrange-Act-Assert.
+- Mock Firebase and other external calls so unit tests do not need the emulators.
+
+## Accessibility
+
+- Rely on Mantine’s built-in accessibility.
+- Use semantic HTML, accurate ARIA where Mantine does not already provide it, and a logical heading order.
+- Interactive elements must be keyboard reachable, with visible focus.
+- Keep text and UI colors at an accessible contrast.
+- Surface errors in text, not color alone.
+
+## UI and Styling
+
+- Import Mantine from `@mantine/core` and the other `@mantine/*` packages. There is no component proxy layer.
+- Linaria styles import `css` from `@linaria/core`. Theme tokens come from `@/frontend/lib/theme`.
+- Wrap `className` values with `clsx`.
+- Build layouts mobile-first.
+- Dark mode uses Mantine’s color scheme and theme `vars`.
+
+## State
+
+- Firestore data goes through TanStack Query in `queries`, or an existing Firestore hook such as `useTemplates`.
+- UI-only state stays in the component that owns it.

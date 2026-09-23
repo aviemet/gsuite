@@ -1,0 +1,33 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# REQUIRED FOR EVERY INTERACTION
+
+1. Read `.project.mdx` at the start of each interaction.
+2. **Testing:** When you add or change behavior (new code, bug fixes, refactors), you MUST:
+   - Add or update specs that cover the behavior (or the fix). Do not leave new/changed code untested.
+   - Run the relevant specs (and any obviously related specs) before finishing. Fix any failures.
+
+## `.project.mdx`
+
+Add a note to `.project.mdx` **only** if every condition is true:
+
+- It describes something about the **structure** of the project which is not readily apparent by reading the code.
+- It is a **stable invariant** of this app: where truth lives, which surface owns a behavior, a constraint that is invisible in the code, or a trap that looks correct and is not.
+- It is **not** already in `.project.mdx`, `.cursor/goals.mdx`, or `.cursor/rules/`.
+
+Unshipped product intent goes in `.cursor/goals.mdx`.
+
+### Never record
+
+- How you fixed a bug, what you tried, or "we used to X then Y"
+- File paths, component splits, helper/type/field names, CSS, flex/grid math, Puck internals, save/dirty/draft mechanics
+- Framework, library, or tooling defaults (Rails, React, Vitest, Vite, ESLint, Node, Linaria, i18n)
+
+### If you do add a note
+
+One or two sentences in the matching section. Do not narrate. Do not add a section for a one-off. Then **delete** any existing bullets that fail the test above. Never expand a bullet into a paragraph.
+
+Write for a future reader of the document, not the chat context window. Do not leave artifacts of poor choices or abandoned strategies, we don't need to know what doesn't work or what not to do, only what does work and what to do.

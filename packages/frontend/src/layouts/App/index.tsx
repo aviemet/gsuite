@@ -1,11 +1,14 @@
-import { AppShell, Burger, Group, NavLink, Stack } from "@mantine/core"
+import { AppShell, Box, Burger, Group, NavLink, Stack } from "@mantine/core"
 import { useDisclosure } from "@mantine/hooks"
-
 import { IconDashboard, IconSettings, IconSignature } from "@tabler/icons-react"
-import { Link } from "@tanstack/react-router"
+import { Link, Outlet } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
 
+import { PAGE_TITLE_PORTAL_ID } from "@/frontend/components/Page"
+import { UserMenu } from "@/frontend/components/UserMenu"
 import { router } from "@/frontend/routes"
+
+import * as classes from "./App.css"
 
 // Custom hook to track the current path
 const useCurrentPath = () => {
@@ -24,31 +27,42 @@ const useCurrentPath = () => {
 	return currentPath
 }
 
-const AppLayout = () => {
+export function AppLayout() {
 	const [opened, { toggle }] = useDisclosure()
 	const currentPath = useCurrentPath()
 
 	return (
 		<AppShell
-			header={ { height: { base: 60, md: 70, lg: 80 } } }
+			layout="alt"
+			header={ { height: 56 } }
 			navbar={ {
-				width: { base: 200, md: 250, lg: 300 },
+				width: 232,
 				breakpoint: "sm",
 				collapsed: { mobile: !opened },
 			} }
-			padding="sm"
+			padding="md"
 		>
-			<AppShell.Header>
-				<Group h="100%" px="sm">
-					<Burger opened={ opened } onClick={ toggle } hiddenFrom="sm" size="sm" />
-					Signatures
+			<AppShell.Header className={ classes.header }>
+				<Group h="100%" px="sm" justify="space-between" wrap="nowrap">
+					<Group wrap="nowrap">
+						<Burger opened={ opened } onClick={ toggle } hiddenFrom="sm" size="sm" />
+						<Box id={ PAGE_TITLE_PORTAL_ID } />
+					</Group>
+					<UserMenu />
 				</Group>
 			</AppShell.Header>
 
-			<AppShell.Navbar>
+			<AppShell.Navbar className={ classes.navbar }>
+				<div className={ classes.brand }>
+					<span className={ classes.brandMark } aria-hidden>
+						<IconSignature size={ 16 } />
+					</span>
+					<span className={ classes.brandName }>Signature Manager</span>
+				</div>
 
-				<Stack gap="xs" p="sm">
+				<Stack gap={ 4 } p="sm" pt={ 4 }>
 					<NavLink
+						className={ classes.navLink }
 						component={ Link }
 						to="/"
 						label="Dashboard"
@@ -57,6 +71,7 @@ const AppLayout = () => {
 					/>
 
 					<NavLink
+						className={ classes.navLink }
 						component={ Link }
 						to="/signatures"
 						label="Signatures"
@@ -65,6 +80,7 @@ const AppLayout = () => {
 					/>
 
 					<NavLink
+						className={ classes.navLink }
 						component={ Link }
 						to="/settings"
 						label="Settings"
@@ -73,9 +89,9 @@ const AppLayout = () => {
 					/>
 				</Stack>
 			</AppShell.Navbar>
-			<AppShell.Main>Main</AppShell.Main>
+			<AppShell.Main className={ classes.main }>
+				<Outlet />
+			</AppShell.Main>
 		</AppShell>
 	)
 }
-
-export { AppLayout }

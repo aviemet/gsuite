@@ -8,21 +8,27 @@
   ],
   "scripts": {
     "dev": "yarn workspace @gsuite/frontend dev",
+    "dev:no-seed": "yarn workspace @gsuite/frontend dev:no-seed",
+    "dev:all": "yarn workspace @gsuite/frontend dev:all",
     "build": "yarn workspaces foreach --all -p run build",
-    "lint": "yarn workspaces foreach --all -p run lint",
+    "lint": "yarn workspaces foreach --all -p run lint --fix",
     "test": "yarn workspaces foreach --all -p run test",
     "commit": "git-cz",
     "prepare": "husky"
   },
   "devDependencies": {
-    "@commitlint/cli": "^19.8.0",
-    "@commitlint/config-conventional": "^19.8.0",
-    "commitizen": "^4.3.1",
+    "@commitlint/cli": "^21.2.2",
+    "@commitlint/config-conventional": "^21.2.2",
+    "@tanstack/router-plugin": "^1.168.40",
+    "@types/add": "^2.0.3",
+    "add": "^2.0.9",
+    "commitizen": "^4.3.2",
+    "concurrently": "^10.0.5",
     "cz-conventional-changelog": "^3.3.0",
     "eslint-config-google": "^0.14.0",
-    "eslint-import-resolver-typescript": "^4.3.1",
+    "eslint-import-resolver-typescript": "^4.4.5",
     "husky": "^9.1.7",
-    "typescript-eslint": "^8.29.0"
+    "typescript-eslint": "^8.70.0"
   },
   "config": {
     "commitizen": {
