@@ -1,5 +1,9 @@
 # GSuite Signature Management
 
+## Workspace
+
+Each customer links a Google Workspace account. That link is the source of the references used for Google API calls.
+
 ## Data
 
 Wizard Save goes through the API, which writes templates and assignments in Firestore and enqueues one signature deploy. That job reads the template once and the directory once, sets each signature in-process, and writes one deploy log when it finishes. People, groups, and OUs for assignment come from the Workspace Directory API (`GET /api/directory`); local/dev uses the mock Directory client seeded with fixtures.
