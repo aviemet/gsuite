@@ -22,7 +22,8 @@
       "@/frontend/*": ["./packages/frontend/src/*"],
       "@/shared/*": ["./packages/shared/src/*"],
       "@/firebase/*": ["./packages/firebase/*"],
-      "@/functions/*": ["./packages/functions/src/*"]
+      "@/functions/*": ["./packages/functions/src/*"],
+      "@/api/*": ["./packages/api/src/*"]
     },
     "noUnusedLocals": true,
     "noUnusedParameters": true,

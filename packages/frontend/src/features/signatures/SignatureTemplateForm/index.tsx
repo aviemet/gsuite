@@ -1,14 +1,12 @@
-import { samplePerson } from "@/shared/person.testdata"
-import { getTemplatePreviewContext } from "@/shared/templatePlaceholders"
 import {
+	Box,
+	Grid,
 	Group,
+	Paper,
+	SegmentedControl,
 	Stack,
 	Text,
 	TextInput,
-	Grid,
-	Paper,
-	SegmentedControl,
-	Box,
 } from "@mantine/core"
 import { useLocalStorage } from "@mantine/hooks"
 import { IconLayoutColumns, IconLayoutRows } from "@tabler/icons-react"
@@ -19,7 +17,9 @@ import { HtmlEditor, type HtmlEditorHandle } from "@/frontend/components/HtmlEdi
 import { HtmlPreview } from "@/frontend/components/HtmlPreview"
 import { RichTextEditor, type RichTextEditorHandle } from "@/frontend/components/RichTextEditor"
 import { PlaceholderPicker } from "@/frontend/features/signatures/PlaceholderPicker"
-import { safeTemplateParse } from "@/frontend/lib/parseTemplate"
+import { safeTemplateParse } from "@/shared/parseTemplate"
+import { samplePerson } from "@/shared/person.testdata"
+import { getTemplatePreviewContext } from "@/shared/templatePlaceholders"
 
 import * as classes from "./SignatureTemplateForm.css"
 

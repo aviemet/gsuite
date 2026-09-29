@@ -2,9 +2,7 @@
 
 ## Data
 
-The signature list reads Firestore template documents. Wizard save returns to that list without writing templates or assignments.
-
-Wizard people, groups, and organizational units are local fixtures. The assignments collection in the security rules has no readers in the app.
+Wizard Save goes through the API, which writes templates and assignments in Firestore and enqueues one signature deploy. That job reads the template once and the directory once, sets each signature in-process, and writes one deploy log when it finishes. People, groups, and OUs for assignment come from the Workspace Directory API (`GET /api/directory`); local/dev uses the mock Directory client seeded with fixtures.
 
 ## Signatures
 
@@ -14,7 +12,7 @@ The rich text editor uses TinyMCE's oxide skin. That skin is what makes the canv
 
 ## Runtime
 
-Client Firebase config is the `VITE_*` variables Vite loads from the `packages` directory, via the frontend Vite config. `yarn dev` starts the emulators and Vite together.
+Client Firebase config is the `VITE_*` variables Vite loads from `packages/.env` (see `packages/.env.example`), via the frontend Vite config. The local API and seed script read `VITE_FIREBASE_PROJECT_ID` from that same file. Emulators and deploy use the project id in `.firebaserc`. Deploy passes `--project default` so that alias wins over a previously selected project on this directory. Those two ids have to match. `yarn dev` starts Auth/Firestore emulators, a local API server on port 3000, and Vite together. Vite proxies `/api` to that API process.
 
 The default emulator command imports the firebase package seed and writes it back on exit, so a dev session rewrites that seed.
 
@@ -23,3 +21,5 @@ Cloud Functions and the shared package entry are compiled output. The frontend r
 Yarn uses the node-modules linker. Plug'n'Play breaks Vite and the Functions emulator.
 
 `yarn dev` loads the frontend Vite config. That config and TypeScript resolve `@/functions` to the functions package; the repo-root Vite config does not.
+
+The Firestore database id is `default`. The client libraries and the CLI use `(default)` unless that id is set. The emulator still uses `(default)`. The Firebase CLI's project directory is the repo root, where `firebase.json` and `.firebaserc` live. Functions source and the Hosting build have to stay inside that directory. Production serves the admin UI from Firebase Hosting and rewrites `/api` to a Cloud Function in the same project. Client Firestore access is authorized by the security rules deployed with the app. The API uses the Admin SDK and bypasses those rules. Signature deploy jobs use Cloud Tasks. Local/dev uses a Node HTTP API with an inline queue publisher and a mock Gmail client until the real Gmail client is configured.

@@ -1,4 +1,4 @@
-import { Badge, Group, Button } from "@mantine/core"
+import { Badge, Button, Group } from "@mantine/core"
 import { IconPencil, IconTrash } from "@tabler/icons-react"
 import { Link } from "@tanstack/react-router"
 import { DataTable } from "mantine-datatable"

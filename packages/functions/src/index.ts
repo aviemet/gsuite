@@ -1,47 +1,48 @@
-/**
- * Import function triggers from their respective submodules:
- *
- * import {onCall} from "firebase-functions/v2/https";
- * import {onDocumentWritten} from "firebase-functions/v2/firestore";
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
- */
-
-import { getFirestore } from "firebase-admin/firestore"
-import * as logger from "firebase-functions/logger"
+import {
+	apiRoutes,
+	dispatchApiRequest,
+	handleSignatureUpdate,
+} from "@gsuite/api"
+import { type SignatureUpdateMessage } from "@gsuite/shared"
 import { onRequest } from "firebase-functions/v2/https"
+import { onTaskDispatched } from "firebase-functions/v2/tasks"
 
-// Start writing functions
-// https://firebase.google.com/docs/functions/typescript
+const region = "us-central1"
 
-// export const helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+export const api = onRequest({
+	region,
+	invoker: "public",
+	timeoutSeconds: 60,
+}, async (request, response) => {
+	const result = await dispatchApiRequest(apiRoutes, {
+		method: request.method,
+		path: request.path,
+		authorizationHeader: request.get("authorization"),
+		body: request.body,
+	})
 
-// Test function to verify Firebase connectivity
-export const testConnection = onRequest(async (req, res) => {
-	try {
-		const db = getFirestore()
-		// Try to read a document to verify Firestore connection
-		const testDoc = await db.collection("test").doc("connection").get()
-
-		logger.info("Firebase connection test successful", {
-			exists: testDoc.exists,
-			projectId: process.env.GCLOUD_PROJECT,
-		})
-
-		res.json({
-			success: true,
-			message: "Firebase connection successful",
-			projectId: process.env.GCLOUD_PROJECT,
-		})
-	} catch (error) {
-		logger.error("Firebase connection test failed", error)
-		res.status(500).json({
-			success: false,
-			error: "Failed to connect to Firebase",
-			details: error instanceof Error ? error.message : "Unknown error",
-		})
+	for(const [name, value] of Object.entries(result.headers)) {
+		response.setHeader(name, value)
 	}
+
+	if(result.status === 204) {
+		response.status(204).send("")
+		return
+	}
+
+	response.status(result.status).json(result.payload)
+})
+
+export const updateSignature = onTaskDispatched<SignatureUpdateMessage>({
+	region,
+	timeoutSeconds: 1800,
+	retryConfig: {
+		maxAttempts: 3,
+		minBackoffSeconds: 60,
+	},
+	rateLimits: {
+		maxConcurrentDispatches: 1,
+	},
+}, async (request) => {
+	await handleSignatureUpdate(request.data)
 })

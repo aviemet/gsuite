@@ -47,6 +47,7 @@ describe("initializeFirebase", () => {
 
 		initializeFirebase()
 
+		expect(getFirestore).toHaveBeenCalledWith({ name: "app" }, "(default)")
 		expect(connectAuthEmulator).toHaveBeenCalledWith(
 			{ name: "auth" },
 			"http://localhost:9099",

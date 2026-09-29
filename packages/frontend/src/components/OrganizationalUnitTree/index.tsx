@@ -9,7 +9,7 @@ import {
 	type TreeNodeData,
 	useTree,
 } from "@mantine/core"
-import { IconChevronDown, IconSearch } from "@tabler/icons-react"
+import { IconCheck, IconChevronDown, IconSearch } from "@tabler/icons-react"
 import clsx from "clsx"
 import { type ChangeEvent, type MouseEvent, type ReactNode, useMemo, useState } from "react"
 
@@ -38,7 +38,7 @@ function OrganizationalUnitNode({
 	elementProps,
 	tree,
 }: RenderTreeNodePayload) {
-	const checked = tree.isNodeChecked(node.value)
+	const checked = tree.isNodeChecked(node.value) === true
 	const nodeLabel = typeof node.label === "string" ? node.label : node.value
 
 	function handleToggleChecked(event: MouseEvent) {
@@ -75,6 +75,13 @@ function OrganizationalUnitNode({
 				)
 				: <span className={ clsx(classes.chevronSpacer) } /> }
 			<span className={ clsx(classes.label) }>{ node.label }</span>
+			{ checked && (
+				<IconCheck
+					size={ 16 }
+					className={ clsx(classes.checkIcon) }
+					aria-label={ `${nodeLabel} selected` }
+				/>
+			) }
 		</div>
 	)
 }

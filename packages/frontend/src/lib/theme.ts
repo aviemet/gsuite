@@ -1,4 +1,4 @@
-import { createTheme, DEFAULT_THEME, mergeMantineTheme, type MantineThemeOverride } from "@mantine/core"
+import { createTheme, DEFAULT_THEME, type MantineThemeOverride, mergeMantineTheme } from "@mantine/core"
 import { themeToVars } from "@mantine/vanilla-extract"
 
 import breakpoints from "./breakpoints.mjs"

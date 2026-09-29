@@ -1,6 +1,7 @@
-import { initializeApp, getApps, FirebaseApp } from "firebase/app"
-import { getAuth, Auth, connectAuthEmulator } from "firebase/auth"
-import { getFirestore, Firestore, connectFirestoreEmulator } from "firebase/firestore"
+import { resolveFirestoreDatabaseId } from "@gsuite/shared"
+import { FirebaseApp, getApps, initializeApp } from "firebase/app"
+import { Auth, connectAuthEmulator, getAuth } from "firebase/auth"
+import { connectFirestoreEmulator, Firestore, getFirestore } from "firebase/firestore"
 
 import { FirebaseConfig } from "../types/firebase"
 
@@ -20,7 +21,7 @@ let auth: Auth
 export const initializeFirebase = (): void => {
 	if(!getApps().length) {
 		app = initializeApp(firebaseConfig)
-		db = getFirestore(app)
+		db = getFirestore(app, resolveFirestoreDatabaseId(import.meta.env.DEV))
 		auth = getAuth(app)
 
 		// Connect to emulators in development mode

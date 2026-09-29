@@ -34,6 +34,8 @@ alwaysApply: false
 - Apply generics where a function needs to stay flexible.
 - Use utility types (`Partial`, `Pick`, `Omit`) and mapped types before inventing a parallel shape.
 - Do not use `any`. If a type cannot be derived, use `unknown` as a last resort.
+- Define types and interfaces where they're used. Don't create a separate types file for a component. Define the type where it's used and export from there.
+- When importing a type, put the `type` keyword inside the braces, not outside. Example: `import { type SomeType } from "some/place"`
 
 ### React Component Architecture
 

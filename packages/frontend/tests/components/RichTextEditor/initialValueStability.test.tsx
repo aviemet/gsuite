@@ -11,8 +11,6 @@ vi.mock("@tinymce/tinymce-react", () => ({
 	},
 }))
 
-vi.mock("@/frontend/components/RichTextEditor/tinymceSetup", () => ({}))
-
 vi.mock("@/frontend/components/RichTextEditor/textColorButton", () => ({
 	registerTextColorButton: vi.fn(),
 }))

@@ -5,11 +5,24 @@ import importPlugin from "eslint-plugin-import"
 import jsoncPlugin from "eslint-plugin-jsonc"
 import jsxA11yPlugin from "eslint-plugin-jsx-a11y"
 import reactHooksPlugin from "eslint-plugin-react-hooks"
+import simpleImportSort from "eslint-plugin-simple-import-sort"
 
 const ignores = [
-	".vscode/**/*",
-	".yarn/**/*",
-	"packages/functions/lib/**/*",
+	"**/.DS_Store",
+	"**/.idea/**",
+	"**/.turbo/**",
+	"**/.vite-cache/**",
+	"**/.vite/**",
+	"**/.vscode/**",
+	"**/.yarn/**",
+	"**/*.min.js",
+	"**/*.tsbuildinfo",
+	"**/build/**",
+	"**/coverage/**",
+	"**/dist-ssr/**",
+	"**/dist/**",
+	"**/node_modules/**",
+	"packages/functions/lib/**",
 ]
 
 const importLintGlobs = ["**/*.{js,jsx,mjs,cjs,ts,tsx}"]
@@ -76,6 +89,7 @@ export default [
 			"react-hooks": reactHooksPlugin,
 			"jsx-a11y": jsxA11yPlugin,
 			"@stylistic": stylistic,
+			"simple-import-sort": simpleImportSort,
 		},
 		rules: {
 			"@stylistic/indent": ["error", "tab", {
@@ -179,23 +193,17 @@ export default [
 			"eqeqeq": "error",
 			"no-console": "warn",
 			"@stylistic/eol-last": ["error", "always"],
-			"import/order": ["error", {
-				"groups": [
-					"builtin",
-					"external",
-					"internal",
-					["parent", "sibling"],
-					"index",
-					"object",
+			"simple-import-sort/imports": ["error", {
+				groups: [
+					["^\\u0000\\."],
+					["^node:"],
+					["^@?\\w"],
+					["^\\u0000"],
+					["^"],
+					["^\\."],
 				],
-				"alphabetize": {
-					"order": "asc",
-					"caseInsensitive": true,
-				},
-				"newlines-between": "always",
 			}],
-
-			// "import/no-default-export": "error",
+			"simple-import-sort/exports": "error",
 			"import/newline-after-import": "error",
 			"import/consistent-type-specifier-style": ["error", "prefer-inline"],
 			"import/no-named-as-default": "off",
@@ -269,15 +277,6 @@ export default [
 					"message": "Use Mantine vars for styling variables",
 				},
 			],
-			"import/order": ["error", {
-				"groups": ["builtin", "external", ["parent", "sibling"], "internal", "index"],
-				"pathGroups": [
-					{ "pattern": "@linaria/core", "group": "external", "position": "before" },
-					{ "pattern": "@mantine/**", "group": "external", "position": "after" },
-					{ "pattern": "@/lib*", "group": "internal" },
-				],
-				"newlines-between": "always",
-			}],
 		},
 	},
 ]

@@ -24,6 +24,14 @@ export default defineConfig({
 		],
 	},
 	cacheDir: ".vite-cache",
+	server: {
+		proxy: {
+			"/api": {
+				target: "http://127.0.0.1:3000",
+				changeOrigin: true,
+			},
+		},
+	},
 	build: {
 		rolldownOptions: {
 			output: {

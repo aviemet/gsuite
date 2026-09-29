@@ -1,19 +1,17 @@
-import { initializeApp, deleteApp } from "firebase/app"
-import { getAuth, connectAuthEmulator, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth"
-import { connectFirestoreEmulator, getFirestore, collection, doc, setDoc, Timestamp } from "firebase/firestore"
+import { readFirebaseProjectId, resolveFirestoreDatabaseId } from "@gsuite/shared"
+import { deleteApp, initializeApp } from "firebase/app"
+import { connectAuthEmulator, createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword } from "firebase/auth"
+import { collection, connectFirestoreEmulator, doc, getFirestore, setDoc, Timestamp } from "firebase/firestore"
 
 const firebaseConfig = {
 	apiKey: "fake-api-key",
 	authDomain: "localhost",
-	projectId: "gsuite-manager-455721-e0e75",
-	storageBucket: "gsuite-manager-455721-e0e75.appspot.com",
-	messagingSenderId: "123456789",
-	appId: "1:123456789:web:abcdef",
+	projectId: readFirebaseProjectId(process.env),
 }
 
 const app = initializeApp(firebaseConfig)
 const auth = getAuth(app)
-const db = getFirestore(app)
+const db = getFirestore(app, resolveFirestoreDatabaseId(true))
 
 connectAuthEmulator(auth, "http://localhost:9099")
 connectFirestoreEmulator(db, "localhost", 8080)
@@ -92,7 +90,7 @@ async function seedData() {
 		let userCredential
 		try {
 			userCredential = await createUserWithEmailAndPassword(auth, "test@test.com", "password")
-		} catch(err: any) {
+		} catch (err: any) {
 			if(err.code !== "auth/email-already-in-use") {
 				throw err
 			}
@@ -105,11 +103,11 @@ async function seedData() {
 		for(const template of templates) {
 			try {
 				await setDoc(doc(templatesRef, template.id), template)
-			} catch(err) {
+			} catch (err) {
 				throw err
 			}
 		}
-	} catch(error) {
+	} catch (error) {
 		process.exit(1)
 	} finally {
 		await deleteApp(app)

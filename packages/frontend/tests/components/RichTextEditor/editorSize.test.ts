@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest"
 
 import {
+	contentOverflowsEditor,
 	EDITOR_MAX_HEIGHT_PX,
 	EDITOR_MIN_HEIGHT_PX,
-	contentOverflowsEditor,
 	getEditorPlugins,
 	getEditorSizeOptions,
 	syncEditorOverflowScroll,

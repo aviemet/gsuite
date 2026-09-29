@@ -1,9 +1,9 @@
-import { buildOrganizationalUnitTree } from "./buildOrganizationalUnitTree"
-
 export interface DirectoryUser {
 	email: string
 	displayName: string
 	signatureHtml: string
+	groupIds: string[]
+	organizationalUnitPaths: string[]
 }
 
 export interface DirectoryGroup {
@@ -28,6 +28,8 @@ export const directoryUsers: DirectoryUser[] = [
 				<p>{{email}} | {{workPhone}}</p>
 			</div>
 		`,
+		groupIds: ["engineering", "product", "all-employees"],
+		organizationalUnitPaths: ["/", "/Engineering", "/Product"],
 	},
 	{
 		email: "sam.lee@example.com",
@@ -39,6 +41,8 @@ export const directoryUsers: DirectoryUser[] = [
 				<p>{{email}}</p>
 			</div>
 		`,
+		groupIds: ["sales", "all-employees"],
+		organizationalUnitPaths: ["/", "/Sales", "/Sales/West"],
 	},
 	{
 		email: "alex.kim@example.com",
@@ -49,6 +53,8 @@ export const directoryUsers: DirectoryUser[] = [
 				<p>{{email}} | {{mobile}}</p>
 			</div>
 		`,
+		groupIds: ["engineering", "all-employees"],
+		organizationalUnitPaths: ["/", "/Engineering", "/Engineering/Platform"],
 	},
 	{
 		email: "morgan.patel@example.com",
@@ -60,6 +66,8 @@ export const directoryUsers: DirectoryUser[] = [
 				<p>{{email}}</p>
 			</div>
 		`,
+		groupIds: ["marketing", "all-employees"],
+		organizationalUnitPaths: ["/", "/Marketing"],
 	},
 ]
 
@@ -81,18 +89,6 @@ export const directoryOrganizationalUnits: DirectoryOrganizationalUnit[] = [
 	{ path: "/Product", name: "Product" },
 ]
 
-export const directoryUserSelectData = directoryUsers.map((user) => ({
-	value: user.email,
-	label: `${user.displayName} (${user.email})`,
-}))
-
-export const directoryGroupSelectData = directoryGroups.map((group) => ({
-	value: group.id,
-	label: group.name,
-}))
-
-export const directoryOrganizationalUnitTreeData = buildOrganizationalUnitTree(directoryOrganizationalUnits)
-
 export function findDirectoryUser(email: string): DirectoryUser | undefined {
 	return directoryUsers.find((user) => user.email === email)
 }
@@ -105,9 +101,45 @@ export function findDirectoryOrganizationalUnit(path: string): DirectoryOrganiza
 	return directoryOrganizationalUnits.find((unit) => unit.path === path)
 }
 
-export function groupIdFromAssignedGroup(assignedGroup: string | null | undefined): string | null {
+export function groupIdFromAssignedGroup(
+	assignedGroup: string | null | undefined,
+	groups: DirectoryGroup[] = directoryGroups,
+): string | null {
 	if(!assignedGroup) return null
 	const normalizedName = assignedGroup.trim().toLowerCase()
-	const match = directoryGroups.find((group) => group.name.toLowerCase() === normalizedName)
+	const match = groups.find((group) => group.name.toLowerCase() === normalizedName)
 	return match?.id ?? null
+}
+
+export function resolveTargetEmails(
+	input: {
+		userEmails: string[]
+		groupIds: string[]
+		organizationalUnitPaths: string[]
+	},
+	users: DirectoryUser[] = directoryUsers,
+): string[] {
+	const emails = new Set<string>()
+
+	for(const email of input.userEmails) {
+		emails.add(email)
+	}
+
+	for(const groupId of input.groupIds) {
+		for(const user of users) {
+			if(user.groupIds.includes(groupId)) {
+				emails.add(user.email)
+			}
+		}
+	}
+
+	for(const organizationalUnitPath of input.organizationalUnitPaths) {
+		for(const user of users) {
+			if(user.organizationalUnitPaths.includes(organizationalUnitPath)) {
+				emails.add(user.email)
+			}
+		}
+	}
+
+	return [...emails].sort()
 }

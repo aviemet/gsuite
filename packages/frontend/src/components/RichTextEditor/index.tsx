@@ -2,15 +2,26 @@ import { Box } from "@mantine/core"
 import { Editor as TinyMceReactEditor } from "@tinymce/tinymce-react"
 import {
 	ReactNode,
+	type Ref,
 	useCallback,
 	useEffect,
 	useImperativeHandle,
 	useMemo,
 	useRef,
 	useState,
-	type Ref,
 } from "react"
 import { type Editor as TinyMCEEditor } from "tinymce"
+
+import "tinymce"
+import "tinymce/icons/default/icons.min.js"
+import "tinymce/models/dom/model.min.js"
+import "tinymce/plugins/autoresize"
+import "tinymce/plugins/link"
+import "tinymce/plugins/lists"
+import "tinymce/skins/content/default/content.js"
+import "tinymce/skins/ui/oxide/content.js"
+import "tinymce/skins/ui/oxide/skin.js"
+import "tinymce/themes/silver/theme.min.js"
 
 import { getEditorPlugins, getEditorSizeOptions, syncEditorOverflowScroll } from "./editorSize"
 import { normalizePastedSignatureHtml } from "./normalizePastedSignatureHtml"
@@ -18,7 +29,6 @@ import * as classes from "./RichTextEditor.css"
 import { registerTextColorButton } from "./textColorButton"
 import { TextColorPopover } from "./TextColorPopover"
 import { unwrapLegacyTokenChips } from "./unwrapLegacyTokenChips"
-import "./tinymceSetup"
 
 export interface RichTextEditorHandle {
 	insertAtCursor: (text: string) => void

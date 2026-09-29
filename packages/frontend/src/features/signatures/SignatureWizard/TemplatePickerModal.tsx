@@ -1,12 +1,12 @@
-import { samplePerson } from "@/shared/person.testdata"
-import { getTemplatePreviewContext } from "@/shared/templatePlaceholders"
 import { Box, Button, Collapse, Group, Modal, Paper, Stack, Text, TextInput } from "@mantine/core"
 import { IconChevronDown, IconChevronRight, IconFileText, IconSearch } from "@tabler/icons-react"
 import clsx from "clsx"
 import { ChangeEvent, useEffect, useRef, useState } from "react"
 
 import { HtmlPreview } from "@/frontend/components/HtmlPreview"
-import { safeTemplateParse } from "@/frontend/lib/parseTemplate"
+import { safeTemplateParse } from "@/shared/parseTemplate"
+import { samplePerson } from "@/shared/person.testdata"
+import { getTemplatePreviewContext } from "@/shared/templatePlaceholders"
 
 import { type StartTemplate } from "./startTemplates"
 import * as classes from "./TemplatePickerModal.css"

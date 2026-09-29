@@ -92,6 +92,11 @@ export const label = css`
 	line-height: 1.4;
 `
 
+export const checkIcon = css`
+	flex-shrink: 0;
+	color: ${ vars.colors.green[6] };
+`
+
 export const empty = css`
 	padding: ${ vars.spacing.md };
 	text-align: center;

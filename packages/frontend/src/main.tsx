@@ -1,9 +1,10 @@
-import { StrictMode } from "react"
-import { createRoot } from "react-dom/client"
-
 import "@mantine/core/styles.css"
 import "@mantine/code-highlight/styles.css"
+import "@mantine/notifications/styles.css"
 import "mantine-datatable/styles.layer.css"
+
+import { StrictMode } from "react"
+import { createRoot } from "react-dom/client"
 
 import { App } from "./App"
 

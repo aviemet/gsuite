@@ -1,0 +1,35 @@
+{
+  "name": "@gsuite/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc --build",
+    "dev": "tsc --build --watch",
+    "dev:server": "node --env-file=../.env --import tsx src/localServer.ts",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@gsuite/shared": "workspace:*",
+    "firebase-admin": "^14.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.24",
+    "eslint": "^10.10.0",
+    "tsx": "^4.23.13",
+    "typescript": "^5.9.3",
+    "vite": "^8.3.0",
+    "vitest": "^5.0.1"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  }
+}
