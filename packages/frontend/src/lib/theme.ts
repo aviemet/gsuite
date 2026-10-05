@@ -1,4 +1,4 @@
-import { createTheme, DEFAULT_THEME, mergeMantineTheme, type MantineThemeOverride } from "@mantine/core"
+import { createTheme, type CSSVariablesResolver, DEFAULT_THEME, type MantineThemeOverride, mergeMantineTheme } from "@mantine/core"
 import { themeToVars } from "@mantine/vanilla-extract"
 
 import breakpoints from "./breakpoints.mjs"
@@ -34,7 +34,7 @@ const copper = [
 export const themeObject: MantineThemeOverride = {
 	breakpoints,
 	primaryColor: "harbor",
-	primaryShade: { light: 7, dark: 5 },
+	primaryShade: { light: 7, dark: 6 },
 	autoContrast: true,
 	black: "#1a2740",
 	colors: {
@@ -89,6 +89,22 @@ export const themeObject: MantineThemeOverride = {
 }
 
 export const theme = mergeMantineTheme(DEFAULT_THEME, createTheme(themeObject))
+
+export const cssVariablesResolver: CSSVariablesResolver = () => ({
+	variables: {},
+	light: {
+		"--mantine-color-dimmed": "var(--mantine-color-gray-7)",
+		"--mantine-color-placeholder": "var(--mantine-color-gray-7)",
+		"--mantine-color-default-border": "var(--mantine-color-gray-6)",
+		"--mantine-color-error": "var(--mantine-color-red-9)",
+	},
+	dark: {
+		"--mantine-color-dimmed": "var(--mantine-color-dark-0)",
+		"--mantine-color-placeholder": "var(--mantine-color-dark-0)",
+		"--mantine-color-default-border": "var(--mantine-color-dark-1)",
+		"--mantine-color-error": "var(--mantine-color-red-4)",
+	},
+})
 
 export const vars = themeToVars(mergeMantineTheme(theme, {
 

@@ -1,5 +1,3 @@
-import { samplePerson } from "@/shared/person.testdata"
-import { getTemplatePreviewContext } from "@/shared/templatePlaceholders"
 import { Box, Button, Group, Paper, Radio, Select, SimpleGrid, Stack, Text } from "@mantine/core"
 import { UseFormReturnType } from "@mantine/form"
 import { IconFile, IconTemplate, IconUser } from "@tabler/icons-react"
@@ -8,13 +6,13 @@ import { useState } from "react"
 
 import { HtmlPreview } from "@/frontend/components/HtmlPreview"
 import { formatHtmlWithDirectives } from "@/frontend/lib"
-import { safeTemplateParse } from "@/frontend/lib/parseTemplate"
+import { type DirectorySnapshot } from "@/frontend/queries/directory"
 import { Template } from "@/frontend/types/firebase"
+import { safeTemplateParse } from "@/shared/parseTemplate"
+import { samplePerson } from "@/shared/person.testdata"
+import { getTemplatePreviewContext } from "@/shared/templatePlaceholders"
 
-import {
-	directoryUserSelectData,
-	findDirectoryUser,
-} from "./directoryTestdata"
+import { findDirectoryUser, toUserSelectData } from "./directoryOptions"
 import * as classes from "./SetupStep.css"
 import {
 	findStartTemplate,
@@ -27,6 +25,7 @@ import { isSetupSource, type SignatureWizardValues } from "./types"
 interface SetupStepProps {
 	form: UseFormReturnType<SignatureWizardValues>
 	templates: Template[]
+	directory: DirectorySnapshot
 }
 
 const previewContext = getTemplatePreviewContext(samplePerson)
@@ -52,15 +51,16 @@ const setupOptions = [
 	},
 ] as const
 
-export function SetupStep({ form, templates }: SetupStepProps) {
+export function SetupStep({ form, templates, directory }: SetupStepProps) {
 	const [isTemplatePickerOpen, setIsTemplatePickerOpen] = useState(false)
 	const [draftTemplateId, setDraftTemplateId] = useState<string | null>(form.values.sourceTemplateId)
 	const savedStartTemplates = templates.map(toSavedStartTemplate)
+	const userSelectData = toUserSelectData(directory.users)
 	const selectedTemplate = form.values.sourceTemplateId
 		? findStartTemplate(form.values.sourceTemplateId, templates)
 		: undefined
 	const selectedAccount = form.values.sourceAccountEmail
-		? findDirectoryUser(form.values.sourceAccountEmail)
+		? findDirectoryUser(directory.users, form.values.sourceAccountEmail)
 		: undefined
 	const previewSourceHtml = form.values.setupSource === "template"
 		? selectedTemplate?.content
@@ -142,7 +142,7 @@ export function SetupStep({ form, templates }: SetupStepProps) {
 		form.clearFieldError("sourceAccountEmail")
 		if(!email) return
 
-		const account = findDirectoryUser(email)
+		const account = findDirectoryUser(directory.users, email)
 		if(!account) return
 
 		form.setFieldValue("content", formatHtmlWithDirectives(account.signatureHtml))
@@ -217,7 +217,7 @@ export function SetupStep({ form, templates }: SetupStepProps) {
 				<Select
 					label="Account"
 					placeholder="Choose a user account"
-					data={ directoryUserSelectData }
+					data={ userSelectData }
 					searchable
 					clearable
 					nothingFoundMessage="No accounts"

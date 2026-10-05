@@ -1,23 +1,25 @@
-import { samplePerson } from "@/shared/person.testdata"
-import { getTemplatePreviewContext } from "@/shared/templatePlaceholders"
 import { Badge, Grid, Group, Paper, Stack, Text } from "@mantine/core"
 import { ReactNode } from "react"
 
 import { HtmlPreview } from "@/frontend/components/HtmlPreview"
-import { safeTemplateParse } from "@/frontend/lib/parseTemplate"
+import { type DirectorySnapshot } from "@/frontend/queries/directory"
 import { Template } from "@/frontend/types/firebase"
+import { safeTemplateParse } from "@/shared/parseTemplate"
+import { samplePerson } from "@/shared/person.testdata"
+import { getTemplatePreviewContext } from "@/shared/templatePlaceholders"
 
 import {
 	findDirectoryGroup,
 	findDirectoryOrganizationalUnit,
 	findDirectoryUser,
-} from "./directoryTestdata"
+} from "./directoryOptions"
 import { findStartTemplate } from "./startTemplates"
 import { SETUP_SOURCE_LABELS, type SignatureWizardValues } from "./types"
 
 interface ConfirmStepProps {
 	values: SignatureWizardValues
 	templates: Template[]
+	directory: DirectorySnapshot
 }
 
 const previewContext = getTemplatePreviewContext(samplePerson)
@@ -31,13 +33,13 @@ function SummaryRow({ label, children }: { label: string, children: ReactNode })
 	)
 }
 
-export function ConfirmStep({ values, templates }: ConfirmStepProps) {
+export function ConfirmStep({ values, templates, directory }: ConfirmStepProps) {
 	const previewHtml = safeTemplateParse(values.content, previewContext)
 	const selectedTemplate = values.sourceTemplateId
 		? findStartTemplate(values.sourceTemplateId, templates)
 		: undefined
 	const selectedAccount = values.sourceAccountEmail
-		? findDirectoryUser(values.sourceAccountEmail)
+		? findDirectoryUser(directory.users, values.sourceAccountEmail)
 		: undefined
 	const setupDetail = values.setupSource === "template"
 		? selectedTemplate?.name ?? "No template selected"
@@ -47,12 +49,14 @@ export function ConfirmStep({ values, templates }: ConfirmStepProps) {
 				: "No account selected"
 			: null
 	const peopleLabels = values.userEmails.map((email) => {
-		const user = findDirectoryUser(email)
+		const user = findDirectoryUser(directory.users, email)
 		return user ? `${user.displayName} (${user.email})` : email
 	})
-	const groupLabels = values.groupIds.map((groupId) => findDirectoryGroup(groupId)?.name ?? groupId)
+	const groupLabels = values.groupIds.map((groupId) => (
+		findDirectoryGroup(directory.groups, groupId)?.name ?? groupId
+	))
 	const organizationalUnitLabels = values.organizationalUnitPaths.map((path) => {
-		const unit = findDirectoryOrganizationalUnit(path)
+		const unit = findDirectoryOrganizationalUnit(directory.organizationalUnits, path)
 		if(!unit) return path
 		return unit.path === "/" ? unit.name : unit.path
 	})

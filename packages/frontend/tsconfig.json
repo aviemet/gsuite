@@ -21,7 +21,6 @@
   "exclude": ["node_modules", "dist"],
   "references": [
     { "path": "../shared" },
-    { "path": "../firebase" },
-    { "path": "./tsconfig.node.json" }
+    { "path": "../firebase" }
   ]
 }

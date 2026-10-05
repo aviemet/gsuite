@@ -1,5 +1,13 @@
 import "@testing-library/jest-dom/vitest"
 
+class TestResizeObserver {
+	observe() {}
+	unobserve() {}
+	disconnect() {}
+}
+
+window.ResizeObserver = TestResizeObserver
+
 Object.defineProperty(window, "matchMedia", {
 	writable: true,
 	value: (query: string) => ({

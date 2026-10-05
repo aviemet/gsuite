@@ -42,17 +42,24 @@ export function AppLayout() {
 			} }
 			padding="md"
 		>
+			<a className={ classes.skipLink } href="#main-content">Skip to content</a>
 			<AppShell.Header className={ classes.header }>
 				<Group h="100%" px="sm" justify="space-between" wrap="nowrap">
 					<Group wrap="nowrap">
-						<Burger opened={ opened } onClick={ toggle } hiddenFrom="sm" size="sm" />
+						<Burger
+							opened={ opened }
+							onClick={ toggle }
+							hiddenFrom="sm"
+							size="sm"
+							aria-label={ opened ? "Close navigation" : "Open navigation" }
+						/>
 						<Box id={ PAGE_TITLE_PORTAL_ID } />
 					</Group>
 					<UserMenu />
 				</Group>
 			</AppShell.Header>
 
-			<AppShell.Navbar className={ classes.navbar }>
+			<AppShell.Navbar className={ classes.navbar } aria-label="Primary">
 				<div className={ classes.brand }>
 					<span className={ classes.brandMark } aria-hidden>
 						<IconSignature size={ 16 } />
@@ -89,7 +96,7 @@ export function AppLayout() {
 					/>
 				</Stack>
 			</AppShell.Navbar>
-			<AppShell.Main className={ classes.main }>
+			<AppShell.Main id="main-content" className={ classes.main }>
 				<Outlet />
 			</AppShell.Main>
 		</AppShell>

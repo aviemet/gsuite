@@ -1,7 +1,6 @@
 import { formatHtmlWithDirectives } from "@/frontend/lib"
 import { Template } from "@/frontend/types/firebase"
-
-import { groupIdFromAssignedGroup } from "./directoryTestdata"
+import { groupIdFromAssignedGroup } from "@/shared/directoryFixtures"
 
 export const SETUP_SOURCES = ["blank", "template", "account"] as const
 

@@ -1,5 +1,7 @@
 import { Timestamp } from "firebase/firestore"
 
+import { type AssignmentType } from "@/shared/template"
+
 export interface Template {
 	id: string
 	name: string
@@ -12,6 +14,7 @@ export interface Template {
 	createdAt: Timestamp
 	updatedAt: Timestamp
 	isActive: boolean
+	customerId: string
 }
 
 export interface UserSettings {
@@ -24,14 +27,15 @@ export interface UserSettings {
 export interface TemplateAssignment {
 	id: string
 	templateId: string
-	assignmentType: "user" | "group" | "domain" | "schedule"
-	targetId: string // user email, group email, domain, or schedule ID
+	assignmentType: AssignmentType
+	targetId: string
 	priority: number
 	conditions?: string[]
 	createdBy: string
 	createdAt: Timestamp
 	updatedAt: Timestamp
 	isActive: boolean
+	customerId: string
 }
 
 export interface FirebaseConfig {

@@ -64,6 +64,25 @@ export const navLink = css`
 	}
 `
 
+export const skipLink = css`
+	position: absolute;
+	left: ${ vars.spacing.sm };
+	top: ${ vars.spacing.sm };
+	z-index: 1000;
+	padding: ${ vars.spacing.xs } ${ vars.spacing.sm };
+	border-radius: ${ vars.radius.sm };
+	background: ${ vars.colors.white };
+	color: ${ vars.colors.harbor[9] };
+	font-weight: 650;
+	transform: translateY(-200%);
+
+	&:focus {
+		transform: none;
+		outline: 2px solid ${ vars.colors.harbor[8] };
+		outline-offset: 2px;
+	}
+`
+
 export const main = css`
 	background: light-dark(#e4ebf4, ${ vars.colors.dark[8] });
 `

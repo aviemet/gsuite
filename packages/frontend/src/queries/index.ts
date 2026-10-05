@@ -4,4 +4,7 @@ export type QueryError = Error
 
 export type QueryResult<TData> = UseQueryResult<TData, QueryError>
 
+export * from "./directory"
 export * from "./templates"
+export * from "./workspace"
+

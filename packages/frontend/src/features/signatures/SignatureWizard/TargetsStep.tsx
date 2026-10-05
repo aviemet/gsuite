@@ -6,25 +6,30 @@ import { ChangeEvent } from "react"
 
 import { OrganizationalUnitTree } from "@/frontend/components/OrganizationalUnitTree"
 import { TransferList } from "@/frontend/components/TransferList"
+import { type DirectorySnapshot } from "@/frontend/queries/directory"
 
 import {
-	directoryGroupSelectData,
-	directoryOrganizationalUnitTreeData,
-	directoryUserSelectData,
-} from "./directoryTestdata"
+	toGroupSelectData,
+	toOrganizationalUnitTreeData,
+	toUserSelectData,
+} from "./directoryOptions"
 import * as classes from "./TargetsStep.css"
 import { type SignatureWizardValues } from "./types"
 
 interface TargetsStepProps {
 	form: UseFormReturnType<SignatureWizardValues>
+	directory: DirectorySnapshot
 }
 
-export function TargetsStep({ form }: TargetsStepProps) {
+export function TargetsStep({ form, directory }: TargetsStepProps) {
 	const defaultInputProps = form.getInputProps("isDefault", { type: "checkbox" })
 	const scheduledInputProps = form.getInputProps("isScheduled", { type: "checkbox" })
 	const peopleInputProps = form.getInputProps("userEmails")
 	const groupsInputProps = form.getInputProps("groupIds")
 	const organizationalUnitInputProps = form.getInputProps("organizationalUnitPaths")
+	const userSelectData = toUserSelectData(directory.users)
+	const groupSelectData = toGroupSelectData(directory.groups)
+	const organizationalUnitTreeData = toOrganizationalUnitTreeData(directory.organizationalUnits)
 
 	function handleDefaultChange(event: ChangeEvent<HTMLInputElement>) {
 		defaultInputProps.onChange(event)
@@ -65,33 +70,29 @@ export function TargetsStep({ form }: TargetsStepProps) {
 					</Text>
 					<TransferList
 						label="People"
-						data={ directoryUserSelectData }
+						data={ userSelectData }
 						value={ peopleInputProps.value }
 						onChange={ peopleInputProps.onChange }
 						error={ peopleInputProps.error }
 						searchPlaceholder="Search people"
 						nothingFoundMessage="No people found"
-						availableSearchLabel="Search available people"
-						selectedSearchLabel="Search selected people"
-						transferToSelectedLabel="Add selected people"
-						transferToAvailableLabel="Remove selected people"
+						choicesSearchLabel="Search people choices"
+						chosenSearchLabel="Search chosen people"
 					/>
 					<TransferList
 						label="Groups"
-						data={ directoryGroupSelectData }
+						data={ groupSelectData }
 						value={ groupsInputProps.value }
 						onChange={ groupsInputProps.onChange }
 						error={ groupsInputProps.error }
 						searchPlaceholder="Search groups"
 						nothingFoundMessage="No groups found"
-						availableSearchLabel="Search available groups"
-						selectedSearchLabel="Search selected groups"
-						transferToSelectedLabel="Add selected groups"
-						transferToAvailableLabel="Remove selected groups"
+						choicesSearchLabel="Search group choices"
+						chosenSearchLabel="Search chosen groups"
 					/>
 					<OrganizationalUnitTree
 						label="Organizational units"
-						data={ directoryOrganizationalUnitTreeData }
+						data={ organizationalUnitTreeData }
 						value={ organizationalUnitInputProps.value }
 						onChange={ organizationalUnitInputProps.onChange }
 						error={ organizationalUnitInputProps.error }

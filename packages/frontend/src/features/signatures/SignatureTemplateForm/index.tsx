@@ -1,14 +1,13 @@
-import { samplePerson } from "@/shared/person.testdata"
-import { getTemplatePreviewContext } from "@/shared/templatePlaceholders"
 import {
+	Box,
+	Grid,
 	Group,
+	Paper,
+	SegmentedControl,
 	Stack,
 	Text,
 	TextInput,
-	Grid,
-	Paper,
-	SegmentedControl,
-	Box,
+	VisuallyHidden,
 } from "@mantine/core"
 import { useLocalStorage } from "@mantine/hooks"
 import { IconLayoutColumns, IconLayoutRows } from "@tabler/icons-react"
@@ -19,7 +18,9 @@ import { HtmlEditor, type HtmlEditorHandle } from "@/frontend/components/HtmlEdi
 import { HtmlPreview } from "@/frontend/components/HtmlPreview"
 import { RichTextEditor, type RichTextEditorHandle } from "@/frontend/components/RichTextEditor"
 import { PlaceholderPicker } from "@/frontend/features/signatures/PlaceholderPicker"
-import { safeTemplateParse } from "@/frontend/lib/parseTemplate"
+import { safeTemplateParse } from "@/shared/parseTemplate"
+import { samplePerson } from "@/shared/person.testdata"
+import { getTemplatePreviewContext } from "@/shared/templatePlaceholders"
 
 import * as classes from "./SignatureTemplateForm.css"
 
@@ -27,7 +28,7 @@ type EditorPreviewLayout = "side-by-side" | "stacked"
 
 const editorPreviewLayoutControlStyles = {
 	root: {
-		border: "1px solid var(--mantine-color-gray-4)",
+		border: "1px solid var(--mantine-color-default-border)",
 		background: "light-dark(var(--mantine-color-white), var(--mantine-color-dark-6))",
 	},
 	label: {
@@ -113,11 +114,21 @@ export function SignatureTemplateForm({
 						data={ [
 							{
 								value: "side-by-side",
-								label: <IconLayoutColumns size="1rem" title="Side by side" />,
+								label: (
+									<>
+										<IconLayoutColumns size="1rem" aria-hidden />
+										<VisuallyHidden>Side by side</VisuallyHidden>
+									</>
+								),
 							},
 							{
 								value: "stacked",
-								label: <IconLayoutRows size="1rem" title="Stacked" />,
+								label: (
+									<>
+										<IconLayoutRows size="1rem" aria-hidden />
+										<VisuallyHidden>Stacked</VisuallyHidden>
+									</>
+								),
 							},
 						] }
 						styles={ editorPreviewLayoutControlStyles }

@@ -1,6 +1,6 @@
-import { Badge, Group, Button } from "@mantine/core"
+import { Badge, Button, Group } from "@mantine/core"
 import { IconPencil, IconTrash } from "@tabler/icons-react"
-import { Link } from "@tanstack/react-router"
+import { Link, useRouter } from "@tanstack/react-router"
 import { DataTable } from "mantine-datatable"
 
 import { Template } from "@/frontend/types/firebase"
@@ -11,6 +11,8 @@ interface SignaturesTableProps {
 }
 
 export function SignaturesTable({ templates }: SignaturesTableProps) {
+	const router = useRouter()
+
 	return (
 		<DataTable
 			withTableBorder={ false }
@@ -67,24 +69,24 @@ export function SignaturesTable({ templates }: SignaturesTableProps) {
 					title: "Actions",
 					render: (record) => (
 						<Group gap="xs">
-							<Link
-								to="/signatures/edit/$id"
-								params={ { id: record.id } }
-								style={ { textDecoration: "none" } }
+							<Button
+								variant="subtle"
+								size="xs"
+								aria-label={ `Edit ${ record.name }` }
+								onClick={ () => router.navigate({
+									to: "/signatures/edit/$id",
+									params: { id: record.id },
+								}) }
 							>
-								<Button
-									variant="subtle"
-									size="xs"
-								>
-									<IconPencil size={ 16 } />
-								</Button>
-							</Link>
+								<IconPencil size={ 16 } aria-hidden />
+							</Button>
 							<Button
 								variant="subtle"
 								size="xs"
 								color="red"
+								aria-label={ `Delete ${ record.name }` }
 							>
-								<IconTrash size={ 16 } />
+								<IconTrash size={ 16 } aria-hidden />
 							</Button>
 						</Group>
 					),

@@ -1,16 +1,7 @@
-import {
-	ActionIcon,
-	Box,
-	Checkbox,
-	Combobox,
-	Group,
-	Input,
-	TextInput,
-	useCombobox,
-} from "@mantine/core"
-import { IconChevronRight } from "@tabler/icons-react"
+import { Button, Input, Text, TextInput, UnstyledButton } from "@mantine/core"
+import { IconArrowLeft, IconArrowRight } from "@tabler/icons-react"
 import clsx from "clsx"
-import { type ChangeEvent, type ReactNode, useState } from "react"
+import { type ChangeEvent, type ReactNode, useId, useState } from "react"
 
 import * as classes from "./TransferList.css"
 
@@ -27,114 +18,144 @@ export interface TransferListProps {
 	error?: ReactNode
 	searchPlaceholder?: string
 	nothingFoundMessage?: string
-	availableSearchLabel?: string
-	selectedSearchLabel?: string
-	transferToSelectedLabel?: string
-	transferToAvailableLabel?: string
+	choicesLabel?: string
+	chosenLabel?: string
+	choicesSearchLabel?: string
+	chosenSearchLabel?: string
+	clearLabel?: string
 }
 
-type TransferDirection = "forward" | "backward"
+type TransferListSide = "choices" | "chosen"
 
-interface RenderListProps {
+interface TransferListItemProps {
+	option: TransferListOption
+	side: TransferListSide
+	onMove: (optionValue: string) => void
+}
+
+function TransferListItem({ option, side, onMove }: TransferListItemProps) {
+	const DirectionIcon = side === "choices" ? IconArrowRight : IconArrowLeft
+	const actionVerb = side === "choices" ? "Add" : "Remove"
+
+	function handleClick() {
+		onMove(option.value)
+	}
+
+	const action = (
+		<span className={ clsx(classes.itemAction) } data-action aria-hidden="true">
+			<DirectionIcon size={ 14 } />
+		</span>
+	)
+
+	return (
+		<UnstyledButton
+			type="button"
+			className={ clsx(classes.item) }
+			aria-label={ `${ actionVerb } ${ option.label }` }
+			onClick={ handleClick }
+		>
+			{ side === "chosen" && action }
+			<Text component="span" size="sm" truncate className={ clsx(classes.itemLabel) }>
+				{ option.label }
+			</Text>
+			{ side === "choices" && action }
+		</UnstyledButton>
+	)
+}
+
+interface TransferListSidePanelProps {
+	side: TransferListSide
+	heading: string
 	options: TransferListOption[]
-	onTransfer: (values: string[]) => void
-	type: TransferDirection
+	onMove: (optionValue: string) => void
+	onClear?: () => void
+	clearLabel: string
+	clearAriaLabel: string
 	searchPlaceholder: string
 	nothingFoundMessage: string
 	searchLabel: string
-	transferLabel: string
 }
 
-function RenderList({
+function listStatusMessage(side: TransferListSide, search: string, nothingFoundMessage: string) {
+	if(search.trim().length > 0) return nothingFoundMessage
+	if(side === "chosen") return "Nothing chosen"
+	return "No choices left"
+}
+
+function TransferListSidePanel({
+	side,
+	heading,
 	options,
-	onTransfer,
-	type,
+	onMove,
+	onClear,
+	clearLabel,
+	clearAriaLabel,
 	searchPlaceholder,
 	nothingFoundMessage,
 	searchLabel,
-	transferLabel,
-}: RenderListProps) {
-	const combobox = useCombobox()
-	const [selectedValues, setSelectedValues] = useState<string[]>([])
+}: TransferListSidePanelProps) {
+	const headingId = useId()
 	const [search, setSearch] = useState("")
-
-	function handleValueSelect(optionValue: string) {
-		setSelectedValues((current) => (
-			current.includes(optionValue)
-				? current.filter((value) => value !== optionValue)
-				: [...current, optionValue]
-		))
-	}
 
 	function handleSearchChange(event: ChangeEvent<HTMLInputElement>) {
 		setSearch(event.currentTarget.value)
-		combobox.updateSelectedOptionIndex()
 	}
 
-	function handleTransferClick() {
-		onTransfer(selectedValues)
-		setSelectedValues([])
-	}
-
+	const normalizedSearch = search.toLowerCase().trim()
 	const filteredOptions = options.filter((option) => (
-		option.label.toLowerCase().includes(search.toLowerCase().trim())
+		option.label.toLowerCase().includes(normalizedSearch)
 	))
 
 	const items = filteredOptions.map((option) => (
-		<Combobox.Option
-			value={ option.value }
+		<TransferListItem
 			key={ option.value }
-			active={ selectedValues.includes(option.value) }
-			onMouseOver={ () => combobox.resetSelectedOption() }
-		>
-			<Group gap="sm" wrap="nowrap">
-				<Checkbox
-					checked={ selectedValues.includes(option.value) }
-					onChange={ () => {} }
-					aria-hidden
-					tabIndex={ -1 }
-					style={ { pointerEvents: "none" } }
-				/>
-				<span>{ option.label }</span>
-			</Group>
-		</Combobox.Option>
+			option={ option }
+			side={ side }
+			onMove={ onMove }
+		/>
 	))
 
 	return (
-		<div className={ clsx(classes.panel) } data-type={ type }>
-			<Combobox store={ combobox } onOptionSubmit={ handleValueSelect }>
-				<Combobox.EventsTarget>
-					<Group wrap="nowrap" gap={ 0 } className={ clsx(classes.controls) }>
-						<TextInput
-							placeholder={ searchPlaceholder }
-							classNames={ { input: classes.input } }
-							aria-label={ searchLabel }
-							value={ search }
-							onChange={ handleSearchChange }
-							style={ { flex: 1 } }
-						/>
-						<ActionIcon
-							radius={ 0 }
-							variant="default"
-							size={ 36 }
-							className={ clsx(classes.control) }
-							aria-label={ transferLabel }
-							onClick={ handleTransferClick }
-						>
-							<IconChevronRight className={ clsx(classes.icon) } />
-						</ActionIcon>
-					</Group>
-				</Combobox.EventsTarget>
-
-				<div className={ clsx(classes.list) }>
-					<Combobox.Options>
-						{ items.length > 0
-							? items
-							: <Combobox.Empty>{ nothingFoundMessage }</Combobox.Empty> }
-					</Combobox.Options>
-				</div>
-			</Combobox>
-		</div>
+		<section
+			className={ clsx(classes.panel) }
+			data-type={ side }
+			aria-labelledby={ headingId }
+		>
+			<div className={ clsx(classes.header) }>
+				<Text id={ headingId } component="div" size="sm" className={ clsx(classes.heading) }>
+					{ heading }
+				</Text>
+				{ side === "chosen" && onClear && (
+					<Button
+						type="button"
+						variant="light"
+						color="harbor"
+						size="compact-xs"
+						disabled={ options.length === 0 }
+						aria-label={ clearAriaLabel }
+						onClick={ onClear }
+					>
+						{ clearLabel }
+					</Button>
+				) }
+			</div>
+			<TextInput
+				placeholder={ searchPlaceholder }
+				classNames={ { input: classes.search } }
+				aria-label={ searchLabel }
+				value={ search }
+				onChange={ handleSearchChange }
+			/>
+			<div className={ clsx(classes.list) }>
+				{ items.length > 0
+					? items
+					: (
+						<Text size="sm" c="dimmed" className={ clsx(classes.empty) }>
+							{ listStatusMessage(side, search, nothingFoundMessage) }
+						</Text>
+					) }
+			</div>
+		</section>
 	)
 }
 
@@ -148,6 +169,13 @@ function partitionOptions(data: TransferListOption[], value: string[]) {
 	return { available, selected }
 }
 
+function clearAllAriaLabel(label: ReactNode, clearLabel: string) {
+	if(typeof label === "string" && label.trim().length > 0) {
+		return `${ clearLabel } ${ label.trim().toLowerCase() }`
+	}
+	return clearLabel
+}
+
 export function TransferList({
 	data,
 	value,
@@ -156,46 +184,56 @@ export function TransferList({
 	error,
 	searchPlaceholder = "Search",
 	nothingFoundMessage = "Nothing found",
-	availableSearchLabel = "Search available",
-	selectedSearchLabel = "Search selected",
-	transferToSelectedLabel = "Transfer selected items to selected list",
-	transferToAvailableLabel = "Transfer selected items to available list",
+	choicesLabel = "Choices",
+	chosenLabel = "Chosen",
+	choicesSearchLabel = "Search choices",
+	chosenSearchLabel = "Search chosen",
+	clearLabel = "Clear all",
 }: TransferListProps) {
 	const { available, selected } = partitionOptions(data, value)
+	const clearAriaLabel = clearAllAriaLabel(label, clearLabel)
 
-	function handleTransfer(transferFrom: TransferDirection, transferredValues: string[]) {
-		if(transferredValues.length === 0) return
+	function handleAdd(optionValue: string) {
+		if(value.includes(optionValue)) return
+		onChange([...value, optionValue])
+	}
 
-		if(transferFrom === "forward") {
-			onChange([...value, ...transferredValues.filter((item) => !value.includes(item))])
-			return
-		}
+	function handleRemove(optionValue: string) {
+		onChange(value.filter((item) => item !== optionValue))
+	}
 
-		onChange(value.filter((item) => !transferredValues.includes(item)))
+	function handleClear() {
+		if(value.length === 0) return
+		onChange([])
 	}
 
 	return (
 		<Input.Wrapper label={ label } error={ error }>
-			<Box className={ clsx(classes.root) }>
-				<RenderList
-					type="forward"
+			<div className={ clsx(classes.root) }>
+				<TransferListSidePanel
+					side="choices"
+					heading={ choicesLabel }
 					options={ available }
-					onTransfer={ (transferredValues) => handleTransfer("forward", transferredValues) }
+					onMove={ handleAdd }
+					clearLabel={ clearLabel }
+					clearAriaLabel={ clearAriaLabel }
 					searchPlaceholder={ searchPlaceholder }
 					nothingFoundMessage={ nothingFoundMessage }
-					searchLabel={ availableSearchLabel }
-					transferLabel={ transferToSelectedLabel }
+					searchLabel={ choicesSearchLabel }
 				/>
-				<RenderList
-					type="backward"
+				<TransferListSidePanel
+					side="chosen"
+					heading={ chosenLabel }
 					options={ selected }
-					onTransfer={ (transferredValues) => handleTransfer("backward", transferredValues) }
+					onMove={ handleRemove }
+					onClear={ handleClear }
+					clearLabel={ clearLabel }
+					clearAriaLabel={ clearAriaLabel }
 					searchPlaceholder={ searchPlaceholder }
 					nothingFoundMessage={ nothingFoundMessage }
-					searchLabel={ selectedSearchLabel }
-					transferLabel={ transferToAvailableLabel }
+					searchLabel={ chosenSearchLabel }
 				/>
-			</Box>
+			</div>
 		</Input.Wrapper>
 	)
 }

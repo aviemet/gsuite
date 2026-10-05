@@ -11,7 +11,7 @@ export const root = css`
 `
 
 export const panel = css`
-	border: 1px solid light-dark(${ vars.colors.gray[4] }, ${ vars.colors.dark[4] });
+	border: 1px solid light-dark(${ vars.colors.gray[6] }, ${ vars.colors.dark[1] });
 	border-radius: ${ vars.radius.md };
 	background: light-dark(${ vars.colors.white }, ${ vars.colors.dark[7] });
 	overflow: hidden;
@@ -27,6 +27,12 @@ export const tree = css`
 	padding: ${ vars.spacing.xs };
 	max-height: 280px;
 	overflow: auto;
+
+	[role="treeitem"]:focus-visible,
+	[role="treeitem"][data-focus-ring="true"] {
+		outline: 2px solid light-dark(${ vars.colors.harbor[8] }, ${ vars.colors.harbor[2] });
+		outline-offset: 2px;
+	}
 `
 
 export const node = css`
@@ -92,9 +98,14 @@ export const label = css`
 	line-height: 1.4;
 `
 
+export const checkIcon = css`
+	flex-shrink: 0;
+	color: light-dark(${ vars.colors.green[9] }, ${ vars.colors.green[4] });
+`
+
 export const empty = css`
 	padding: ${ vars.spacing.md };
 	text-align: center;
-	color: light-dark(${ vars.colors.gray[6] }, ${ vars.colors.dark[2] });
+	color: light-dark(${ vars.colors.gray[7] }, ${ vars.colors.dark[0] });
 	font-size: ${ vars.fontSizes.sm };
 `

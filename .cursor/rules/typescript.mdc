@@ -34,9 +34,12 @@ alwaysApply: false
 - Apply generics where a function needs to stay flexible.
 - Use utility types (`Partial`, `Pick`, `Omit`) and mapped types before inventing a parallel shape.
 - Do not use `any`. If a type cannot be derived, use `unknown` as a last resort.
+- Define types and interfaces where they're used. Don't create a separate types file for a component. Define the type where it's used and export from there.
+- When importing a type, put the `type` keyword inside the braces, not outside. Example: `import { type SomeType } from "some/place"`
 
 ### React Component Architecture
 
+- Apply the single-purpose unit rule in `.cursor/rules/project.mdc` to components, hooks, and helpers the same way as to any other module.
 - Define components with `export function ComponentName()`.
 - Props are an interface named after the component (`SignatureCardProps`).
 - Extract reusable logic into custom hooks.

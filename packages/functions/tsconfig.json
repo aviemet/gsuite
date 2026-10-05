@@ -1,20 +1,21 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "noImplicitReturns": true,
-    "noUnusedLocals": true,
-    "outDir": "lib",
-    "sourceMap": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "noEmit": true,
     "strict": true,
-    "target": "es2020",
+    "target": "ES2022",
     "skipLibCheck": true,
-    "declaration": true,
     "esModuleInterop": true,
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "rootDir": "src"
+    "isolatedModules": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "forceConsistentCasingInFileNames": true,
+    "paths": {
+      "@gsuite/api": ["../api/src/index.ts"],
+      "@gsuite/shared": ["../shared/src/index.ts"]
+    }
   },
-  "compileOnSave": true,
   "include": ["src"],
   "exclude": ["node_modules", "lib"]
 }

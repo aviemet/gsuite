@@ -1,9 +1,3 @@
-import {
-	getPlaceholderInsertValue,
-	templatePlaceholders,
-	type PlaceholderInsertMode,
-	type PlaceholderToken,
-} from "@/shared/templatePlaceholders"
 import { ActionIcon, Group, Paper, SimpleGrid, Tabs, Text, Tooltip, UnstyledButton } from "@mantine/core"
 import {
 	IconBriefcase,
@@ -35,6 +29,13 @@ import {
 } from "@tabler/icons-react"
 import clsx from "clsx"
 import { useState } from "react"
+
+import {
+	getPlaceholderInsertValue,
+	type PlaceholderInsertMode,
+	type PlaceholderToken,
+	templatePlaceholders,
+} from "@/shared/templatePlaceholders"
 
 import * as classes from "./PlaceholderPicker.css"
 
@@ -176,7 +177,7 @@ export function PlaceholderPicker({ onInsert }: PlaceholderPickerProps) {
 					w={ 280 }
 					withArrow
 				>
-					<ActionIcon variant="subtle" color="gray" size="sm" aria-label="About placeholders">
+					<ActionIcon variant="subtle" size="sm" aria-label="About placeholders">
 						<IconInfoCircle size={ 16 } />
 					</ActionIcon>
 				</Tooltip>

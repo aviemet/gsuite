@@ -1,12 +1,14 @@
-import { Badge, Card, Group, Text, Button, Box } from "@mantine/core"
+import { Badge, Box, Button, Card, Group, Text } from "@mantine/core"
 import { IconCalendarEvent, IconPencil, IconUsers } from "@tabler/icons-react"
 import { Link, useRouter } from "@tanstack/react-router"
 import clsx from "clsx"
+
 import { HtmlPreview } from "@/frontend/components/HtmlPreview"
-import { safeTemplateParse } from "@/frontend/lib/parseTemplate"
 import { Template } from "@/frontend/types/firebase"
+import { safeTemplateParse } from "@/shared/parseTemplate"
 import { samplePerson } from "@/shared/person.testdata"
 import { getTemplatePreviewContext } from "@/shared/templatePlaceholders"
+
 import * as classes from "./SignatureCard.css"
 
 interface SignatureCardProps {
@@ -42,9 +44,10 @@ export function SignatureCard({ template }: SignatureCardProps) {
 					variant="subtle"
 					size="xs"
 					className={ clsx(classes.editButton) }
+					aria-label={ `Edit ${ template.name }` }
 					onClick={ () => router.navigate({ to: "/signatures/edit/$id", params: { id: template.id } }) }
 				>
-					<IconPencil size={ 16 } />
+					<IconPencil size={ 16 } aria-hidden />
 				</Button>
 			</Group>
 			<Group gap="xs" mb="md">

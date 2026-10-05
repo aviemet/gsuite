@@ -50,6 +50,13 @@ describe("OrganizationalUnitTree", () => {
 		expect(onChange).toHaveBeenCalledWith(["/Sales"])
 	})
 
+	it("shows a selected check mark for checked organizational units", () => {
+		renderTree(["/Engineering"])
+
+		expect(screen.getByLabelText("Engineering selected")).toBeInTheDocument()
+		expect(screen.queryByLabelText("Sales selected")).not.toBeInTheDocument()
+	})
+
 	it("filters the tree by search while keeping ancestors", async () => {
 		const user = userEvent.setup()
 		renderTree()

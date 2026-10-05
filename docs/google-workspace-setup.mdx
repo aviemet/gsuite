@@ -1,81 +1,34 @@
-# Google Workspace Addon Setup Guide
+# Google Workspace connection
 
-## Prerequisites
-- A Google Workspace account with admin privileges
-- Access to the Google Cloud Console
-- Domain verification completed for your organization
+The app signs users in with Google for access to the dashboard. Workspace API calls use a service account with domain-wide delegation. Each customer stores the primary domain and the Workspace admin email. Directory calls impersonate that admin. Signature updates impersonate each mailbox.
 
-## Step 1: Create Google Cloud Project
-1. Go to [Google Cloud Console](https://console.cloud.google.com)
-2. Create a new project named "GSuite Signature Manager"
-3. Enable billing for the project (required for some APIs)
+## Google Cloud project
 
-## Step 2: Enable Required APIs
-Enable the following APIs in the Google Cloud Console:
-- Gmail API
-- Google Workspace Marketplace SDK
-- Admin SDK
-- OAuth2 API
+1. Open [Google Cloud Console](https://console.cloud.google.com) and create a project for this app.
+2. Enable the Admin SDK API and the Gmail API.
+3. Create a service account.
+4. In the service account details, enable Google Workspace domain-wide delegation and copy the numeric Client ID.
+5. Create a JSON key. Store the file contents in `GOOGLE_SERVICE_ACCOUNT_JSON` in `packages/.env`. Do not commit the key.
 
-## Step 3: Configure OAuth Consent Screen
-1. In Google Cloud Console, go to "APIs & Services" > "OAuth consent screen"
-2. Choose "External" user type
-3. Fill in the required information:
-   - App name: "GSuite Signature Manager"
-   - User support email: [Your email]
-   - Developer contact information: [Your email]
-4. Add the following scopes:
-   - `https://www.googleapis.com/auth/gmail.settings.basic`
-   - `https://www.googleapis.com/auth/gmail.settings.sharing`
-   - `https://www.googleapis.com/auth/admin.directory.user`
-   - `https://www.googleapis.com/auth/admin.directory.domain.readonly`
+## Domain-wide delegation
 
-## Step 4: Create OAuth 2.0 Credentials
-1. Go to "APIs & Services" > "Credentials"
-2. Create new OAuth 2.0 Client ID
-3. Choose "Web application" as the application type
-4. Add authorized JavaScript origins:
-   - Development: `http://localhost:3000`
-   - Production: [Your production domain]
-5. Add authorized redirect URIs:
-   - Development: `http://localhost:3000/oauth2callback`
-   - Production: `https://[your-domain]/oauth2callback`
+A super admin of the customer domain authorizes the service account:
 
-## Step 5: Create Addon Configuration
-Create a new file `appsscript.json` in the project root:
+1. Open the Admin console at [admin.google.com](https://admin.google.com).
+2. Go to Security → Access and data control → API controls → Domain-wide delegation.
+3. Add the service account Client ID with these scopes:
 
-```json
-{
-  "timeZone": "America/New_York",
-  "dependencies": {
-  },
-  "exceptionLogging": "STACKDRIVER",
-  "runtimeVersion": "V8",
-  "oauthScopes": [
-    "https://www.googleapis.com/auth/gmail.settings.basic",
-    "https://www.googleapis.com/auth/gmail.settings.sharing",
-    "https://www.googleapis.com/auth/admin.directory.user",
-    "https://www.googleapis.com/auth/admin.directory.domain.readonly"
-  ]
-}
+```
+https://www.googleapis.com/auth/admin.directory.user.readonly
+https://www.googleapis.com/auth/admin.directory.group.readonly
+https://www.googleapis.com/auth/admin.directory.orgunit.readonly
+https://www.googleapis.com/auth/gmail.settings.basic
 ```
 
-## Step 6: Environment Configuration
-Create a `.env` file in the project root (add to .gitignore):
+Some Workspace editions require a second super admin to approve a new delegation client.
 
-```env
-GOOGLE_CLIENT_ID=your_client_id
-GOOGLE_CLIENT_SECRET=your_client_secret
-GOOGLE_REDIRECT_URI=http://localhost:3000/oauth2callback
-```
+## Workspace admin
 
-## Security Considerations
-1. Never commit credentials to version control
-2. Use environment variables for sensitive data
-3. Implement proper token storage and refresh mechanisms
-4. Follow the principle of least privilege for API scopes
+In the app, Settings → Workspace admin stores the super admin the Directory calls impersonate. Use a dedicated super admin in an organizational unit where Directory and Gmail are turned on.
 
-## Next Steps
-1. Set up Firebase project
-2. Implement authentication flow
-3. Create template storage structure 
+`GMAIL_MODE=mock` uses the fixture directory and does not call Google. `GMAIL_MODE=real` reads `GOOGLE_SERVICE_ACCOUNT_JSON`.

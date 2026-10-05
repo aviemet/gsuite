@@ -8,7 +8,7 @@ interface SignatureGridProps {
 	loading: boolean
 }
 
-export function SignatureGrid({ templates, loading }: SignatureGridProps) {
+export function SignatureGrid({ templates }: SignatureGridProps) {
 	return (
 		<SimpleGrid
 			cols={ { base: 1, sm: 2, lg: 3 } }

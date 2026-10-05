@@ -1,7 +1,8 @@
 import { Box } from "@mantine/core"
 import Prism from "prismjs"
+import { type Ref, useEffect, useImperativeHandle, useRef } from "react"
+
 import "prismjs/components/prism-markup"
-import { useEffect, useImperativeHandle, useRef, type Ref } from "react"
 
 import { editorRoot } from "./HtmlEditor.css"
 

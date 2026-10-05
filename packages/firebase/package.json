@@ -10,7 +10,8 @@
     "functions:build": "cd functions && tsc --build",
     "functions:serve": "npm run functions:build && firebase emulators:start --only functions",
     "functions:deploy": "firebase deploy --only functions",
-    "functions:logs": "firebase functions:log"
+    "functions:logs": "firebase functions:log",
+    "deploy": "firebase deploy --project default --only hosting,functions,firestore"
   },
   "dependencies": {
     "@gsuite/shared": "workspace:*",

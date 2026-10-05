@@ -4,7 +4,7 @@ import { vars } from "@/frontend/lib/theme"
 
 export const editorRoot = css`
 	position: relative;
-	border: 1px solid ${ vars.colors.gray[4] };
+	border: 1px solid ${ vars.colors.gray[6] };
 	border-radius: ${ vars.radius.md };
 	overflow: hidden;
 	min-height: 16rem;
@@ -60,11 +60,11 @@ export const editorRoot = css`
 	.token.prolog,
 	.token.doctype,
 	.token.cdata {
-		color: ${ vars.colors.gray[6] };
+		color: ${ vars.colors.gray[7] };
 	}
 
 	.token.punctuation {
-		color: ${ vars.colors.gray[6] };
+		color: ${ vars.colors.gray[7] };
 	}
 
 	.token.tag,
@@ -80,12 +80,12 @@ export const editorRoot = css`
 
 	.token.attr-value,
 	.token.string {
-		color: ${ vars.colors.teal[8] };
+		color: ${ vars.colors.teal[9] };
 	}
 
 	.token.operator,
 	.token.entity,
 	.token.url {
-		color: ${ vars.colors.orange[8] };
+		color: ${ vars.colors.copper[7] };
 	}
 `

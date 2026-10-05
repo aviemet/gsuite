@@ -3,10 +3,23 @@
     "noEmit": true,
     "esModuleInterop": true
   },
-  "files": ["eslint.config.js", "prettier.config.js", "vite.config.ts"],
+  "files": [
+    "eslint.config.js",
+    "prettier.config.js",
+    "vite.config.ts"
+  ],
   "references": [
-    { "path": "./packages/frontend" },
-    { "path": "./packages/shared" },
-    { "path": "./packages/firebase" }
+    {
+      "path": "./packages/frontend"
+    },
+    {
+      "path": "./packages/shared"
+    },
+    {
+      "path": "./packages/firebase"
+    },
+    {
+      "path": "./packages/api"
+    }
   ]
 }

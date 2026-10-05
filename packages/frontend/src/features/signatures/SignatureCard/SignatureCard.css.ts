@@ -12,12 +12,12 @@ export const cardRoot = css`
 export const editButton = css`
 	padding: 4px;
 	min-width: 0;
-	color: ${ vars.colors.gray[3] };
+	color: light-dark(${ vars.colors.gray[7] }, ${ vars.colors.gray[2] });
 	transition: color 0.15s, background 0.15s;
 
 	&:hover {
-		color: ${ vars.colors.harbor[8] };
-		background: ${ vars.colors.harbor[0] };
+		color: light-dark(${ vars.colors.harbor[8] }, ${ vars.colors.harbor[2] });
+		background: light-dark(${ vars.colors.harbor[0] }, ${ vars.colors.dark[5] });
 	}
 `
 
