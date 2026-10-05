@@ -3,7 +3,7 @@ import { css } from "@linaria/core"
 import { vars } from "@/frontend/lib/theme"
 
 export const panel = css`
-	border: 1px solid light-dark(${ vars.colors.gray[4] }, ${ vars.colors.dark[4] });
+	border: 1px solid light-dark(${ vars.colors.gray[6] }, ${ vars.colors.dark[1] });
 	background: light-dark(${ vars.colors.white }, ${ vars.colors.dark[6] });
 	box-shadow: 0 1px 2px rgba(22, 40, 69, 0.05);
 `
@@ -19,11 +19,16 @@ export const card = css`
 	gap: ${ vars.spacing.sm };
 	width: 100%;
 	padding: ${ vars.spacing.sm } ${ vars.spacing.md };
-	border: 1px solid light-dark(${ vars.colors.gray[4] }, ${ vars.colors.dark[4] });
+	border: 1px solid light-dark(${ vars.colors.gray[6] }, ${ vars.colors.dark[1] });
 	border-radius: ${ vars.radius.md };
 	background: light-dark(${ vars.colors.gray[0] }, ${ vars.colors.dark[7] });
 	text-align: left;
 	cursor: pointer;
+
+	&:focus-visible {
+		outline: 2px solid light-dark(${ vars.colors.harbor[8] }, ${ vars.colors.harbor[2] });
+		outline-offset: 2px;
+	}
 
 	&:hover {
 		border-color: ${ vars.colors.harbor[4] };
@@ -50,9 +55,9 @@ export const cardBody = css`
 
 export const cardChevron = css`
 	flex-shrink: 0;
-	color: ${ vars.colors.gray[5] };
+	color: light-dark(${ vars.colors.gray[7] }, ${ vars.colors.dark[0] });
 `
 
 export const cardInserted = css`
-	color: ${ vars.colors.harbor[6] };
+	color: light-dark(${ vars.colors.harbor[7] }, ${ vars.colors.harbor[2] });
 `

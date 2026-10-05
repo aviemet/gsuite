@@ -5,7 +5,7 @@ import { vars } from "@/frontend/lib/theme"
 export const stepIcon = css`
 	[data-mantine-color-scheme="light"] & {
 		background-color: ${ vars.colors.white };
-		border-color: ${ vars.colors.gray[4] };
+		border-color: ${ vars.colors.gray[6] };
 		color: ${ vars.colors.harbor[8] };
 	}
 

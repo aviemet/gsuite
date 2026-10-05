@@ -177,7 +177,7 @@ export function PlaceholderPicker({ onInsert }: PlaceholderPickerProps) {
 					w={ 280 }
 					withArrow
 				>
-					<ActionIcon variant="subtle" color="gray" size="sm" aria-label="About placeholders">
+					<ActionIcon variant="subtle" size="sm" aria-label="About placeholders">
 						<IconInfoCircle size={ 16 } />
 					</ActionIcon>
 				</Tooltip>

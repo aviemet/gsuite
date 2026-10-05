@@ -26,10 +26,11 @@ async function fetchDirectory(): Promise<DirectorySnapshot> {
 
 export { fetchDirectory }
 
-export function useDirectoryQuery() {
+export function useDirectoryQuery(options?: { enabled?: boolean }) {
 	return useQuery({
 		queryKey: DIRECTORY_QUERY_KEY,
 		queryFn: fetchDirectory,
+		enabled: options?.enabled ?? true,
 		staleTime: 1000 * 60 * 5,
 	})
 }

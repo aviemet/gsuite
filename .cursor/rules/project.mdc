@@ -6,10 +6,21 @@ alwaysApply: true
 # REQUIRED FOR EVERY INTERACTION
 
 1. Read `.project.mdx` at the start of each interaction.
-2. **Testing:** When you add or change behavior (new code, bug fixes, refactors), you MUST:
-   - Add or update specs that cover the behavior (or the fix). Do not leave new/changed code untested.
-   - Run the relevant specs (and any obviously related specs) before finishing. Fix any failures.
-   - Run tsc and eslint to check for errors or warnings.
+2. **Single-purpose units.** Apply this to every language and every layer before considering a module done.
+
+   A responsibility is one reason to change: one decision, one request, or one piece of presentation. Name the module's responsibility in a single sentence. A second behavior is a second unit, in its own function, type, or module.
+
+   A screen, a handler, or a service that performs several of those is a composition. The composing module calls the others. Their implementations live in their own modules.
+
+   Extract a unit so another caller can use it without the feature it came from, and so a test can run it without constructing that feature. Decisions that need no I/O are pure functions.
+3. **Design.** Apply this before considering a screen done.
+
+   A screen is a path through one task. The person can see where they are, what to do next, and what happened. Each element is a step on that path: it asks for a decision or it performs an action, and the outcome of that action is visible. Group the steps so the path can be scanned. A fact is on the screen only when the current step needs it.
+
+4. **Testing:** When you add or change behavior (new code, bug fixes, refactors), you MUST:
+   - Add or update tests that cover the behavior (or the fix). Do not leave new/changed code untested.
+   - Run the relevant tests (and any obviously related tests) before finishing. Fix any failures.
+   - Run tsc and eslint, fix all errors and warnings.
 
 ## `.project.mdx`
 

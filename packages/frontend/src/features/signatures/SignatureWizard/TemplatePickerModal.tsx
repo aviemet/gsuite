@@ -69,9 +69,10 @@ function TemplateGroup({
 							type="button"
 							className={ clsx(classes.templateButton) }
 							data-selected={ selectedId === template.id }
+							aria-pressed={ selectedId === template.id }
 							onClick={ () => handleSelect(template.id) }
 						>
-							<IconFileText size={ 16 } />
+							<IconFileText size={ 16 } aria-hidden />
 							<Text size="sm" truncate>{ template.name }</Text>
 						</button>
 					)) }
@@ -96,7 +97,7 @@ function UnstyledGroupToggle({ label, isExpanded, onToggle, Chevron }: UnstyledG
 			onClick={ onToggle }
 			aria-expanded={ isExpanded }
 		>
-			<Chevron size={ 14 } />
+			<Chevron size={ 14 } aria-hidden />
 			<Text size="sm" fw={ 600 }>{ label }</Text>
 		</button>
 	)
@@ -162,7 +163,8 @@ export function TemplatePickerModal({
 				<Box className={ clsx(classes.shell) }>
 					<Box className={ clsx(classes.sidebar) }>
 						<TextInput
-							placeholder="Search"
+							aria-label="Search templates"
+							placeholder="Search templates"
 							leftSection={ <IconSearch size={ 16 } /> }
 							value={ searchQuery }
 							onChange={ handleSearchChange }

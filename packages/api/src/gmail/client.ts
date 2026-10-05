@@ -5,4 +5,5 @@ export interface SignatureUpdate {
 
 export interface GmailClient {
 	updateSignature(userEmail: string, html: string): Promise<void>
+	probeSignatureSettings(userEmail: string): Promise<void>
 }

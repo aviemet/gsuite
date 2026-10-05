@@ -79,7 +79,7 @@ function OrganizationalUnitNode({
 				<IconCheck
 					size={ 16 }
 					className={ clsx(classes.checkIcon) }
-					aria-label={ `${nodeLabel} selected` }
+					aria-label={ `${ node.label } selected` }
 				/>
 			) }
 		</div>
@@ -141,6 +141,7 @@ export function OrganizationalUnitTree({
 							data={ filteredData }
 							tree={ tree }
 							expandOnClick={ false }
+							checkOnSpace
 							levelOffset={ 22 }
 							renderNode={ (payload) => <OrganizationalUnitNode { ...payload } /> }
 						/>

@@ -15,6 +15,7 @@ import { createCloudTasksPublisher, shouldEnqueueCloudTask } from "../src/queue/
 const message: SignatureUpdateMessage = {
 	deployId: "deploy-1",
 	templateId: "template-1",
+	customerId: "customer-1",
 	userEmails: ["jane.doe@example.com"],
 }
 

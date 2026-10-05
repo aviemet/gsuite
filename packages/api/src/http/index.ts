@@ -10,7 +10,12 @@ export {
 	ok,
 } from "./types"
 export {
-	type AdminApiHandler,
-	type AdminApiRequestContext,
-	withAdminAuth,
-} from "./withAdminAuth"
+	type MemberApiHandler,
+	type MemberApiRequestContext,
+	withMemberAuth,
+} from "./withMemberAuth"
+export {
+	type SignedInApiHandler,
+	type SignedInApiRequestContext,
+	withSignedInAuth,
+} from "./withSignedInAuth"

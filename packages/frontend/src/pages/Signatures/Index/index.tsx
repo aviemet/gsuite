@@ -1,4 +1,4 @@
-import { Button, Container, Group, SegmentedControl, Select, Text, TextInput } from "@mantine/core"
+import { Button, Container, Group, SegmentedControl, Select, Text, TextInput, VisuallyHidden } from "@mantine/core"
 import { useLocalStorage } from "@mantine/hooks"
 import { IconLayoutGrid, IconList, IconSearch } from "@tabler/icons-react"
 import { Link } from "@tanstack/react-router"
@@ -49,12 +49,14 @@ export function SignaturesListPage() {
 				<Group justify="space-between" mb="md">
 					<Group>
 						<TextInput
+							aria-label="Search signatures"
 							placeholder="Search signatures"
 							leftSection={ <IconSearch size={ 16 } /> }
 							value={ searchQuery }
 							onChange={ (event) => setSearchQuery(event.currentTarget.value) }
 						/>
 						<Select
+							aria-label="Filter by status"
 							placeholder="Status"
 							clearable
 							data={ [
@@ -71,22 +73,33 @@ export function SignaturesListPage() {
 					</Group>
 					<Group>
 						<SegmentedControl
+							aria-label="Signature layout"
 							size="xs"
 							value={ viewMode }
 							onChange={ (value) => setViewMode(value as "table" | "grid") }
 							data={ [
 								{
 									value: "grid",
-									label: <IconLayoutGrid size="1rem" />,
+									label: (
+										<>
+											<IconLayoutGrid size="1rem" aria-hidden />
+											<VisuallyHidden>Grid</VisuallyHidden>
+										</>
+									),
 								},
 								{
 									value: "table",
-									label: <IconList size="1rem" />,
+									label: (
+										<>
+											<IconList size="1rem" aria-hidden />
+											<VisuallyHidden>List</VisuallyHidden>
+										</>
+									),
 								},
 							] }
 							styles={ {
 								root: {
-									border: "1px solid var(--mantine-color-gray-3)",
+									border: "1px solid var(--mantine-color-default-border)",
 								},
 								label: {
 									lineHeight: 1,

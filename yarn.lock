@@ -2625,6 +2625,7 @@ __metadata:
     "@types/node": "npm:^22.15.24"
     eslint: "npm:^10.10.0"
     firebase-admin: "npm:^14.4.0"
+    googleapis: "npm:^182.0.0"
     tsx: "npm:^4.23.13"
     typescript: "npm:^5.9.3"
     vite: "npm:^8.3.0"
@@ -9386,7 +9387,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"gaxios@npm:^7.0.0, gaxios@npm:^7.1.3, gaxios@npm:^7.1.4":
+"gaxios@npm:^7.0.0, gaxios@npm:^7.1.3, gaxios@npm:^7.1.4, gaxios@npm:^7.3.0":
   version: 7.3.1
   resolution: "gaxios@npm:7.3.1"
   dependencies:
@@ -9792,6 +9793,30 @@ __metadata:
   version: 2.0.1
   resolution: "google-logging-utils@npm:2.0.1"
   checksum: 10c0/f8926ef09ad94e2c9f0bca4c455e300f610a7b13da6fb055aecaab79975fc0fe0d308241063da9bdbfc19cf450088258a3c4c7ce5ffdf79c77d74c71a9427881
+  languageName: node
+  linkType: hard
+
+"googleapis-common@npm:^9.0.0":
+  version: 9.1.0
+  resolution: "googleapis-common@npm:9.1.0"
+  dependencies:
+    extend: "npm:^3.0.2"
+    gaxios: "npm:^7.3.0"
+    google-auth-library: "npm:^11.0.0"
+    google-logging-utils: "npm:^2.0.0"
+    qs: "npm:^6.7.0"
+    url-template: "npm:^2.0.8"
+  checksum: 10c0/adb9974574b46a4c8c07355bc440b8bf756e77e4f3821c9bf05371e826631067348070d879451b95e03bc40e40bcf77b288292e3b9ce0bfebed7a2c951241b56
+  languageName: node
+  linkType: hard
+
+"googleapis@npm:^182.0.0":
+  version: 182.0.0
+  resolution: "googleapis@npm:182.0.0"
+  dependencies:
+    google-auth-library: "npm:^11.0.0"
+    googleapis-common: "npm:^9.0.0"
+  checksum: 10c0/f321aa0707d80c1d59dcaaace8b37e20e2f320dcf40808ad3c2a2eca7fb0dd5460fc2dc0bf8dea274c875673e69f261239ff4c17aed03c8d1fdd4b4efcc05de3
   languageName: node
   linkType: hard
 
@@ -13375,7 +13400,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"qs@npm:^6.15.2":
+"qs@npm:^6.15.2, qs@npm:^6.7.0":
   version: 6.16.0
   resolution: "qs@npm:6.16.0"
   dependencies:
@@ -15327,6 +15352,13 @@ __metadata:
   dependencies:
     punycode: "npm:^2.1.0"
   checksum: 10c0/4ef57b45aa820d7ac6496e9208559986c665e49447cb072744c13b66925a362d96dd5a46c4530a6b8e203e5db5fe849369444440cb22ecfc26c679359e5dfa3c
+  languageName: node
+  linkType: hard
+
+"url-template@npm:^2.0.8":
+  version: 2.0.8
+  resolution: "url-template@npm:2.0.8"
+  checksum: 10c0/56a15057eacbcf05d52b0caed8279c8451b3dd9d32856a1fdd91c6dc84dcb1646f12bafc756b7ade62ca5b1564da8efd7baac5add35868bafb43eb024c62805b
   languageName: node
   linkType: hard
 

@@ -10,7 +10,7 @@ import {
 } from "@gsuite/shared"
 import { type Firestore } from "firebase-admin/firestore"
 
-import { type AuthenticatedAdmin } from "./firebase/admin"
+import { HttpError } from "./http/errors"
 import { type QueuePublisher } from "./queue/publisher"
 
 export interface SaveAndDeployDependencies {
@@ -22,6 +22,11 @@ export interface SaveAndDeployDependencies {
 	createId?: () => string
 }
 
+export interface SaveActor {
+	uid: string
+	customerId: string
+}
+
 function assignedGroupName(groupIds: string[], groups: DirectoryGroup[]): string | null {
 	if(groupIds.length !== 1) return null
 	return groups.find((group) => group.id === groupIds[0])?.name ?? null
@@ -29,7 +34,7 @@ function assignedGroupName(groupIds: string[], groups: DirectoryGroup[]): string
 
 export async function saveAndDeploy(
 	request: SaveAndDeployRequest,
-	admin: AuthenticatedAdmin,
+	actor: SaveActor,
 	dependencies: SaveAndDeployDependencies,
 ): Promise<SaveAndDeployResponse> {
 	const now = dependencies.now?.() ?? new Date()
@@ -45,6 +50,9 @@ export async function saveAndDeploy(
 
 	const templateRef = dependencies.db.collection("templates").doc(templateId)
 	const existing = await templateRef.get()
+	if(existing.exists && existing.data()?.customerId !== actor.customerId) {
+		throw new HttpError("Template belongs to another customer", 403)
+	}
 	const createdAt = existing.exists
 		? String(existing.data()?.createdAt ?? nowIso)
 		: nowIso
@@ -58,8 +66,9 @@ export async function saveAndDeploy(
 		assignedGroup: assignedGroupName(request.groupIds, dependencies.groups),
 		isScheduled: request.isScheduled,
 		createdBy: existing.exists
-			? String(existing.data()?.createdBy ?? admin.uid)
-			: admin.uid,
+			? String(existing.data()?.createdBy ?? actor.uid)
+			: actor.uid,
+		customerId: actor.customerId,
 		createdAt,
 		updatedAt: nowIso,
 		isActive: true,
@@ -75,7 +84,8 @@ export async function saveAndDeploy(
 			assignmentType: assignmentTypes.user,
 			targetId: userEmail,
 			priority: priority++,
-			createdBy: admin.uid,
+			customerId: actor.customerId,
+			createdBy: actor.uid,
 			createdAt: nowIso,
 			updatedAt: nowIso,
 			isActive: true,
@@ -89,7 +99,8 @@ export async function saveAndDeploy(
 			assignmentType: assignmentTypes.group,
 			targetId: groupId,
 			priority: priority++,
-			createdBy: admin.uid,
+			customerId: actor.customerId,
+			createdBy: actor.uid,
 			createdAt: nowIso,
 			updatedAt: nowIso,
 			isActive: true,
@@ -103,7 +114,8 @@ export async function saveAndDeploy(
 			assignmentType: assignmentTypes.organizationalUnit,
 			targetId: organizationalUnitPath,
 			priority: priority++,
-			createdBy: admin.uid,
+			customerId: actor.customerId,
+			createdBy: actor.uid,
 			createdAt: nowIso,
 			updatedAt: nowIso,
 			isActive: true,
@@ -123,6 +135,7 @@ export async function saveAndDeploy(
 		await dependencies.queue.publishSignatureUpdate({
 			deployId: createId(),
 			templateId,
+			customerId: actor.customerId,
 			userEmails: targetEmails,
 		})
 	}

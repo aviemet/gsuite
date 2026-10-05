@@ -44,9 +44,10 @@ export function SignatureCard({ template }: SignatureCardProps) {
 					variant="subtle"
 					size="xs"
 					className={ clsx(classes.editButton) }
+					aria-label={ `Edit ${ template.name }` }
 					onClick={ () => router.navigate({ to: "/signatures/edit/$id", params: { id: template.id } }) }
 				>
-					<IconPencil size={ 16 } />
+					<IconPencil size={ 16 } aria-hidden />
 				</Button>
 			</Group>
 			<Group gap="xs" mb="md">

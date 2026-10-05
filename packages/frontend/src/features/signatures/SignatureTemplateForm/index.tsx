@@ -7,6 +7,7 @@ import {
 	Stack,
 	Text,
 	TextInput,
+	VisuallyHidden,
 } from "@mantine/core"
 import { useLocalStorage } from "@mantine/hooks"
 import { IconLayoutColumns, IconLayoutRows } from "@tabler/icons-react"
@@ -27,7 +28,7 @@ type EditorPreviewLayout = "side-by-side" | "stacked"
 
 const editorPreviewLayoutControlStyles = {
 	root: {
-		border: "1px solid var(--mantine-color-gray-4)",
+		border: "1px solid var(--mantine-color-default-border)",
 		background: "light-dark(var(--mantine-color-white), var(--mantine-color-dark-6))",
 	},
 	label: {
@@ -113,11 +114,21 @@ export function SignatureTemplateForm({
 						data={ [
 							{
 								value: "side-by-side",
-								label: <IconLayoutColumns size="1rem" title="Side by side" />,
+								label: (
+									<>
+										<IconLayoutColumns size="1rem" aria-hidden />
+										<VisuallyHidden>Side by side</VisuallyHidden>
+									</>
+								),
 							},
 							{
 								value: "stacked",
-								label: <IconLayoutRows size="1rem" title="Stacked" />,
+								label: (
+									<>
+										<IconLayoutRows size="1rem" aria-hidden />
+										<VisuallyHidden>Stacked</VisuallyHidden>
+									</>
+								),
 							},
 						] }
 						styles={ editorPreviewLayoutControlStyles }

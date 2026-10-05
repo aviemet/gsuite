@@ -41,12 +41,12 @@ export function getAdminFirestore(): Firestore {
 	return getFirestore(getAdminApp(), resolveFirestoreDatabaseId(Boolean(process.env.FIRESTORE_EMULATOR_HOST)))
 }
 
-export interface AuthenticatedAdmin {
+export interface AuthenticatedUser {
 	uid: string
 	email: string | undefined
 }
 
-export async function verifyAdminToken(authorizationHeader: string | undefined): Promise<AuthenticatedAdmin> {
+export async function verifyIdToken(authorizationHeader: string | undefined): Promise<AuthenticatedUser> {
 	if(!authorizationHeader?.startsWith("Bearer ")) {
 		throw new Error("Missing bearer token")
 	}
@@ -57,10 +57,6 @@ export async function verifyAdminToken(authorizationHeader: string | undefined):
 	}
 
 	const decoded = await getAdminAuth().verifyIdToken(idToken)
-	if(decoded.admin !== true) {
-		throw new Error("Admin access required")
-	}
-
 	return {
 		uid: decoded.uid,
 		email: decoded.email,

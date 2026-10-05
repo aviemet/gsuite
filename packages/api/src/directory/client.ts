@@ -1,4 +1,5 @@
 import {
+	type DirectoryAccount,
 	type DirectoryGroup,
 	type DirectoryOrganizationalUnit,
 	type DirectoryUser,
@@ -12,4 +13,8 @@ export interface DirectorySnapshot {
 
 export interface DirectoryClient {
 	listDirectory(): Promise<DirectorySnapshot>
+	getUser(email: string): Promise<DirectoryAccount | undefined>
+	checkUsers(): Promise<void>
+	checkGroups(): Promise<void>
+	checkOrganizationalUnits(): Promise<void>
 }

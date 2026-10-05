@@ -1,7 +1,7 @@
 import { createDirectoryClient } from "./directory"
-import { ok, withAdminAuth } from "./http"
+import { ok, withMemberAuth } from "./http"
 
-export const directoryHandler = withAdminAuth(async () => {
-	const snapshot = await createDirectoryClient().listDirectory()
+export const directoryHandler = withMemberAuth(async ({ member }) => {
+	const snapshot = await createDirectoryClient(member.workspaceAdminEmail).listDirectory()
 	return ok(snapshot)
 })

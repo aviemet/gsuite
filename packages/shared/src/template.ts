@@ -20,6 +20,7 @@ export interface TemplateRecord {
 	createdAt: string
 	updatedAt: string
 	isActive: boolean
+	customerId: string
 }
 
 export interface TemplateAssignmentRecord {
@@ -29,6 +30,7 @@ export interface TemplateAssignmentRecord {
 	targetId: string
 	priority: number
 	conditions?: string[]
+	customerId: string
 	createdBy: string
 	createdAt: string
 	updatedAt: string
@@ -54,6 +56,7 @@ export interface SaveAndDeployResponse {
 export interface SignatureUpdateMessage {
 	deployId: string
 	templateId: string
+	customerId: string
 	userEmails: string[]
 }
 
@@ -77,6 +80,7 @@ export type SignatureDeployResult = SignatureDeployFailure | SignatureDeploySucc
 export interface SignatureDeployLog {
 	deployId: string
 	templateId: string
+	customerId: string
 	startedAt: string
 	finishedAt: string
 	results: SignatureDeployResult[]

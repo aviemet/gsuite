@@ -39,6 +39,7 @@ alwaysApply: false
 
 ### React Component Architecture
 
+- Apply the single-purpose unit rule in `.cursor/rules/project.mdc` to components, hooks, and helpers the same way as to any other module.
 - Define components with `export function ComponentName()`.
 - Props are an interface named after the component (`SignatureCardProps`).
 - Extract reusable logic into custom hooks.

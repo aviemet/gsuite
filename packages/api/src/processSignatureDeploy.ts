@@ -56,6 +56,9 @@ export async function processSignatureDeploy(
 	if(!templateSnap.exists) {
 		throw new Error(`Template not found: ${message.templateId}`)
 	}
+	if(templateSnap.data()?.customerId !== message.customerId) {
+		throw new Error("Template does not belong to this customer")
+	}
 
 	const content = String(templateSnap.data()?.content ?? "")
 	const users = await dependencies.loadUsers()
@@ -116,6 +119,7 @@ export async function processSignatureDeploy(
 	const log: SignatureDeployLog = {
 		deployId: message.deployId,
 		templateId: message.templateId,
+		customerId: message.customerId,
 		startedAt,
 		finishedAt: now().toISOString(),
 		results,

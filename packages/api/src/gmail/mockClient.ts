@@ -19,6 +19,12 @@ export class MockGmailClient implements GmailClient {
 		}
 		this.updates.push({ userEmail, html })
 	}
+
+	async probeSignatureSettings(userEmail: string): Promise<void> {
+		if(this.failingEmails.has(userEmail)) {
+			throw new Error(`Mock Gmail failure for ${userEmail}`)
+		}
+	}
 }
 
 let sharedMock: MockGmailClient | undefined

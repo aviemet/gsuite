@@ -2,7 +2,7 @@
 
 ## Workspace
 
-Each customer links a Google Workspace account. That link is the source of the references used for Google API calls.
+Each user has one membership, and that membership is the customer they can access. The customer link stores the primary domain and the Workspace admin email. Directory calls impersonate that admin. Signature updates impersonate each mailbox. The API resolves the customer from the membership because it writes with the Admin SDK.
 
 ## Data
 

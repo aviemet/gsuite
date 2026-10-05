@@ -1,20 +1,24 @@
-import { readFirebaseProjectId, resolveFirestoreDatabaseId } from "@gsuite/shared"
-import { deleteApp, initializeApp } from "firebase/app"
-import { connectAuthEmulator, createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword } from "firebase/auth"
-import { collection, connectFirestoreEmulator, doc, getFirestore, setDoc, Timestamp } from "firebase/firestore"
+import {
+	CUSTOMERS_COLLECTION,
+	membershipRoles,
+	MEMBERSHIPS_COLLECTION,
+	readFirebaseProjectId,
+	resolveFirestoreDatabaseId,
+	SEED_CUSTOMER_ID,
+	SEED_PRIMARY_DOMAIN,
+	SEED_USER_EMAIL,
+	SEED_WORKSPACE_ADMIN_EMAIL,
+} from "@gsuite/shared"
+import { initializeApp } from "firebase-admin/app"
+import { getAuth } from "firebase-admin/auth"
+import { getFirestore, Timestamp } from "firebase-admin/firestore"
 
-const firebaseConfig = {
-	apiKey: "fake-api-key",
-	authDomain: "localhost",
-	projectId: readFirebaseProjectId(process.env),
-}
+process.env.FIRESTORE_EMULATOR_HOST ??= "127.0.0.1:8080"
+process.env.FIREBASE_AUTH_EMULATOR_HOST ??= "127.0.0.1:9099"
 
-const app = initializeApp(firebaseConfig)
+const app = initializeApp({ projectId: readFirebaseProjectId(process.env) })
 const auth = getAuth(app)
 const db = getFirestore(app, resolveFirestoreDatabaseId(true))
-
-connectAuthEmulator(auth, "http://localhost:9099")
-connectFirestoreEmulator(db, "localhost", 8080)
 
 const templates = [
 	{
@@ -34,6 +38,7 @@ const templates = [
 		assignedGroup: "Engineering",
 		isScheduled: true,
 		createdBy: "admin",
+		customerId: SEED_CUSTOMER_ID,
 		createdAt: Timestamp.fromDate(new Date("2024-01-01")),
 		updatedAt: Timestamp.fromDate(new Date("2024-01-01")),
 		isActive: true,
@@ -52,6 +57,7 @@ const templates = [
 		assignedGroup: "All Employees",
 		isScheduled: false,
 		createdBy: "admin",
+		customerId: SEED_CUSTOMER_ID,
 		createdAt: Timestamp.fromDate(new Date("2024-01-15")),
 		updatedAt: Timestamp.fromDate(new Date("2024-01-15")),
 		isActive: true,
@@ -72,46 +78,50 @@ const templates = [
 		assignedGroup: null,
 		isScheduled: true,
 		createdBy: "admin",
+		customerId: SEED_CUSTOMER_ID,
 		createdAt: Timestamp.fromDate(new Date("2024-02-01")),
 		updatedAt: Timestamp.fromDate(new Date("2024-02-01")),
 		isActive: false,
 	},
 ]
 
-async function verifyAdminClaim() {
-	const idTokenResult = await auth.currentUser?.getIdTokenResult(true)
-	if(!idTokenResult?.claims.admin) {
-		throw new Error("Please set admin claim manually in the Firebase Auth Emulator UI (http://localhost:9099)")
+async function seedUser() {
+	try {
+		return await auth.getUserByEmail(SEED_USER_EMAIL)
+	} catch{
+		return auth.createUser({
+			email: SEED_USER_EMAIL,
+			password: "password",
+			emailVerified: true,
+		})
 	}
 }
 
 async function seedData() {
 	try {
-		let userCredential
-		try {
-			userCredential = await createUserWithEmailAndPassword(auth, "test@test.com", "password")
-		} catch (err: any) {
-			if(err.code !== "auth/email-already-in-use") {
-				throw err
-			}
-			userCredential = await signInWithEmailAndPassword(auth, "test@test.com", "password")
-		}
-
-		await verifyAdminClaim()
-
-		const templatesRef = collection(db, "templates")
+		const user = await seedUser()
+		const nowIso = new Date().toISOString()
+		await db.collection(CUSTOMERS_COLLECTION).doc(SEED_CUSTOMER_ID).set({
+			id: SEED_CUSTOMER_ID,
+			primaryDomain: SEED_PRIMARY_DOMAIN,
+			workspaceAdminEmail: SEED_WORKSPACE_ADMIN_EMAIL,
+			createdAt: nowIso,
+			updatedAt: nowIso,
+		})
+		await db.collection(MEMBERSHIPS_COLLECTION).doc(user.uid).set({
+			uid: user.uid,
+			customerId: SEED_CUSTOMER_ID,
+			role: membershipRoles.owner,
+			email: SEED_USER_EMAIL,
+			createdAt: nowIso,
+		})
 		for(const template of templates) {
-			try {
-				await setDoc(doc(templatesRef, template.id), template)
-			} catch (err) {
-				throw err
-			}
+			await db.collection("templates").doc(template.id).set(template)
 		}
-	} catch (error) {
-		process.exit(1)
+	} catch{
+		process.exitCode = 1
 	} finally {
-		await deleteApp(app)
-		process.exit(0)
+		process.exit()
 	}
 }
 

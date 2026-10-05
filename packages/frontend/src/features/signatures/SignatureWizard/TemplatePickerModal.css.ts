@@ -48,6 +48,11 @@ export const groupToggle = css`
 	font: inherit;
 	text-align: left;
 	cursor: pointer;
+
+	&:focus-visible {
+		outline: 2px solid light-dark(${ vars.colors.harbor[8] }, ${ vars.colors.harbor[2] });
+		outline-offset: 2px;
+	}
 `
 
 export const templateButton = css`
@@ -63,6 +68,11 @@ export const templateButton = css`
 	font: inherit;
 	text-align: left;
 	cursor: pointer;
+
+	&:focus-visible {
+		outline: 2px solid light-dark(${ vars.colors.harbor[8] }, ${ vars.colors.harbor[2] });
+		outline-offset: 2px;
+	}
 
 	&:hover {
 		background: light-dark(${ vars.colors.gray[0] }, ${ vars.colors.dark[5] });

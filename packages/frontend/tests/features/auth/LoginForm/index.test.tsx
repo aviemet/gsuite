@@ -1,9 +1,9 @@
-import "@testing-library/jest-dom/vitest"
-
 import { MantineProvider } from "@mantine/core"
 import { cleanup, render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+
+import "@testing-library/jest-dom/vitest"
 
 import { LoginForm } from "@/frontend/features/auth/LoginForm"
 import { type AuthState } from "@/frontend/hooks/useAuth"

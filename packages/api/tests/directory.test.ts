@@ -5,12 +5,19 @@ import {
 } from "@gsuite/shared"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-vi.mock("../src/firebase/admin", () => ({
-	verifyAdminToken: vi.fn(async (authorizationHeader: string | undefined) => {
+vi.mock("../src/workspace/authorize", () => ({
+	authorizeMember: vi.fn(async (authorizationHeader: string | undefined) => {
 		if(authorizationHeader !== "Bearer admin-token") {
 			throw new Error("Missing bearer token")
 		}
-		return { uid: "admin-1", email: "admin@example.com" }
+		return {
+			uid: "admin-1",
+			email: "admin@example.com",
+			customerId: "customer-1",
+			role: "owner",
+			primaryDomain: "example.com",
+			workspaceAdminEmail: "jane.doe@example.com",
+		}
 	}),
 }))
 

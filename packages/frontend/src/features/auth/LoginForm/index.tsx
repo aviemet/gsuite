@@ -41,7 +41,7 @@ export function LoginForm({ redirectTo = "/" }: LoginFormProps) {
 			await action()
 			await router.invalidate()
 			router.history.push(safeRedirectTo)
-		} catch(error) {
+		} catch (error) {
 			setErrorMessage(auth.getAuthErrorMessage(error))
 		}
 	}
@@ -61,7 +61,7 @@ export function LoginForm({ redirectTo = "/" }: LoginFormProps) {
 	return (
 		<Stack gap="md">
 			<div>
-				<Title order={ 2 } size="h3">Sign in</Title>
+				<Title order={ 1 } size="h3">Sign in</Title>
 				<Text c="dimmed" size="sm" mt={ 4 }>
 					Use your Google account or email and password.
 				</Text>

@@ -8,7 +8,7 @@ import { TanStackRouterDevtools } from "@tanstack/react-router-devtools"
 import { AuthProvider, useAuth } from "@/frontend/hooks/useAuth"
 import { useRouterAuthSync } from "@/frontend/hooks/useRouterAuthSync"
 import { queryClient } from "@/frontend/lib/query"
-import { theme } from "@/frontend/lib/theme"
+import { cssVariablesResolver, theme } from "@/frontend/lib/theme"
 
 import { router } from "./routes"
 
@@ -47,7 +47,7 @@ function InnerApp() {
 export function App() {
 	return (
 		<QueryClientProvider client={ queryClient }>
-			<MantineProvider theme={ theme } defaultColorScheme="light">
+			<MantineProvider theme={ theme } cssVariablesResolver={ cssVariablesResolver } defaultColorScheme="light">
 				<Notifications />
 				<CodeHighlightAdapterProvider adapter={ shikiAdapter }>
 					<AuthProvider>

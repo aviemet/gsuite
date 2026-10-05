@@ -3,7 +3,7 @@ import { type SaveAndDeployRequest } from "@gsuite/shared"
 import { createDirectoryClient } from "./directory"
 import { getAdminFirestore } from "./firebase/admin"
 import { createGmailClient } from "./gmail"
-import { HttpError, ok, withAdminAuth } from "./http"
+import { HttpError, ok, withMemberAuth } from "./http"
 import { processSignatureDeploy } from "./processSignatureDeploy"
 import { createCloudTasksPublisher, createInlineQueuePublisher, shouldEnqueueCloudTask } from "./queue/publisher"
 import { saveAndDeploy } from "./saveAndDeploy"
@@ -20,14 +20,14 @@ function isSaveAndDeployRequest(value: unknown): value is SaveAndDeployRequest {
 		&& Array.isArray(record.organizationalUnitPaths)
 }
 
-export const saveAndDeployHandler = withAdminAuth(async ({ admin, body }) => {
+export const saveAndDeployHandler = withMemberAuth(async ({ member, body }) => {
 	if(!isSaveAndDeployRequest(body)) {
 		throw new HttpError("Invalid request body", 400)
 	}
 
 	const db = getAdminFirestore()
 	const gmail = createGmailClient()
-	const directory = await createDirectoryClient().listDirectory()
+	const directory = await createDirectoryClient(member.workspaceAdminEmail).listDirectory()
 	const queue = shouldEnqueueCloudTask(process.env)
 		? createCloudTasksPublisher()
 		: createInlineQueuePublisher(async (message) => {
@@ -38,7 +38,7 @@ export const saveAndDeployHandler = withAdminAuth(async ({ admin, body }) => {
 			})
 		})
 
-	const result = await saveAndDeploy(body, admin, {
+	const result = await saveAndDeploy(body, member, {
 		db,
 		queue,
 		users: directory.users,

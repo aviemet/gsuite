@@ -14,6 +14,7 @@ export interface Template {
 	createdAt: Timestamp
 	updatedAt: Timestamp
 	isActive: boolean
+	customerId: string
 }
 
 export interface UserSettings {
@@ -34,6 +35,7 @@ export interface TemplateAssignment {
 	createdAt: Timestamp
 	updatedAt: Timestamp
 	isActive: boolean
+	customerId: string
 }
 
 export interface FirebaseConfig {

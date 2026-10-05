@@ -120,7 +120,7 @@ describe("saveAndDeploy", () => {
 
 		const result = await saveAndDeploy(
 			request,
-			{ uid: "admin-1", email: "admin@example.com" },
+			{ uid: "admin-1", email: "admin@example.com", customerId: "customer-1" },
 			{
 				db: firestore.db as never,
 				queue: {
@@ -146,12 +146,39 @@ describe("saveAndDeploy", () => {
 			assignmentTypes.user,
 			assignmentTypes.group,
 		])
+		expect(firestore.templates.get("id-1")?.customerId).toBe("customer-1")
 		expect(published).toHaveLength(1)
-		expect(published[0]).toEqual({
-			deployId: "id-4",
-			templateId: "id-1",
-			userEmails: ["jane.doe@example.com", "morgan.patel@example.com"],
+		expect(published[0]?.customerId).toBe("customer-1")
+		expect(published[0]?.userEmails).toEqual(["jane.doe@example.com", "morgan.patel@example.com"])
+	})
+
+	it("rejects a template owned by another customer", async () => {
+		const firestore = createFirestoreMock({
+			id: "template-9",
+			customerId: "other-customer",
+			content: "<p>x</p>",
 		})
+		const request: SaveAndDeployRequest = {
+			templateId: "template-9",
+			name: "Standard",
+			content: "<p>x</p>",
+			isDefault: false,
+			userEmails: [],
+			groupIds: [],
+			organizationalUnitPaths: [],
+			isScheduled: false,
+		}
+
+		await expect(saveAndDeploy(
+			request,
+			{ uid: "admin-1", customerId: "customer-1" },
+			{
+				db: firestore.db as never,
+				queue: { async publishSignatureUpdate() {} },
+				users: directoryUsers,
+				groups: directoryGroups,
+			},
+		)).rejects.toThrow("Template belongs to another customer")
 	})
 })
 
@@ -160,6 +187,7 @@ describe("processSignatureDeploy", () => {
 		const gmail = new MockGmailClient()
 		const firestore = createFirestoreMock({
 			id: "template-1",
+			customerId: "customer-1",
 			content: "<p>{{fullName}} | {{email}}</p>",
 		})
 		const loadUsers = vi.fn(async () => directoryUsers)
@@ -168,6 +196,7 @@ describe("processSignatureDeploy", () => {
 			{
 				deployId: "deploy-1",
 				templateId: "template-1",
+				customerId: "customer-1",
 				userEmails: ["jane.doe@example.com", "sam.lee@example.com"],
 			},
 			deployDependencies(firestore, gmail, { loadUsers }),
@@ -201,9 +230,11 @@ describe("processSignatureDeploy", () => {
 				}
 				updates.push({ userEmail, html })
 			},
+			async probeSignatureSettings() {},
 		}
 		const firestore = createFirestoreMock({
 			id: "template-1",
+			customerId: "customer-1",
 			content: "<p>{{fullName}}</p>",
 		})
 		const pauses: number[] = []
@@ -212,6 +243,7 @@ describe("processSignatureDeploy", () => {
 			{
 				deployId: "deploy-2",
 				templateId: "template-1",
+				customerId: "customer-1",
 				userEmails: ["jane.doe@example.com", "broken@example.com"],
 			},
 			deployDependencies(firestore, gmail, {
@@ -252,6 +284,7 @@ describe("processSignatureDeploy", () => {
 			{
 				deployId: "deploy-3",
 				templateId: "missing",
+				customerId: "customer-1",
 				userEmails: ["jane.doe@example.com"],
 			},
 			deployDependencies(firestore, new MockGmailClient(), { loadUsers }),
@@ -261,10 +294,31 @@ describe("processSignatureDeploy", () => {
 		expect(firestore.logs.size).toBe(0)
 	})
 
+	it("does not write a log when the template belongs to another customer", async () => {
+		const firestore = createFirestoreMock({
+			id: "template-1",
+			customerId: "other-customer",
+			content: "<p>x</p>",
+		})
+
+		await expect(processSignatureDeploy(
+			{
+				deployId: "deploy-5",
+				templateId: "template-1",
+				customerId: "customer-1",
+				userEmails: ["jane.doe@example.com"],
+			},
+			deployDependencies(firestore, new MockGmailClient()),
+		)).rejects.toThrow("Template does not belong to this customer")
+
+		expect(firestore.logs.size).toBe(0)
+	})
+
 	it("supports inline queue publishing into the consumer", async () => {
 		const gmail = new MockGmailClient()
 		const firestore = createFirestoreMock({
 			id: "template-2",
+			customerId: "customer-1",
 			content: "<p>{{fullName}}</p>",
 		})
 		const queue = createInlineQueuePublisher((message) => processSignatureDeploy(message, deployDependencies(firestore, gmail)))
@@ -272,6 +326,7 @@ describe("processSignatureDeploy", () => {
 		await queue.publishSignatureUpdate({
 			deployId: "deploy-4",
 			templateId: "template-2",
+			customerId: "customer-1",
 			userEmails: ["sam.lee@example.com"],
 		})
 

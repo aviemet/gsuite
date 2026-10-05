@@ -1,6 +1,6 @@
-import "@testing-library/jest-dom/vitest"
-
 import { afterEach, describe, expect, it, vi } from "vitest"
+
+import "@testing-library/jest-dom/vitest"
 
 const { onAuthStateChanged } = vi.hoisted(() => ({
 	onAuthStateChanged: vi.fn(),

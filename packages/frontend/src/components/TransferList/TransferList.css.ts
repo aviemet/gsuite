@@ -16,7 +16,7 @@ export const panel = css`
 	min-width: 0;
 	display: flex;
 	flex-direction: column;
-	border: 1px solid light-dark(${ vars.colors.gray[4] }, ${ vars.colors.dark[4] });
+	border: 1px solid light-dark(${ vars.colors.gray[6] }, ${ vars.colors.dark[1] });
 	border-radius: ${ vars.radius.md };
 	background: light-dark(${ vars.colors.white }, ${ vars.colors.dark[7] });
 	overflow: hidden;
