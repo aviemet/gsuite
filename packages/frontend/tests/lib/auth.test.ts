@@ -18,8 +18,10 @@ describe("sanitizeRedirectPath", () => {
 
 describe("getAuthErrorMessage", () => {
 	it("maps known firebase auth codes", () => {
-		expect(getAuthErrorMessage({ code: "auth/invalid-credential" })).toBe("Invalid email or password")
 		expect(getAuthErrorMessage({ code: "auth/popup-closed-by-user" })).toBe("Sign-in was cancelled")
+		expect(getAuthErrorMessage({ code: "auth/popup-blocked" })).toBe(
+			"Pop-up was blocked. Allow pop-ups and try again",
+		)
 	})
 
 	it("falls back for unknown errors", () => {

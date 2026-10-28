@@ -1,16 +1,10 @@
-import { Alert, Button, Divider, PasswordInput, Stack, Text, TextInput, Title } from "@mantine/core"
-import { useForm } from "@mantine/form"
-import { IconBrandGoogle } from "@tabler/icons-react"
+import { Alert, Button, Stack, Text, Title } from "@mantine/core"
 import { useRouter } from "@tanstack/react-router"
 import { useState } from "react"
 
+import { GoogleMark } from "@/frontend/features/auth/GoogleMark"
 import { useAuth } from "@/frontend/hooks/useAuth"
 import { sanitizeRedirectPath } from "@/frontend/lib/auth"
-
-interface LoginFormValues {
-	email: string
-	password: string
-}
 
 interface LoginFormProps {
 	redirectTo?: string
@@ -20,41 +14,19 @@ export function LoginForm({ redirectTo = "/" }: LoginFormProps) {
 	const auth = useAuth()
 	const router = useRouter()
 	const [errorMessage, setErrorMessage] = useState<string | null>(null)
-	const [isEmailLoading, setIsEmailLoading] = useState(false)
 	const [isGoogleLoading, setIsGoogleLoading] = useState(false)
 	const safeRedirectTo = sanitizeRedirectPath(redirectTo)
 
-	const form = useForm<LoginFormValues>({
-		initialValues: {
-			email: "",
-			password: "",
-		},
-		validate: {
-			email: (value) => (/^\S+@\S+\.\S+$/.test(value) ? null : "Enter a valid email address"),
-			password: (value) => (value.length > 0 ? null : "Enter your password"),
-		},
-	})
-
-	async function completeSignIn(action: () => Promise<unknown>) {
+	async function handleGoogleSignIn() {
 		setErrorMessage(null)
+		setIsGoogleLoading(true)
 		try {
-			await action()
+			await auth.signInWithGoogle()
 			await router.invalidate()
 			router.history.push(safeRedirectTo)
 		} catch (error) {
 			setErrorMessage(auth.getAuthErrorMessage(error))
 		}
-	}
-
-	async function handleEmailSubmit(values: LoginFormValues) {
-		setIsEmailLoading(true)
-		await completeSignIn(() => auth.signInWithEmail(values.email, values.password))
-		setIsEmailLoading(false)
-	}
-
-	async function handleGoogleSignIn() {
-		setIsGoogleLoading(true)
-		await completeSignIn(() => auth.signInWithGoogle())
 		setIsGoogleLoading(false)
 	}
 
@@ -63,7 +35,7 @@ export function LoginForm({ redirectTo = "/" }: LoginFormProps) {
 			<div>
 				<Title order={ 1 } size="h3">Sign in</Title>
 				<Text c="dimmed" size="sm" mt={ 4 }>
-					Use your Google account or email and password.
+					Access Signature Manager for Gmail with your corporate Google account.
 				</Text>
 			</div>
 
@@ -74,36 +46,14 @@ export function LoginForm({ redirectTo = "/" }: LoginFormProps) {
 			) }
 
 			<Button
-				variant="default"
+				variant="filled"
 				fullWidth
-				leftSection={ <IconBrandGoogle size={ 18 } /> }
+				leftSection={ <GoogleMark size={ 18 } /> }
 				loading={ isGoogleLoading }
 				onClick={ handleGoogleSignIn }
 			>
 				Continue with Google
 			</Button>
-
-			<Divider label="or" labelPosition="center" />
-
-			<form onSubmit={ form.onSubmit(handleEmailSubmit) }>
-				<Stack gap="sm">
-					<TextInput
-						label="Email"
-						placeholder="you@company.com"
-						autoComplete="email"
-						{ ...form.getInputProps("email") }
-					/>
-					<PasswordInput
-						label="Password"
-						placeholder="Your password"
-						autoComplete="current-password"
-						{ ...form.getInputProps("password") }
-					/>
-					<Button type="submit" fullWidth loading={ isEmailLoading }>
-						Sign in
-					</Button>
-				</Stack>
-			</form>
 		</Stack>
 	)
 }
