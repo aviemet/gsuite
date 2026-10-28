@@ -1,4 +1,4 @@
-# GSuite Signature Manager
+# Suite Desk
 
 Centralized email signature management for Google Workspace.
 

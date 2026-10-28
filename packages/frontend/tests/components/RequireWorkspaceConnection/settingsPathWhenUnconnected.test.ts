@@ -1,13 +1,16 @@
 import { describe, expect, it } from "vitest"
 
-import { settingsPathWhenUnconnected } from "@/frontend/components/RequireWorkspaceConnection"
+import {
+	isSettingsPath,
+	settingsPathWhenUnconnected,
+} from "@/frontend/components/RequireWorkspaceConnection"
 
 describe("settingsPathWhenUnconnected", () => {
 	it("returns null while signed out", () => {
 		expect(settingsPathWhenUnconnected("/", false, true, false)).toBeNull()
 	})
 
-	it("returns null while workspace is unresolved", () => {
+	it("returns null while membership is unresolved", () => {
 		expect(settingsPathWhenUnconnected("/", false, false, true)).toBeNull()
 	})
 
@@ -24,5 +27,14 @@ describe("settingsPathWhenUnconnected", () => {
 		expect(settingsPathWhenUnconnected("/", false, true, true)).toBe("/settings")
 		expect(settingsPathWhenUnconnected("/signatures", false, true, true)).toBe("/settings")
 		expect(settingsPathWhenUnconnected("/signatures/edit", false, true, true)).toBe("/settings")
+	})
+})
+
+describe("isSettingsPath", () => {
+	it("recognizes settings routes", () => {
+		expect(isSettingsPath("/settings")).toBe(true)
+		expect(isSettingsPath("/settings/")).toBe(true)
+		expect(isSettingsPath("/")).toBe(false)
+		expect(isSettingsPath("/signatures")).toBe(false)
 	})
 })

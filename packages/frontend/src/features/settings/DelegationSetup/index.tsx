@@ -1,5 +1,7 @@
 import { Button, CopyButton, Group, Stack, Text, Textarea, TextInput, Title } from "@mantine/core"
 
+import { APP_NAME } from "@/frontend/lib/appName"
+
 import * as classes from "../ApiStatusPanel/ApiStatusPanel.css"
 
 interface DelegationSetupProps {
@@ -12,7 +14,7 @@ export function DelegationSetup({ clientId, scopes }: DelegationSetupProps) {
 
 	return (
 		<Stack gap="sm" className={ classes.section }>
-			<Title order={ 2 } size="h4">Authorize Signature Manager</Title>
+			<Title order={ 2 } size="h4">Authorize { APP_NAME }</Title>
 			<Text>
 				A check failed, so Google has not granted this app access yet. In the Admin console, open Security, then Access and data control, then API controls, then Domain-wide delegation. Add the client ID, paste the scopes, then check again.
 			</Text>

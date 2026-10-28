@@ -69,10 +69,11 @@ export async function fetchWorkspace(): Promise<WorkspaceSession> {
 	}
 }
 
-export function useWorkspaceQuery() {
+export function useWorkspaceQuery(options?: { enabled?: boolean }) {
 	return useQuery({
 		queryKey: ["workspace"],
 		queryFn: fetchWorkspace,
+		enabled: options?.enabled ?? true,
 	})
 }
 

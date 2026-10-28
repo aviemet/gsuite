@@ -1,7 +1,9 @@
 import { Box, Paper } from "@mantine/core"
-import { IconSignature } from "@tabler/icons-react"
+import { IconDesk } from "@tabler/icons-react"
 import clsx from "clsx"
 import { type ReactNode } from "react"
+
+import { APP_NAME } from "@/frontend/lib/appName"
 
 import * as classes from "./Auth.css"
 
@@ -15,9 +17,9 @@ export function AuthLayout({ children }: AuthLayoutProps) {
 			<main className={ clsx(classes.panel) }>
 				<Box className={ clsx(classes.brand) }>
 					<span className={ clsx(classes.brandMark) } aria-hidden>
-						<IconSignature size={ 20 } />
+						<IconDesk size={ 20 } />
 					</span>
-					<span className={ clsx(classes.brandName) }>Signature Manager</span>
+					<span className={ clsx(classes.brandName) }>{ APP_NAME }</span>
 				</Box>
 				<Paper withBorder p="xl" radius="md" shadow="sm">
 					{ children }

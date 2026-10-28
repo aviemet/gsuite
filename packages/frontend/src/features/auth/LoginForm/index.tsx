@@ -4,6 +4,7 @@ import { useState } from "react"
 
 import { GoogleMark } from "@/frontend/features/auth/GoogleMark"
 import { useAuth } from "@/frontend/hooks/useAuth"
+import { APP_NAME } from "@/frontend/lib/appName"
 import { sanitizeRedirectPath } from "@/frontend/lib/auth"
 
 interface LoginFormProps {
@@ -35,7 +36,7 @@ export function LoginForm({ redirectTo = "/" }: LoginFormProps) {
 			<div>
 				<Title order={ 1 } size="h3">Sign in</Title>
 				<Text c="dimmed" size="sm" mt={ 4 }>
-					Access Signature Manager for Gmail with your corporate Google account.
+					Access { APP_NAME } with your corporate Google account.
 				</Text>
 			</div>
 

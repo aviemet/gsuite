@@ -8,6 +8,25 @@ import "@testing-library/jest-dom/vitest"
 import { WorkspaceSettings } from "@/frontend/features/settings/WorkspaceSettings"
 import { apiStatusCheckIds, type ApiStatusResult, membershipRoles } from "@/shared/workspace"
 
+const membershipMock = vi.hoisted(() => ({
+	isPending: false,
+	isError: false,
+	error: null as Error | null,
+	data: {
+		uid: "user-1",
+		customerId: "example-corp",
+		role: "superAdmin" as const,
+		email: "test@test.com",
+		createdAt: "2026-01-01T00:00:00.000Z",
+	} as {
+		uid: string
+		customerId: string
+		role: "superAdmin"
+		email: string
+		createdAt: string
+	} | null,
+}))
+
 const apiStatusMock = vi.hoisted(() => ({
 	isPending: false,
 	isError: false,
@@ -18,6 +37,10 @@ const apiStatusMock = vi.hoisted(() => ({
 
 vi.mock("@/frontend/hooks/useAuth", () => ({
 	useAuth: () => ({ user: { email: "test@test.com" } }),
+}))
+
+vi.mock("@/frontend/queries/templates", () => ({
+	useMembershipQuery: () => membershipMock,
 }))
 
 vi.mock("@/frontend/queries/directory", () => ({
@@ -83,6 +106,16 @@ vi.mock("@/frontend/queries/workspace", () => ({
 
 afterEach(() => {
 	cleanup()
+	membershipMock.isPending = false
+	membershipMock.isError = false
+	membershipMock.error = null
+	membershipMock.data = {
+		uid: "user-1",
+		customerId: "example-corp",
+		role: "superAdmin",
+		email: "test@test.com",
+		createdAt: "2026-01-01T00:00:00.000Z",
+	}
 	apiStatusMock.isPending = false
 	apiStatusMock.isError = false
 	apiStatusMock.error = null
@@ -99,6 +132,16 @@ function renderSettings() {
 }
 
 describe("WorkspaceSettings", () => {
+	it("shows Connect Workspace immediately when the user has no membership", () => {
+		membershipMock.data = null
+		renderSettings()
+
+		expect(screen.getByRole("heading", { name: "Connect Workspace" })).toBeInTheDocument()
+		expect(screen.getByRole("button", { name: "Connect" })).toBeInTheDocument()
+		expect(screen.getByRole("tab", { name: "Workspace" })).toHaveAttribute("aria-selected", "true")
+		expect(screen.getByLabelText("Workspace admin email")).toHaveValue("test@test.com")
+	})
+
 	it("keeps each settings section on its own tab", async () => {
 		const user = userEvent.setup()
 		renderSettings()
@@ -146,7 +189,7 @@ describe("WorkspaceSettings", () => {
 		await user.click(screen.getByRole("tab", { name: "API status" }))
 
 		expect(screen.getByText("Delegation denied")).toBeInTheDocument()
-		expect(screen.getByRole("heading", { name: "Authorize Signature Manager" })).toBeInTheDocument()
+		expect(screen.getByRole("heading", { name: "Authorize Suite Desk" })).toBeInTheDocument()
 		expect(screen.getByLabelText("Client ID")).toHaveValue("mock-client-id")
 	})
 

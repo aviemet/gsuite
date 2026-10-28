@@ -1,40 +1,47 @@
-import { useNavigate, useRouterState } from "@tanstack/react-router"
-import { useEffect } from "react"
+import { useRouterState } from "@tanstack/react-router"
 
 import { useAuth } from "@/frontend/hooks/useAuth"
+import { useMembershipQuery } from "@/frontend/queries/templates"
 import { useWorkspaceQuery } from "@/frontend/queries/workspace"
 
 export function settingsPathWhenUnconnected(
 	pathname: string,
 	hasMembership: boolean,
-	isWorkspaceResolved: boolean,
+	isMembershipResolved: boolean,
 	isAuthenticated: boolean,
 ): string | null {
 	if(!isAuthenticated) return null
-	if(!isWorkspaceResolved) return null
+	if(!isMembershipResolved) return null
 	if(hasMembership) return null
 	if(pathname === "/settings" || pathname.startsWith("/settings/")) return null
 	return "/settings"
 }
 
-export function RequireWorkspaceConnection() {
+export function isSettingsPath(pathname: string): boolean {
+	return pathname === "/settings" || pathname.startsWith("/settings/")
+}
+
+export function useWorkspaceConnectionGate() {
 	const auth = useAuth()
-	const navigate = useNavigate()
 	const pathname = useRouterState({ select: (state) => state.location.pathname })
-	const workspace = useWorkspaceQuery()
-	const isWorkspaceResolved = !workspace.isLoading && !workspace.isError && workspace.data !== undefined
-	const hasMembership = Boolean(workspace.data?.membership)
+	const membership = useMembershipQuery()
+	const isMembershipResolved = membership.isFetched || membership.isError
+	const hasMembership = Boolean(membership.data)
+	useWorkspaceQuery({ enabled: auth.isAuthenticated && hasMembership })
 	const redirectTo = settingsPathWhenUnconnected(
 		pathname,
 		hasMembership,
-		isWorkspaceResolved,
+		isMembershipResolved && !membership.isError,
 		auth.isAuthenticated,
 	)
+	const blocksApp = auth.isAuthenticated
+		&& !isSettingsPath(pathname)
+		&& (membership.isPending || (isMembershipResolved && !membership.isError && !hasMembership))
 
-	useEffect(() => {
-		if(!redirectTo) return
-		void navigate({ to: redirectTo })
-	}, [navigate, redirectTo])
-
-	return null
+	return {
+		redirectTo,
+		blocksApp,
+		hasMembership,
+		isMembershipPending: membership.isPending,
+	}
 }

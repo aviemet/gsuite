@@ -7,6 +7,7 @@ import "@testing-library/jest-dom/vitest"
 
 import { LoginForm } from "@/frontend/features/auth/LoginForm"
 import { type AuthState } from "@/frontend/hooks/useAuth"
+import { APP_NAME } from "@/frontend/lib/appName"
 
 const {
 	signInWithGoogle,
@@ -65,7 +66,7 @@ describe("LoginForm", () => {
 
 		expect(screen.getByRole("heading", { name: "Sign in" })).toBeInTheDocument()
 		expect(screen.getByText(
-			"Access Signature Manager for Gmail with your corporate Google account.",
+			`Access ${ APP_NAME } with your corporate Google account.`,
 		)).toBeInTheDocument()
 		expect(screen.getByRole("button", { name: "Continue with Google" })).toBeInTheDocument()
 	})

@@ -1,6 +1,7 @@
 import { Autocomplete, Button, Group, Select, Stack, Text, Title } from "@mantine/core"
 import { useState } from "react"
 
+import { APP_NAME } from "@/frontend/lib/appName"
 import { useDirectoryQuery } from "@/frontend/queries/directory"
 import {
 	useRemoveAccess,
@@ -107,7 +108,7 @@ export function PermissionsPanel() {
 		<Stack gap="sm">
 			<Title order={ 2 } size="h4">Permissions</Title>
 			<Text>
-				Choose who from your Workspace can use Signature Manager, and what they can do.
+				Choose who from your Workspace can use { APP_NAME }, and what they can do.
 			</Text>
 			{ session.access.map((entry) => (
 				<AccessRow

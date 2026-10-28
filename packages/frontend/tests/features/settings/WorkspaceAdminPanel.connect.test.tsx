@@ -4,39 +4,25 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 
 import "@testing-library/jest-dom/vitest"
 
-import { WorkspaceAdminPanel } from "@/frontend/features/settings/WorkspaceAdminPanel"
+import { ConnectWorkspacePanel } from "@/frontend/features/settings/ConnectWorkspacePanel"
 
 vi.mock("@/frontend/hooks/useAuth", () => ({
 	useAuth: () => ({ user: { email: "avram@thebatterysf.com" } }),
 }))
 
-vi.mock("@/frontend/queries/directory", () => ({
-	useDirectoryQuery: () => ({ data: { users: [] } }),
-}))
-
 vi.mock("@/frontend/queries/workspace", () => ({
-	useWorkspaceQuery: () => ({
-		data: {
-			clientId: "mock-client-id",
-			scopes: [],
-			customer: null,
-			membership: null,
-			access: [],
-		},
-	}),
 	useConnectWorkspace: () => ({ isPending: false, mutate: vi.fn() }),
-	useSetWorkspaceAdmin: () => ({ isPending: false, mutate: vi.fn() }),
 }))
 
 afterEach(() => {
 	cleanup()
 })
 
-describe("WorkspaceAdminPanel connect path", () => {
+describe("ConnectWorkspacePanel", () => {
 	it("only offers Connect for a first-time Workspace link", () => {
 		render(
 			<MantineProvider>
-				<WorkspaceAdminPanel />
+				<ConnectWorkspacePanel />
 			</MantineProvider>,
 		)
 
