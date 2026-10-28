@@ -14,7 +14,7 @@ vi.mock("../src/workspace/authorize", () => ({
 			uid: "admin-1",
 			email: "admin@example.com",
 			customerId: "customer-1",
-			role: "owner",
+			role: "superAdmin",
 			primaryDomain: "example.com",
 			workspaceAdminEmail: "jane.doe@example.com",
 		}

@@ -2,6 +2,10 @@ import { css } from "@linaria/core"
 
 import { vars } from "@/frontend/lib/theme"
 
+export const fieldLabel = css`
+	margin-bottom: ${ vars.spacing.sm };
+`
+
 export const root = css`
 	display: flex;
 	gap: ${ vars.spacing.md };
@@ -16,7 +20,7 @@ export const panel = css`
 	min-width: 0;
 	display: flex;
 	flex-direction: column;
-	border: 1px solid light-dark(${ vars.colors.gray[6] }, ${ vars.colors.dark[1] });
+	border: 1px solid light-dark(${ vars.colors.gray[3] }, ${ vars.colors.dark[4] });
 	border-radius: ${ vars.radius.md };
 	background: light-dark(${ vars.colors.white }, ${ vars.colors.dark[7] });
 	overflow: hidden;
@@ -81,11 +85,32 @@ export const item = css`
 		outline: 2px solid ${ vars.colors.harbor[5] };
 		outline-offset: 1px;
 	}
+
+	&[data-disabled="true"] {
+		cursor: not-allowed;
+		opacity: 0.55;
+		color: light-dark(${ vars.colors.gray[6] }, ${ vars.colors.dark[1] });
+	}
+
+	&[data-disabled="true"]:hover {
+		background: transparent;
+	}
+
+	&[data-disabled="true"]:hover [data-action] {
+		background: light-dark(${ vars.colors.white }, ${ vars.colors.harbor[9] });
+		border-color: light-dark(${ vars.colors.harbor[3] }, ${ vars.colors.harbor[7] });
+	}
 `
 
 export const itemLabel = css`
 	flex: 1;
 	min-width: 0;
+`
+
+export const itemReason = css`
+	flex-shrink: 0;
+	max-width: 45%;
+	color: light-dark(${ vars.colors.gray[6] }, ${ vars.colors.dark[1] });
 `
 
 export const itemAction = css`

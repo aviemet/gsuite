@@ -1,14 +1,13 @@
 import { css } from "@linaria/core"
 
 export const editor = css`
-	border: 1px solid var(--mantine-color-gray-4);
+	border: 1px solid var(--mantine-color-gray-3);
 	border-radius: var(--mantine-radius-md);
 	background-color: #ffffff;
 	color: #000000;
 	color-scheme: light;
-	overflow: visible;
+	overflow: hidden;
 	min-height: 16rem;
-	box-shadow: 0 1px 2px rgba(22, 40, 69, 0.06);
 
 	.tox-tinymce {
 		border: none;
@@ -20,40 +19,46 @@ export const editor = css`
 	}
 
 	.tox.tox-tinymce:not(.tox-tinymce-inline) .tox-editor-header {
-		padding: 0.5rem 0.5rem 0.25rem;
+		padding: 0.35rem 0.5rem;
 		box-shadow: none;
-		border-bottom: 1px solid var(--mantine-color-default-border);
+		background: #ffffff;
+		border: none;
+		border-top: 1px solid var(--mantine-color-gray-3);
 	}
 
 	.tox .tox-toolbar,
 	.tox .tox-toolbar__primary,
 	.tox .tox-toolbar__overflow {
 		background: transparent;
+		background-image: none;
 	}
 
 	.tox .tox-toolbar__group {
-		gap: 0;
-		margin: 0 0.375rem 0.25rem 0;
+		gap: 0.125rem;
+		margin: 0 0.5rem 0 0;
 		padding: 0;
-		border: 1px solid var(--mantine-color-default-border);
-		border-radius: var(--mantine-radius-sm);
-		overflow: hidden;
-		background-color: #ffffff;
+		border: none;
+		background: transparent;
 	}
 
 	.tox:not([dir="rtl"]) .tox-toolbar__group:not(:last-of-type),
 	.tox[dir="rtl"] .tox-toolbar__group:not(:last-of-type) {
-		border-inline-end: 1px solid var(--mantine-color-default-border);
+		padding-inline-end: 0.5rem;
+		margin-inline-end: 0.5rem;
+		border-inline-end: 1px solid var(--mantine-color-gray-3);
 	}
 
-	.tox .tox-toolbar__group > .tox-tbtn {
+	.tox .tox-toolbar__group > .tox-tbtn,
+	.tox .tox-toolbar__group > .tox-split-button {
 		margin: 0;
-		border-radius: 0;
-		border-inline-end: 1px solid var(--mantine-color-default-border);
+		border: none;
+		border-radius: var(--mantine-radius-sm);
 	}
 
-	.tox .tox-toolbar__group > .tox-tbtn:last-child {
-		border-inline-end: none;
+	.tox .tox-tbtn:hover,
+	.tox .tox-tbtn--enabled,
+	.tox .tox-tbtn--enabled:hover {
+		background: var(--mantine-color-gray-1);
 	}
 
 	:root[data-mantine-color-scheme="dark"] & {
@@ -70,40 +75,30 @@ export const editor = css`
 
 		.tox.tox-tinymce:not(.tox-tinymce-inline) .tox-editor-header {
 			background-color: var(--mantine-color-dark-5);
-			border-bottom: 1px solid var(--mantine-color-dark-4);
-			border-radius: var(--mantine-radius-md) var(--mantine-radius-md) 0 0;
-			padding: 0.35rem 0.45rem 0.1rem;
+			border-top: 1px solid var(--mantine-color-dark-4);
+			padding: 0.35rem 0.5rem;
 		}
 
 		.tox .tox-toolbar__group {
-			border: 1px solid var(--mantine-color-dark-3);
+			border: none;
 			background: transparent;
-			box-shadow: none;
-			overflow: hidden;
-			margin: 0 0.375rem 0.25rem 0;
+			margin: 0 0.5rem 0 0;
 			padding: 0;
 		}
 
 		.tox:not([dir="rtl"]) .tox-toolbar__group:not(:last-of-type),
 		.tox[dir="rtl"] .tox-toolbar__group:not(:last-of-type) {
 			border-inline-end: 1px solid var(--mantine-color-dark-3);
-			padding-inline-end: 0;
-			padding-inline-start: 0;
+			padding-inline-end: 0.5rem;
+			margin-inline-end: 0.5rem;
 		}
 
 		.tox .tox-toolbar__group > .tox-tbtn,
 		.tox .tox-toolbar__group > .tox-split-button,
 		.tox .tox-split-button .tox-tbtn {
 			border: none;
-			border-radius: 0;
+			border-radius: var(--mantine-radius-sm);
 			margin: 0;
-			border-inline-end: 1px solid var(--mantine-color-dark-3);
-		}
-
-		.tox .tox-toolbar__group > .tox-tbtn:last-child,
-		.tox .tox-toolbar__group > .tox-split-button:last-child,
-		.tox .tox-split-button .tox-tbtn:last-child {
-			border-inline-end: none;
 		}
 
 		.tox .tox-tbtn,
@@ -167,4 +162,11 @@ export const editor = css`
 			fill: var(--mantine-color-white);
 		}
 	}
+`
+
+export const embedded = css`
+	border: none;
+	border-radius: 0;
+	box-shadow: none;
+	min-height: 14rem;
 `

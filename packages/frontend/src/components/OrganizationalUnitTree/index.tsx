@@ -29,6 +29,7 @@ export interface OrganizationalUnitTreeProps {
 	error?: ReactNode
 	searchPlaceholder?: string
 	nothingFoundMessage?: string
+	disabledPaths?: ReadonlyMap<string, string>
 }
 
 function OrganizationalUnitNode({
@@ -37,12 +38,15 @@ function OrganizationalUnitNode({
 	hasChildren,
 	elementProps,
 	tree,
-}: RenderTreeNodePayload) {
+	disabledReason,
+}: RenderTreeNodePayload & { disabledReason?: string }) {
 	const checked = tree.isNodeChecked(node.value) === true
+	const isDisabled = Boolean(disabledReason) && !checked
 	const nodeLabel = typeof node.label === "string" ? node.label : node.value
 
 	function handleToggleChecked(event: MouseEvent) {
 		event.stopPropagation()
+		if(isDisabled) return
 		if(checked) tree.uncheckNode(node.value)
 		else tree.checkNode(node.value)
 	}
@@ -58,6 +62,8 @@ function OrganizationalUnitNode({
 			{ ...elementProps }
 			className={ clsx(elementProps.className, classes.node) }
 			data-checked={ checked }
+			data-disabled={ isDisabled }
+			aria-disabled={ isDisabled }
 			onClick={ handleToggleChecked }
 		>
 			{ hasChildren
@@ -75,6 +81,9 @@ function OrganizationalUnitNode({
 				)
 				: <span className={ clsx(classes.chevronSpacer) } /> }
 			<span className={ clsx(classes.label) }>{ node.label }</span>
+			{ isDisabled && disabledReason && (
+				<span className={ clsx(classes.disabledReason) }>{ disabledReason }</span>
+			) }
 			{ checked && (
 				<IconCheck
 					size={ 16 }
@@ -94,6 +103,7 @@ export function OrganizationalUnitTree({
 	error,
 	searchPlaceholder = "Search",
 	nothingFoundMessage = "No organizational units found",
+	disabledPaths,
 }: OrganizationalUnitTreeProps) {
 	const [search, setSearch] = useState("")
 	const tree = useTree({
@@ -109,8 +119,12 @@ export function OrganizationalUnitTree({
 	)
 
 	function handleCheckedStateChange(nextValue: string[]) {
-		if(arePathListsEqual(value, nextValue)) return
-		onChange(nextValue)
+		const allowed = nextValue.filter((path) => {
+			if(value.includes(path)) return true
+			return !disabledPaths?.has(path)
+		})
+		if(arePathListsEqual(value, allowed)) return
+		onChange(allowed)
 	}
 
 	function handleSearchChange(event: ChangeEvent<HTMLInputElement>) {
@@ -124,7 +138,12 @@ export function OrganizationalUnitTree({
 	}
 
 	return (
-		<Input.Wrapper label={ label } error={ error } className={ clsx(classes.root) }>
+		<Input.Wrapper
+			label={ label }
+			error={ error }
+			className={ clsx(classes.root) }
+			classNames={ { label: classes.fieldLabel } }
+		>
 			<div className={ clsx(classes.panel) }>
 				<TextInput
 					placeholder={ searchPlaceholder }
@@ -143,7 +162,12 @@ export function OrganizationalUnitTree({
 							expandOnClick={ false }
 							checkOnSpace
 							levelOffset={ 22 }
-							renderNode={ (payload) => <OrganizationalUnitNode { ...payload } /> }
+							renderNode={ (payload) => (
+								<OrganizationalUnitNode
+									{ ...payload }
+									disabledReason={ disabledPaths?.get(payload.node.value) }
+								/>
+							) }
 						/>
 					)
 					: (

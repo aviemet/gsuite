@@ -1,4 +1,5 @@
 import {
+	ACCESS_COLLECTION,
 	CUSTOMERS_COLLECTION,
 	membershipRoles,
 	MEMBERSHIPS_COLLECTION,
@@ -34,15 +35,28 @@ export async function ensureEmulatorTenant(db: Firestore): Promise<void> {
 		})
 	}
 
+	const email = (user.email ?? SEED_USER_EMAIL).toLowerCase()
 	const membershipRef = db.collection(MEMBERSHIPS_COLLECTION).doc(user.uid)
 	const membership = await membershipRef.get()
 	if(!membership.exists) {
 		await membershipRef.set({
 			uid: user.uid,
 			customerId: SEED_CUSTOMER_ID,
-			role: membershipRoles.owner,
-			email: (user.email ?? SEED_USER_EMAIL).toLowerCase(),
+			role: membershipRoles.superAdmin,
+			email,
 			createdAt: nowIso,
+		})
+	}
+
+	const accessRef = db.collection(ACCESS_COLLECTION).doc(email)
+	const access = await accessRef.get()
+	if(!access.exists) {
+		await accessRef.set({
+			email,
+			customerId: SEED_CUSTOMER_ID,
+			role: membershipRoles.superAdmin,
+			createdAt: nowIso,
+			uid: user.uid,
 		})
 	}
 

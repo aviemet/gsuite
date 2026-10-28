@@ -1,26 +1,28 @@
 import { Avatar, Menu, Text, UnstyledButton, useComputedColorScheme, useMantineColorScheme } from "@mantine/core"
 import { IconLogout, IconMoon, IconSun } from "@tabler/icons-react"
-import { useRouter } from "@tanstack/react-router"
+import { useState } from "react"
 
 import { useAuth } from "@/frontend/hooks/useAuth"
+import { queryClient } from "@/frontend/lib/query"
 
 export function UserMenu() {
 	const auth = useAuth()
-	const router = useRouter()
 	const { setColorScheme } = useMantineColorScheme()
 	const computedColorScheme = useComputedColorScheme("light")
 	const isDark = computedColorScheme === "dark"
 	const displayName = auth.user?.displayName || auth.user?.email || "Account"
+	const [isSigningOut, setIsSigningOut] = useState(false)
 
 	async function handleSignOut() {
-		await auth.signOut()
-		await router.invalidate()
-		await router.navigate({
-			to: "/login",
-			search: {
-				redirect: "/",
-			},
-		})
+		setIsSigningOut(true)
+
+		try {
+			await auth.signOut()
+			queryClient.clear()
+			window.location.assign("/login")
+		} catch{
+			setIsSigningOut(false)
+		}
 	}
 
 	return (
@@ -55,6 +57,7 @@ export function UserMenu() {
 					color="red"
 					leftSection={ <IconLogout size={ 16 } /> }
 					onClick={ handleSignOut }
+					disabled={ isSigningOut }
 				>
 					Sign out
 				</Menu.Item>

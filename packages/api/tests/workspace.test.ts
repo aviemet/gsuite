@@ -1,6 +1,6 @@
 import {
+	ACCESS_COLLECTION,
 	CUSTOMERS_COLLECTION,
-	INVITES_COLLECTION,
 	membershipRoles,
 	MEMBERSHIPS_COLLECTION,
 } from "@gsuite/shared"
@@ -8,9 +8,9 @@ import { describe, expect, it } from "vitest"
 
 import { type DirectoryClient } from "../src/directory/client"
 import { type GmailClient } from "../src/gmail/client"
+import { removeAccess, setAccess } from "../src/workspace/access"
 import { checkApiStatus } from "../src/workspace/apiStatus"
 import { connectWorkspace, setWorkspaceAdmin } from "../src/workspace/connect"
-import { acceptInvite, inviteMember, removeMember } from "../src/workspace/invites"
 import { type AuthorizedMember } from "../src/workspace/records"
 
 function createMemoryFirestore() {
@@ -166,17 +166,17 @@ function directoryWith(accounts: Record<string, { isAdmin: boolean, primaryDomai
 	}
 }
 
-const owner: AuthorizedMember = {
+const superAdmin: AuthorizedMember = {
 	uid: "owner-1",
 	email: "owner@example.com",
 	customerId: "customer-1",
-	role: membershipRoles.owner,
+	role: membershipRoles.superAdmin,
 	primaryDomain: "example.com",
 	workspaceAdminEmail: "admin@example.com",
 }
 
 describe("connectWorkspace", () => {
-	it("creates a customer and an owner membership for a super admin", async () => {
+	it("creates a customer and a super admin membership", async () => {
 		const database = createMemoryFirestore()
 		const customer = await connectWorkspace(
 			database as never,
@@ -198,12 +198,17 @@ describe("connectWorkspace", () => {
 		})
 		expect(database.documents.get(`${MEMBERSHIPS_COLLECTION}/user-1`)).toMatchObject({
 			customerId: "customer-1",
-			role: membershipRoles.owner,
+			role: membershipRoles.superAdmin,
 			email: "owner@example.com",
+		})
+		expect(database.documents.get(`${ACCESS_COLLECTION}/owner@example.com`)).toMatchObject({
+			customerId: "customer-1",
+			role: membershipRoles.superAdmin,
+			uid: "user-1",
 		})
 	})
 
-	it("rejects an account that is not a super admin", async () => {
+	it("rejects an account that is not a Workspace super admin", async () => {
 		const database = createMemoryFirestore()
 		await expect(connectWorkspace(
 			database as never,
@@ -241,7 +246,7 @@ describe("connectWorkspace", () => {
 })
 
 describe("setWorkspaceAdmin", () => {
-	it("stores a super admin from the same domain", async () => {
+	it("stores a Workspace super admin from the same domain", async () => {
 		const database = createMemoryFirestore()
 		database.documents.set(`${CUSTOMERS_COLLECTION}/customer-1`, {
 			id: "customer-1",
@@ -251,7 +256,7 @@ describe("setWorkspaceAdmin", () => {
 			updatedAt: "2026-01-01T00:00:00.000Z",
 		})
 
-		const customer = await setWorkspaceAdmin(database as never, owner, "jane.doe@example.com", {
+		const customer = await setWorkspaceAdmin(database as never, superAdmin, "jane.doe@example.com", {
 			createDirectory: () => directoryWith({
 				"jane.doe@example.com": { isAdmin: true, primaryDomain: "example.com" },
 			}),
@@ -261,51 +266,77 @@ describe("setWorkspaceAdmin", () => {
 		expect(customer.workspaceAdminEmail).toBe("jane.doe@example.com")
 	})
 
-	it("rejects a member", async () => {
+	it("rejects a non super admin site role", async () => {
 		const database = createMemoryFirestore()
 		await expect(setWorkspaceAdmin(
 			database as never,
-			{ ...owner, role: membershipRoles.member },
+			{ ...superAdmin, role: membershipRoles.admin },
 			"jane.doe@example.com",
 			{ createDirectory: () => directoryWith({}) },
-		)).rejects.toThrow("Owner access required")
+		)).rejects.toThrow("Super admin access required")
 	})
 })
 
-describe("invites", () => {
-	it("lets the invited account join the customer", async () => {
+describe("access", () => {
+	it("grants a Directory user a role", async () => {
 		const database = createMemoryFirestore()
-		await inviteMember(database as never, owner, "Member@example.com", () => new Date("2026-01-01T00:00:00.000Z"))
-		expect(database.documents.has(`${CUSTOMERS_COLLECTION}/customer-1/${INVITES_COLLECTION}/member@example.com`)).toBe(true)
+		database.documents.set(`${ACCESS_COLLECTION}/owner@example.com`, {
+			email: "owner@example.com",
+			customerId: "customer-1",
+			role: membershipRoles.superAdmin,
+			createdAt: "2026-01-01T00:00:00.000Z",
+			uid: "owner-1",
+		})
 
-		const membership = await acceptInvite(
+		const access = await setAccess(
 			database as never,
-			{ uid: "member-1", email: "member@example.com" },
-			() => new Date("2026-01-02T00:00:00.000Z"),
+			superAdmin,
+			"Editor@example.com",
+			membershipRoles.editor,
+			() => new Date("2026-01-01T00:00:00.000Z"),
 		)
 
-		expect(membership).toMatchObject({
-			uid: "member-1",
-			customerId: "customer-1",
-			role: membershipRoles.member,
+		expect(access).toMatchObject({
+			email: "editor@example.com",
+			role: membershipRoles.editor,
 		})
-		expect(database.documents.has(`${CUSTOMERS_COLLECTION}/customer-1/${INVITES_COLLECTION}/member@example.com`)).toBe(false)
+		expect(database.documents.get(`${ACCESS_COLLECTION}/editor@example.com`)).toMatchObject({
+			customerId: "customer-1",
+			role: membershipRoles.editor,
+		})
 	})
 
-	it("removes a member and keeps the owner", async () => {
+	it("removes access and keeps at least one super admin", async () => {
 		const database = createMemoryFirestore()
-		database.documents.set(`${MEMBERSHIPS_COLLECTION}/member-1`, {
-			uid: "member-1",
+		database.documents.set(`${ACCESS_COLLECTION}/owner@example.com`, {
+			email: "owner@example.com",
 			customerId: "customer-1",
-			role: membershipRoles.member,
-			email: "member@example.com",
+			role: membershipRoles.superAdmin,
+			createdAt: "2026-01-01T00:00:00.000Z",
+			uid: "owner-1",
+		})
+		database.documents.set(`${ACCESS_COLLECTION}/editor@example.com`, {
+			email: "editor@example.com",
+			customerId: "customer-1",
+			role: membershipRoles.editor,
+			createdAt: "2026-01-01T00:00:00.000Z",
+			uid: "editor-1",
+		})
+		database.documents.set(`${MEMBERSHIPS_COLLECTION}/editor-1`, {
+			uid: "editor-1",
+			customerId: "customer-1",
+			role: membershipRoles.editor,
+			email: "editor@example.com",
 			createdAt: "2026-01-01T00:00:00.000Z",
 		})
 
-		await removeMember(database as never, owner, "member-1")
-		expect(database.documents.has(`${MEMBERSHIPS_COLLECTION}/member-1`)).toBe(false)
+		await removeAccess(database as never, superAdmin, "editor@example.com")
+		expect(database.documents.has(`${ACCESS_COLLECTION}/editor@example.com`)).toBe(false)
+		expect(database.documents.has(`${MEMBERSHIPS_COLLECTION}/editor-1`)).toBe(false)
 
-		await expect(removeMember(database as never, owner, owner.uid)).rejects.toThrow("The owner cannot be removed")
+		await expect(removeAccess(database as never, superAdmin, "owner@example.com")).rejects.toThrow(
+			"Keep at least one super admin",
+		)
 	})
 })
 

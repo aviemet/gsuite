@@ -25,11 +25,11 @@ service cloud.firestore {
     match /customers/{customerId} {
       allow read: if isMember() && callerCustomerId() == customerId;
       allow write: if false;
+    }
 
-      match /invites/{inviteId} {
-        allow read: if isMember() && callerCustomerId() == customerId;
-        allow write: if false;
-      }
+    match /accessByEmail/{email} {
+      allow read: if isMember() && resource.data.customerId == callerCustomerId();
+      allow write: if false;
     }
 
     match /templates/{templateId} {

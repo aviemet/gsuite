@@ -7,6 +7,7 @@ import { HttpError, ok, withMemberAuth } from "./http"
 import { processSignatureDeploy } from "./processSignatureDeploy"
 import { createCloudTasksPublisher, createInlineQueuePublisher, shouldEnqueueCloudTask } from "./queue/publisher"
 import { saveAndDeploy } from "./saveAndDeploy"
+import { requireSignatureEditor } from "./workspace/authorize"
 
 function isSaveAndDeployRequest(value: unknown): value is SaveAndDeployRequest {
 	if(!value || typeof value !== "object") return false
@@ -21,6 +22,7 @@ function isSaveAndDeployRequest(value: unknown): value is SaveAndDeployRequest {
 }
 
 export const saveAndDeployHandler = withMemberAuth(async ({ member, body }) => {
+	requireSignatureEditor(member)
 	if(!isSaveAndDeployRequest(body)) {
 		throw new HttpError("Invalid request body", 400)
 	}

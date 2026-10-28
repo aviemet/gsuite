@@ -6,7 +6,7 @@ export const cardRoot = css`
 	position: relative;
 	display: flex;
 	flex-direction: column;
-	height: 100%;
+	border-color: light-dark(${ vars.colors.gray[6] }, ${ vars.colors.dark[1] });
 `
 
 export const editButton = css`
@@ -22,16 +22,15 @@ export const editButton = css`
 `
 
 export const previewFrame = css`
-	flex: 1;
-	min-height: 8rem;
-	overflow: hidden;
+	width: 100%;
+	overflow: visible;
 	pointer-events: none;
-	border: 1px solid #dee2e6;
+	border: 1px solid light-dark(${ vars.colors.gray[6] }, ${ vars.colors.gray[5] });
 	border-radius: ${ vars.radius.md };
 	background-color: #ffffff;
 	color: #000000;
 	color-scheme: light;
-	padding: ${ vars.spacing.sm };
+	padding: ${ vars.spacing.md };
 `
 
 export const previewContent = css`

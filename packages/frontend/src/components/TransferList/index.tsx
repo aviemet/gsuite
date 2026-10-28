@@ -3,12 +3,15 @@ import { IconArrowLeft, IconArrowRight } from "@tabler/icons-react"
 import clsx from "clsx"
 import { type ChangeEvent, type ReactNode, useId, useState } from "react"
 
+import {
+	nextTransferListValueAfterAdd,
+	nextTransferListValueAfterRemove,
+	partitionTransferListOptions,
+	type TransferListOption,
+} from "./partitionTransferListOptions"
 import * as classes from "./TransferList.css"
 
-export interface TransferListOption {
-	value: string
-	label: string
-}
+export type { TransferListOption }
 
 export interface TransferListProps {
 	data: TransferListOption[]
@@ -36,8 +39,10 @@ interface TransferListItemProps {
 function TransferListItem({ option, side, onMove }: TransferListItemProps) {
 	const DirectionIcon = side === "choices" ? IconArrowRight : IconArrowLeft
 	const actionVerb = side === "choices" ? "Add" : "Remove"
+	const isDisabled = side === "choices" && option.disabled === true
 
 	function handleClick() {
+		if(isDisabled) return
 		onMove(option.value)
 	}
 
@@ -51,6 +56,8 @@ function TransferListItem({ option, side, onMove }: TransferListItemProps) {
 		<UnstyledButton
 			type="button"
 			className={ clsx(classes.item) }
+			data-disabled={ isDisabled }
+			disabled={ isDisabled }
 			aria-label={ `${ actionVerb } ${ option.label }` }
 			onClick={ handleClick }
 		>
@@ -58,7 +65,12 @@ function TransferListItem({ option, side, onMove }: TransferListItemProps) {
 			<Text component="span" size="sm" truncate className={ clsx(classes.itemLabel) }>
 				{ option.label }
 			</Text>
-			{ side === "choices" && action }
+			{ isDisabled && option.disabledReason && (
+				<Text component="span" size="xs" truncate className={ clsx(classes.itemReason) }>
+					{ option.disabledReason }
+				</Text>
+			) }
+			{ side === "choices" && !isDisabled && action }
 		</UnstyledButton>
 	)
 }
@@ -108,7 +120,7 @@ function TransferListSidePanel({
 
 	const items = filteredOptions.map((option) => (
 		<TransferListItem
-			key={ option.value }
+			key={ `${ side }-${ option.value }` }
 			option={ option }
 			side={ side }
 			onMove={ onMove }
@@ -159,16 +171,6 @@ function TransferListSidePanel({
 	)
 }
 
-function partitionOptions(data: TransferListOption[], value: string[]) {
-	const selectedValueSet = new Set(value)
-	const available = data.filter((option) => !selectedValueSet.has(option.value))
-	const selected = value.map((selectedValue) => {
-		const match = data.find((option) => option.value === selectedValue)
-		return match ?? { value: selectedValue, label: selectedValue }
-	})
-	return { available, selected }
-}
-
 function clearAllAriaLabel(label: ReactNode, clearLabel: string) {
 	if(typeof label === "string" && label.trim().length > 0) {
 		return `${ clearLabel } ${ label.trim().toLowerCase() }`
@@ -190,16 +192,17 @@ export function TransferList({
 	chosenSearchLabel = "Search chosen",
 	clearLabel = "Clear all",
 }: TransferListProps) {
-	const { available, selected } = partitionOptions(data, value)
+	const { available, selected } = partitionTransferListOptions(data, value)
 	const clearAriaLabel = clearAllAriaLabel(label, clearLabel)
 
 	function handleAdd(optionValue: string) {
-		if(value.includes(optionValue)) return
-		onChange([...value, optionValue])
+		const nextValue = nextTransferListValueAfterAdd(value, optionValue, data)
+		if(!nextValue) return
+		onChange(nextValue)
 	}
 
 	function handleRemove(optionValue: string) {
-		onChange(value.filter((item) => item !== optionValue))
+		onChange(nextTransferListValueAfterRemove(value, optionValue))
 	}
 
 	function handleClear() {
@@ -208,7 +211,11 @@ export function TransferList({
 	}
 
 	return (
-		<Input.Wrapper label={ label } error={ error }>
+		<Input.Wrapper
+			label={ label }
+			error={ error }
+			classNames={ { label: classes.fieldLabel } }
+		>
 			<div className={ clsx(classes.root) }>
 				<TransferListSidePanel
 					side="choices"

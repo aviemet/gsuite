@@ -1,4 +1,5 @@
 import {
+	ACCESS_COLLECTION,
 	type CustomerRecord,
 	CUSTOMERS_COLLECTION,
 	type DirectoryAccount,
@@ -71,6 +72,9 @@ export async function connectWorkspace(
 
 	const nowIso = (dependencies.now?.() ?? new Date()).toISOString()
 	const customerId = dependencies.createId?.() ?? crypto.randomUUID()
+	const email = (user.email ?? "").toLowerCase()
+	if(!email) throw new HttpError("Signed-in account has no email", 400)
+
 	const customer: CustomerRecord = {
 		id: customerId,
 		primaryDomain: account.primaryDomain,
@@ -81,13 +85,20 @@ export async function connectWorkspace(
 	const membership: MembershipRecord = {
 		uid: user.uid,
 		customerId,
-		role: membershipRoles.owner,
-		email: (user.email ?? "").toLowerCase(),
+		role: membershipRoles.superAdmin,
+		email,
 		createdAt: nowIso,
 	}
 	const batch = db.batch()
 	batch.set(db.collection(CUSTOMERS_COLLECTION).doc(customerId), customer)
 	batch.set(db.collection(MEMBERSHIPS_COLLECTION).doc(user.uid), membership)
+	batch.set(db.collection(ACCESS_COLLECTION).doc(email), {
+		email,
+		customerId,
+		role: membershipRoles.superAdmin,
+		createdAt: nowIso,
+		uid: user.uid,
+	})
 	await batch.commit()
 	return customer
 }
@@ -101,8 +112,8 @@ export async function setWorkspaceAdmin(
 		now?: () => Date
 	},
 ): Promise<CustomerRecord> {
-	if(member.role !== membershipRoles.owner) {
-		throw new HttpError("Owner access required", 403)
+	if(member.role !== membershipRoles.superAdmin) {
+		throw new HttpError("Super admin access required", 403)
 	}
 	const customer = await loadCustomer(db, member.customerId)
 	if(!customer) throw new HttpError("Customer not found", 404)

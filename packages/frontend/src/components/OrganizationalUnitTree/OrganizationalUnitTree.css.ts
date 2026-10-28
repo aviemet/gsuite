@@ -4,14 +4,14 @@ import { vars } from "@/frontend/lib/theme"
 
 export const root = css`
 	width: 100%;
+`
 
-	@media (min-width: 62em) {
-		width: 50%;
-	}
+export const fieldLabel = css`
+	margin-bottom: ${ vars.spacing.sm };
 `
 
 export const panel = css`
-	border: 1px solid light-dark(${ vars.colors.gray[6] }, ${ vars.colors.dark[1] });
+	border: 1px solid light-dark(${ vars.colors.gray[3] }, ${ vars.colors.dark[4] });
 	border-radius: ${ vars.radius.md };
 	background: light-dark(${ vars.colors.white }, ${ vars.colors.dark[7] });
 	overflow: hidden;
@@ -53,6 +53,16 @@ export const node = css`
 	&[data-checked="true"] {
 		background: light-dark(${ vars.colors.harbor[0] }, ${ vars.colors.harbor[9] });
 		color: light-dark(${ vars.colors.harbor[8] }, ${ vars.colors.harbor[2] });
+	}
+
+	&[data-disabled="true"] {
+		cursor: not-allowed;
+		opacity: 0.55;
+		color: light-dark(${ vars.colors.gray[6] }, ${ vars.colors.dark[1] });
+	}
+
+	&[data-disabled="true"]:hover {
+		background: transparent;
 	}
 `
 
@@ -96,6 +106,13 @@ export const label = css`
 	min-width: 0;
 	font-size: ${ vars.fontSizes.sm };
 	line-height: 1.4;
+`
+
+export const disabledReason = css`
+	flex-shrink: 0;
+	max-width: 40%;
+	font-size: ${ vars.fontSizes.xs };
+	color: light-dark(${ vars.colors.gray[6] }, ${ vars.colors.dark[1] });
 `
 
 export const checkIcon = css`

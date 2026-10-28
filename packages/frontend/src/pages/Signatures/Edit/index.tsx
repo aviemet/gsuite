@@ -25,6 +25,7 @@ export function SignatureEditPage() {
 		try {
 			await saveAndDeploySignature(values, isEdit ? id : undefined)
 			await queryClient.invalidateQueries({ queryKey: ["templates"] })
+			await queryClient.invalidateQueries({ queryKey: ["templateAssignments"] })
 			notifications.show({
 				color: "green",
 				message: "Signature saved and queued for deploy",

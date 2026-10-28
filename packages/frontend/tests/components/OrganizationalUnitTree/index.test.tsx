@@ -17,7 +17,11 @@ const data = buildOrganizationalUnitTree([
 	{ path: "/Sales", name: "Sales" },
 ])
 
-function renderTree(value: string[] = [], onChange = vi.fn()) {
+function renderTree(
+	value: string[] = [],
+	onChange = vi.fn(),
+	disabledPaths?: ReadonlyMap<string, string>,
+) {
 	render(
 		<MantineProvider>
 			<OrganizationalUnitTree
@@ -25,6 +29,7 @@ function renderTree(value: string[] = [], onChange = vi.fn()) {
 				data={ data }
 				value={ value }
 				onChange={ onChange }
+				disabledPaths={ disabledPaths }
 			/>
 		</MantineProvider>,
 	)
@@ -85,6 +90,19 @@ describe("OrganizationalUnitTree", () => {
 		await user.click(screen.getByRole("button", { name: "Collapse Engineering" }))
 
 		expect(screen.queryByText("Platform")).not.toBeInTheDocument()
+		expect(onChange).not.toHaveBeenCalled()
+	})
+
+	it("does not select a disabled organizational unit", async () => {
+		const user = userEvent.setup()
+		const onChange = renderTree(
+			[],
+			vi.fn(),
+			new Map([["/Engineering", "Used by Engineering Sig"]]),
+		)
+
+		expect(screen.getByText("Used by Engineering Sig")).toBeInTheDocument()
+		await user.click(screen.getByText("Engineering"))
 		expect(onChange).not.toHaveBeenCalled()
 	})
 })

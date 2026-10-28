@@ -6,6 +6,7 @@ export function resolveFirestoreDatabaseId(isEmulator: boolean): string {
 }
 
 export interface FirebaseProjectEnvironment {
+	[key: string]: string | undefined
 	GCLOUD_PROJECT?: string
 	FIREBASE_PROJECT_ID?: string
 	VITE_FIREBASE_PROJECT_ID?: string

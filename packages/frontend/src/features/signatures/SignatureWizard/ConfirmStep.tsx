@@ -80,7 +80,7 @@ export function ConfirmStep({ values, templates, directory }: ConfirmStepProps) 
 						{ values.isDefault
 							? (
 								<Badge variant="light" color="blue">
-									Default — anyone not otherwise matched
+									Default — anyone not matched by a person, group, or OU
 								</Badge>
 							)
 							: (
@@ -109,6 +109,9 @@ export function ConfirmStep({ values, templates, directory }: ConfirmStepProps) 
 									{ peopleLabels.length === 0 && groupLabels.length === 0 && organizationalUnitLabels.length === 0 && (
 										<Text c="dimmed">No targets selected</Text>
 									) }
+									<Text size="xs" c="dimmed">
+										Person overrides group, which overrides OU. Each target can only be claimed by one template.
+									</Text>
 								</Stack>
 							) }
 					</SummaryRow>

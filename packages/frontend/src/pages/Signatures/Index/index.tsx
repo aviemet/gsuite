@@ -7,18 +7,37 @@ import { useMemo, useState } from "react"
 import { Page } from "@/frontend/components/Page"
 import { SignatureGrid } from "@/frontend/features/signatures/SignatureGrid"
 import { SignaturesTable } from "@/frontend/features/signatures/SignaturesTable"
-import { useTemplatesQuery } from "@/frontend/queries/templates"
+import { summarizeTemplateAssignments } from "@/frontend/features/signatures/summarizeTemplateAssignments"
+import { useDirectoryQuery } from "@/frontend/queries/directory"
+import { useTemplateAssignmentsQuery, useTemplatesQuery } from "@/frontend/queries/templates"
 
 type StatusFilter = "active" | "inactive" | null
 
 export function SignaturesListPage() {
 	const { data: templates = [], isLoading, error } = useTemplatesQuery()
+	const { data: assignments = [] } = useTemplateAssignmentsQuery()
+	const { data: directory } = useDirectoryQuery()
 	const [viewMode, setViewMode] = useLocalStorage<"table" | "grid">({
 		key: "signatures-view-mode",
 		defaultValue: "grid",
 	})
 	const [searchQuery, setSearchQuery] = useState("")
 	const [statusFilter, setStatusFilter] = useState<StatusFilter>(null)
+
+	const assignmentSummaries = useMemo(() => {
+		const directoryLookup = {
+			users: directory?.users,
+			groups: directory?.groups,
+			organizationalUnits: directory?.organizationalUnits,
+		}
+		const summaries = new Map(
+			templates.map((template) => [
+				template.id,
+				summarizeTemplateAssignments(template, assignments, directoryLookup),
+			]),
+		)
+		return summaries
+	}, [templates, assignments, directory])
 
 	const filteredTemplates = useMemo(() => {
 		const normalizedQuery = searchQuery.trim().toLowerCase()
@@ -36,7 +55,7 @@ export function SignaturesListPage() {
 	if(error) {
 		return (
 			<Page title="Signatures">
-				<Container>
+				<Container size="xl">
 					<Text c="red">Error loading signatures: { error.message }</Text>
 				</Container>
 			</Page>
@@ -45,7 +64,7 @@ export function SignaturesListPage() {
 
 	return (
 		<Page title="Signatures">
-			<Container>
+			<Container size="xl">
 				<Group justify="space-between" mb="md">
 					<Group>
 						<TextInput
@@ -117,10 +136,18 @@ export function SignaturesListPage() {
 					)
 					: viewMode === "table"
 						? (
-							<SignaturesTable templates={ filteredTemplates } loading={ isLoading } />
+							<SignaturesTable
+								templates={ filteredTemplates }
+								assignmentSummaries={ assignmentSummaries }
+								loading={ isLoading }
+							/>
 						)
 						: (
-							<SignatureGrid templates={ filteredTemplates } loading={ isLoading } />
+							<SignatureGrid
+								templates={ filteredTemplates }
+								assignmentSummaries={ assignmentSummaries }
+								loading={ isLoading }
+							/>
 						) }
 			</Container>
 		</Page>

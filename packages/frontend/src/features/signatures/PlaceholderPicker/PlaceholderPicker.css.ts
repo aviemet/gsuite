@@ -5,7 +5,7 @@ import { vars } from "@/frontend/lib/theme"
 export const panel = css`
 	border: 1px solid light-dark(${ vars.colors.gray[6] }, ${ vars.colors.dark[1] });
 	background: light-dark(${ vars.colors.white }, ${ vars.colors.dark[6] });
-	box-shadow: 0 1px 2px rgba(22, 40, 69, 0.05);
+	box-shadow: 0 1px 3px rgba(22, 40, 69, 0.08);
 `
 
 export const heading = css`

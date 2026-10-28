@@ -1,6 +1,7 @@
 import { formatHtmlWithDirectives } from "@/frontend/lib"
-import { Template } from "@/frontend/types/firebase"
-import { groupIdFromAssignedGroup } from "@/shared/directoryFixtures"
+import { type Template, type TemplateAssignment } from "@/frontend/types/firebase"
+
+import { assignmentTargetsForTemplate } from "./claimedTargets"
 
 export const SETUP_SOURCES = ["blank", "template", "account"] as const
 
@@ -31,8 +32,13 @@ export function isSetupSource(value: string): value is SetupSource {
 	return SETUP_SOURCES.some((source) => source === value)
 }
 
-export function getInitialWizardValues(template?: Template): SignatureWizardValues {
-	const assignedGroupId = groupIdFromAssignedGroup(template?.assignedGroup)
+export function getInitialWizardValues(
+	template?: Template,
+	assignments: readonly TemplateAssignment[] = [],
+): SignatureWizardValues {
+	const targets = template
+		? assignmentTargetsForTemplate(assignments, template.id)
+		: { userEmails: [], groupIds: [], organizationalUnitPaths: [] }
 
 	return {
 		setupSource: template ? "template" : "blank",
@@ -40,10 +46,10 @@ export function getInitialWizardValues(template?: Template): SignatureWizardValu
 		sourceAccountEmail: null,
 		name: template?.name ?? "",
 		content: formatHtmlWithDirectives(template?.content ?? ""),
-		isDefault: false,
-		userEmails: [],
-		groupIds: assignedGroupId ? [assignedGroupId] : [],
-		organizationalUnitPaths: [],
+		isDefault: template?.isDefault === true,
+		userEmails: targets.userEmails,
+		groupIds: targets.groupIds,
+		organizationalUnitPaths: targets.organizationalUnitPaths,
 		isScheduled: template?.isScheduled === true,
 	}
 }
