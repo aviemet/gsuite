@@ -2,10 +2,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 import { fetchAuthorized } from "@/frontend/lib/fetchAuthorized"
 import {
+	type AccessRecord,
 	type ApiStatusResult,
-	type CustomerInvite,
 	type CustomerRecord,
 	type MembershipRecord,
+	type MembershipRole,
 } from "@/shared/workspace"
 
 export interface WorkspaceSession {
@@ -13,8 +14,7 @@ export interface WorkspaceSession {
 	scopes: readonly string[]
 	customer: CustomerRecord | null
 	membership: MembershipRecord | null
-	members: MembershipRecord[]
-	invites: CustomerInvite[]
+	access: AccessRecord[]
 }
 
 function hasKey(value: object, key: string): boolean {
@@ -57,19 +57,15 @@ export async function fetchWorkspace(): Promise<WorkspaceSession> {
 		: []
 	const customer = hasKey(payload, "customer") ? Reflect.get(payload, "customer") : null
 	const membership = hasKey(payload, "membership") ? Reflect.get(payload, "membership") : null
-	const members = hasKey(payload, "members") && Array.isArray(Reflect.get(payload, "members"))
-		? Reflect.get(payload, "members") as MembershipRecord[]
-		: []
-	const invites = hasKey(payload, "invites") && Array.isArray(Reflect.get(payload, "invites"))
-		? Reflect.get(payload, "invites") as CustomerInvite[]
+	const access = hasKey(payload, "access") && Array.isArray(Reflect.get(payload, "access"))
+		? Reflect.get(payload, "access") as AccessRecord[]
 		: []
 	return {
 		clientId,
 		scopes,
 		customer: customer && typeof customer === "object" ? customer as CustomerRecord : null,
 		membership: membership && typeof membership === "object" ? membership as MembershipRecord : null,
-		members,
-		invites,
+		access,
 	}
 }
 
@@ -108,24 +104,17 @@ export function useSetWorkspaceAdmin() {
 	)
 }
 
-export function useInviteMember() {
-	return useWorkspaceMutation<{ email: string }, CustomerInvite>(
-		"/api/workspace/invites",
-		"Failed to invite member",
+export function useSetAccess() {
+	return useWorkspaceMutation<{ email: string, role: MembershipRole }, AccessRecord>(
+		"/api/workspace/access",
+		"Failed to update access",
 	)
 }
 
-export function useRemoveMember() {
-	return useWorkspaceMutation<{ uid: string }, { ok: true }>(
-		"/api/workspace/members/remove",
-		"Failed to remove member",
-	)
-}
-
-export function useAcceptInvite() {
-	return useWorkspaceMutation<Record<string, never>, MembershipRecord>(
-		"/api/workspace/invites/accept",
-		"Invite not found",
+export function useRemoveAccess() {
+	return useWorkspaceMutation<{ email: string }, { ok: true }>(
+		"/api/workspace/access/remove",
+		"Failed to remove access",
 	)
 }
 

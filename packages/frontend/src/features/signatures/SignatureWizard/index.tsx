@@ -11,10 +11,11 @@ import { useState } from "react"
 
 import { SignatureTemplateForm } from "@/frontend/features/signatures/SignatureTemplateForm"
 import { formatHtmlWithDirectives } from "@/frontend/lib"
-import { useDirectoryQuery } from "@/frontend/queries/directory"
-import { useTemplatesQuery } from "@/frontend/queries/templates"
-import { Template } from "@/frontend/types/firebase"
+import { type DirectorySnapshot, useDirectoryQuery } from "@/frontend/queries/directory"
+import { useTemplateAssignmentsQuery, useTemplatesQuery } from "@/frontend/queries/templates"
+import { type Template, type TemplateAssignment } from "@/frontend/types/firebase"
 
+import { buildClaimedTargets } from "./claimedTargets"
 import { ConfirmStep } from "./ConfirmStep"
 import { SetupStep } from "./SetupStep"
 import * as classes from "./SignatureWizard.css"
@@ -32,24 +33,76 @@ interface SignatureWizardProps {
 	isSubmitting?: boolean
 }
 
+interface SignatureWizardLoadedProps extends SignatureWizardProps {
+	templates: Template[]
+	assignments: TemplateAssignment[]
+	directory: DirectorySnapshot
+}
+
 export function SignatureWizard({
 	template,
 	onSubmit,
 	onCancel,
 	isSubmitting = false,
 }: SignatureWizardProps) {
-	const isNarrow = useMediaQuery("(max-width: 48em)")
 	const { data: templates = [] } = useTemplatesQuery()
+	const {
+		data: assignments = [],
+		isLoading: isAssignmentsLoading,
+	} = useTemplateAssignmentsQuery()
 	const {
 		data: directory,
 		isLoading: isDirectoryLoading,
 		error: directoryError,
 	} = useDirectoryQuery()
+
+	if(isDirectoryLoading || (template && isAssignmentsLoading)) {
+		return (
+			<Center mih="12rem">
+				<Loader />
+			</Center>
+		)
+	}
+
+	if(directoryError || !directory) {
+		return (
+			<Alert color="red" title="Directory unavailable">
+				{ directoryError instanceof Error
+					? directoryError.message
+					: "Failed to load Workspace directory" }
+			</Alert>
+		)
+	}
+
+	return (
+		<SignatureWizardLoaded
+			template={ template }
+			templates={ templates }
+			assignments={ assignments }
+			directory={ directory }
+			onSubmit={ onSubmit }
+			onCancel={ onCancel }
+			isSubmitting={ isSubmitting }
+		/>
+	)
+}
+
+function SignatureWizardLoaded({
+	template,
+	templates,
+	assignments,
+	directory,
+	onSubmit,
+	onCancel,
+	isSubmitting = false,
+}: SignatureWizardLoadedProps) {
+	const isNarrow = useMediaQuery("(max-width: 48em)")
 	const form = useForm<SignatureWizardValues>({
-		initialValues: getInitialWizardValues(template),
+		initialValues: getInitialWizardValues(template, assignments),
 	})
 	const [activeStep, setActiveStep] = useState(template ? 1 : 0)
 	const [highestStepVisited, setHighestStepVisited] = useState(template ? 1 : 0)
+	const claimedTargets = buildClaimedTargets(assignments, templates, template?.id)
 
 	function hasTargetSelection(values: SignatureWizardValues) {
 		return values.userEmails.length > 0
@@ -144,24 +197,6 @@ export function SignatureWizard({
 	const nameError = typeof form.errors.name === "string" ? form.errors.name : undefined
 	const contentError = typeof form.errors.content === "string" ? form.errors.content : undefined
 
-	if(isDirectoryLoading) {
-		return (
-			<Center mih="12rem">
-				<Loader />
-			</Center>
-		)
-	}
-
-	if(directoryError || !directory) {
-		return (
-			<Alert color="red" title="Directory unavailable">
-				{ directoryError instanceof Error
-					? directoryError.message
-					: "Failed to load Workspace directory" }
-			</Alert>
-		)
-	}
-
 	return (
 		<Stack gap="xl">
 			<Stepper
@@ -201,7 +236,11 @@ export function SignatureWizard({
 					icon={ <IconUsers size={ 18 } /> }
 					allowStepSelect={ shouldAllowSelectStep(2) }
 				>
-					<TargetsStep form={ form } directory={ directory } />
+					<TargetsStep
+						form={ form }
+						directory={ directory }
+						claimedTargets={ claimedTargets }
+					/>
 				</Stepper.Step>
 				<Stepper.Step
 					label="Confirm"

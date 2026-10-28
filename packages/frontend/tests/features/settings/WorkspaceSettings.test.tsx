@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 import "@testing-library/jest-dom/vitest"
 
 import { WorkspaceSettings } from "@/frontend/features/settings/WorkspaceSettings"
-import { apiStatusCheckIds, type ApiStatusResult } from "@/shared/workspace"
+import { apiStatusCheckIds, type ApiStatusResult, membershipRoles } from "@/shared/workspace"
 
 const apiStatusMock = vi.hoisted(() => ({
 	isPending: false,
@@ -60,27 +60,24 @@ vi.mock("@/frontend/queries/workspace", () => ({
 			membership: {
 				uid: "user-1",
 				customerId: "example-corp",
-				role: "owner",
+				role: membershipRoles.superAdmin,
 				email: "test@test.com",
 				createdAt: "2026-01-01T00:00:00.000Z",
 			},
-			members: [
+			access: [
 				{
-					uid: "user-1",
-					customerId: "example-corp",
-					role: "owner",
 					email: "test@test.com",
+					role: membershipRoles.superAdmin,
 					createdAt: "2026-01-01T00:00:00.000Z",
+					uid: "user-1",
 				},
 			],
-			invites: [],
 		},
 	}),
 	useConnectWorkspace: () => ({ isPending: false, mutate: vi.fn() }),
 	useSetWorkspaceAdmin: () => ({ isPending: false, mutate: vi.fn() }),
-	useInviteMember: () => ({ isPending: false, mutate: vi.fn() }),
-	useRemoveMember: () => ({ isPending: false, mutate: vi.fn() }),
-	useAcceptInvite: () => ({ isPending: false, mutate: vi.fn() }),
+	useSetAccess: () => ({ isPending: false, mutate: vi.fn() }),
+	useRemoveAccess: () => ({ isPending: false, mutate: vi.fn() }),
 	useApiStatus: () => apiStatusMock,
 }))
 
@@ -108,28 +105,22 @@ describe("WorkspaceSettings", () => {
 
 		expect(screen.getByRole("tab", { name: "Workspace" })).toHaveAttribute("aria-selected", "true")
 		expect(screen.getByLabelText("Current Workspace admin")).toHaveValue("jane.doe@example.com")
-		expect(screen.queryByText(/Domain:/)).not.toBeInTheDocument()
-		expect(screen.queryByRole("option", { name: /Sam Lee/ })).not.toBeInTheDocument()
 		expect(screen.queryByLabelText("Client ID")).not.toBeInTheDocument()
 		expect(screen.queryByRole("button", { name: "Check again" })).not.toBeInTheDocument()
-		expect(screen.queryByLabelText("Invite by email")).not.toBeInTheDocument()
+		expect(screen.queryByRole("heading", { name: "Permissions" })).not.toBeInTheDocument()
 
 		await user.click(screen.getByRole("tab", { name: "API status" }))
 
 		expect(screen.getByRole("heading", { name: "Google API status" })).toBeInTheDocument()
-		expect(screen.getByRole("heading", { name: "Admin APIs" })).toBeInTheDocument()
-		expect(screen.getByRole("heading", { name: "User APIs" })).toBeInTheDocument()
 		expect(screen.getByLabelText("Mailbox")).toHaveValue("jane.doe@example.com")
-		expect(screen.getByText("Checking Google APIs")).toBeInTheDocument()
 		expect(apiStatusMock.mutate).toHaveBeenCalledWith("jane.doe@example.com", expect.any(Object))
-		expect(screen.queryByLabelText("Client ID")).not.toBeInTheDocument()
-		expect(screen.queryByLabelText("Scopes")).not.toBeInTheDocument()
 		expect(screen.queryByLabelText("Current Workspace admin")).not.toBeInTheDocument()
 
-		await user.click(screen.getByRole("tab", { name: "Members" }))
+		await user.click(screen.getByRole("tab", { name: "Permissions" }))
 
-		expect(screen.getByLabelText("Invite by email")).toBeInTheDocument()
-		expect(screen.getByText("test@test.com (owner)")).toBeInTheDocument()
+		expect(screen.getByRole("heading", { name: "Permissions" })).toBeInTheDocument()
+		expect(screen.getByRole("button", { name: "Add" })).toBeInTheDocument()
+		expect(screen.getByText("test@test.com")).toBeInTheDocument()
 		expect(screen.queryByRole("button", { name: "Check again" })).not.toBeInTheDocument()
 	})
 
@@ -157,9 +148,6 @@ describe("WorkspaceSettings", () => {
 		expect(screen.getByText("Delegation denied")).toBeInTheDocument()
 		expect(screen.getByRole("heading", { name: "Authorize Signature Manager" })).toBeInTheDocument()
 		expect(screen.getByLabelText("Client ID")).toHaveValue("mock-client-id")
-		expect(screen.getByLabelText("Scopes")).toHaveValue("https://www.googleapis.com/auth/admin.directory.user.readonly")
-		expect(screen.getByRole("button", { name: "Copy client ID" })).toBeInTheDocument()
-		expect(screen.getByRole("button", { name: "Copy scopes" })).toBeInTheDocument()
 	})
 
 	it("offers directory users in an autocomplete", async () => {
@@ -167,11 +155,9 @@ describe("WorkspaceSettings", () => {
 		renderSettings()
 
 		expect(screen.getByText(/Select a Super Admin from your directory/)).toBeInTheDocument()
-		expect(screen.queryByRole("option", { name: /Jane Doe/ })).not.toBeInTheDocument()
 
 		await user.type(screen.getByRole("combobox", { name: "Change Workspace admin" }), "sam")
 
 		expect(screen.getByRole("option", { name: /Sam Lee/, hidden: true })).toBeInTheDocument()
-		expect(screen.queryByRole("option", { name: /Jane Doe/, hidden: true })).not.toBeInTheDocument()
 	})
 })

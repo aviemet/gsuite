@@ -84,5 +84,5 @@ export const skipLink = css`
 `
 
 export const main = css`
-	background: light-dark(#e4ebf4, ${ vars.colors.dark[8] });
+	background: light-dark(${ vars.colors.white }, ${ vars.colors.dark[8] });
 `

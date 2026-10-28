@@ -2,11 +2,10 @@ import { directoryHandler } from "./directoryHandler"
 import { type ApiHandler, type ApiRouteDefinition, ok } from "./http"
 import { saveAndDeployHandler } from "./saveAndDeployHandler"
 import {
-	acceptInviteHandler,
 	apiStatusHandler,
 	connectWorkspaceHandler,
-	inviteMemberHandler,
-	removeMemberHandler,
+	removeAccessHandler,
+	setAccessHandler,
 	setWorkspaceAdminHandler,
 	workspaceSessionHandler,
 } from "./workspace/handlers"
@@ -21,7 +20,6 @@ export const apiRoutes: ApiRouteDefinition[] = [
 	{ method: "POST", path: "/api/workspace/connect", handler: connectWorkspaceHandler },
 	{ method: "POST", path: "/api/workspace/admin", handler: setWorkspaceAdminHandler },
 	{ method: "POST", path: "/api/workspace/api-status", handler: apiStatusHandler },
-	{ method: "POST", path: "/api/workspace/invites", handler: inviteMemberHandler },
-	{ method: "POST", path: "/api/workspace/invites/accept", handler: acceptInviteHandler },
-	{ method: "POST", path: "/api/workspace/members/remove", handler: removeMemberHandler },
+	{ method: "POST", path: "/api/workspace/access", handler: setAccessHandler },
+	{ method: "POST", path: "/api/workspace/access/remove", handler: removeAccessHandler },
 ]

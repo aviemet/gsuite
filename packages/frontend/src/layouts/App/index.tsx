@@ -5,6 +5,7 @@ import { Link, Outlet } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
 
 import { PAGE_TITLE_PORTAL_ID } from "@/frontend/components/Page"
+import { RequireWorkspaceConnection } from "@/frontend/components/RequireWorkspaceConnection"
 import { UserMenu } from "@/frontend/components/UserMenu"
 import { router } from "@/frontend/routes"
 
@@ -42,7 +43,11 @@ export function AppLayout() {
 			} }
 			padding="md"
 		>
+
+			<RequireWorkspaceConnection />
+
 			<a className={ classes.skipLink } href="#main-content">Skip to content</a>
+
 			<AppShell.Header className={ classes.header }>
 				<Group h="100%" px="sm" justify="space-between" wrap="nowrap">
 					<Group wrap="nowrap">

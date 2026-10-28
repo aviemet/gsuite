@@ -84,7 +84,7 @@ alwaysApply: false
 - Rely on Mantine’s built-in accessibility.
 - Use semantic HTML, accurate ARIA where Mantine does not already provide it, and a logical heading order.
 - Interactive elements must be keyboard reachable, with visible focus.
-- Keep text and UI colors at an accessible contrast.
+- Keep text and UI colors at an accessible contrast. Panel and card borders against the page need high contrast too (light mode: gray[6] on white), so sections stay visually separable.
 - Surface errors in text, not color alone.
 
 ## UI and Styling

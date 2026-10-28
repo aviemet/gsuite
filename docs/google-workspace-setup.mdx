@@ -2,21 +2,42 @@
 
 The app signs users in with Google for access to the dashboard. Workspace API calls use a service account with domain-wide delegation. Each customer stores the primary domain and the Workspace admin email. Directory calls impersonate that admin. Signature updates impersonate each mailbox.
 
+Use the same Google Cloud project as the Firebase app (`gsuite-b63f0`).
+
 ## Google Cloud project
 
-1. Open [Google Cloud Console](https://console.cloud.google.com) and create a project for this app.
-2. Enable the Admin SDK API and the Gmail API.
-3. Create a service account.
-4. In the service account details, enable Google Workspace domain-wide delegation and copy the numeric Client ID.
-5. Create a JSON key. Store the file contents in `GOOGLE_SERVICE_ACCOUNT_JSON` in `packages/.env`. Do not commit the key.
+1. Open [Google Cloud Console](https://console.cloud.google.com) and select the Firebase project.
+2. Enable the **Admin SDK API** and the **Gmail API**.
+3. Confirm the Firebase project is on the **Blaze** plan (Billing). Cloud Functions and Cloud Tasks require it.
+4. Create a service account (IAM & Admin → Service Accounts → Create).
+5. Open the service account → Advanced settings → enable **Domain-wide delegation**. Copy the numeric **Client ID**.
+6. Keys → Add key → Create new key → JSON. Do not commit the file.
+
+## Production Functions secret
+
+Cloud Functions read the key from Secret Manager. From the repo root:
+
+```bash
+firebase functions:secrets:set GOOGLE_SERVICE_ACCOUNT_JSON --project default
+```
+
+Paste the full JSON key when prompted, then deploy Functions:
+
+```bash
+yarn deploy
+```
+
+Production sets `GMAIL_MODE=real` and `DIRECTORY_MODE=real` in the Functions entry. Local `yarn dev` keeps mock Directory/Gmail unless you override those vars and put the same JSON in `packages/.env`.
 
 ## Domain-wide delegation
+
+This project's Workspace service account is `signature-manager@gsuite-b63f0.iam.gserviceaccount.com`. In Google Cloud Console → IAM → Service Accounts → that account → Advanced settings, enable **Google Workspace Domain-wide Delegation** if it is not already on.
 
 A super admin of the customer domain authorizes the service account:
 
 1. Open the Admin console at [admin.google.com](https://admin.google.com).
 2. Go to Security → Access and data control → API controls → Domain-wide delegation.
-3. Add the service account Client ID with these scopes:
+3. Add Client ID `112775791895278687783` with these scopes:
 
 ```
 https://www.googleapis.com/auth/admin.directory.user.readonly
@@ -27,8 +48,10 @@ https://www.googleapis.com/auth/gmail.settings.basic
 
 Some Workspace editions require a second super admin to approve a new delegation client.
 
+After sign-in, open Settings → Workspace, connect with the Workspace admin email, then Settings → API status. Failed checks show the Client ID and scopes to copy.
+
 ## Workspace admin
 
-In the app, Settings → Workspace admin stores the super admin the Directory calls impersonate. Use a dedicated super admin in an organizational unit where Directory and Gmail are turned on.
+In the app, Settings → Workspace stores the super admin the Directory calls impersonate. Use a dedicated super admin in an organizational unit where Directory and Gmail are turned on.
 
 `GMAIL_MODE=mock` uses the fixture directory and does not call Google. `GMAIL_MODE=real` reads `GOOGLE_SERVICE_ACCOUNT_JSON`.

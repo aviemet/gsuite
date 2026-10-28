@@ -8,6 +8,10 @@ export const assignmentTypes = {
 
 export type AssignmentType = typeof assignmentTypes[keyof typeof assignmentTypes]
 
+export function isAssignmentType(value: string): value is AssignmentType {
+	return Object.values(assignmentTypes).some((assignmentType) => assignmentType === value)
+}
+
 export interface TemplateRecord {
 	id: string
 	name: string
@@ -15,6 +19,7 @@ export interface TemplateRecord {
 	variables: string[]
 	conditions: string[]
 	assignedGroup?: string | null
+	isDefault?: boolean
 	isScheduled?: boolean
 	createdBy: string
 	createdAt: string

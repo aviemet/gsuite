@@ -1,9 +1,11 @@
 import { Badge, Box, Button, Card, Group, Text } from "@mantine/core"
-import { IconCalendarEvent, IconPencil, IconUsers } from "@tabler/icons-react"
+import { IconCalendarEvent, IconPencil } from "@tabler/icons-react"
 import { Link, useRouter } from "@tanstack/react-router"
 import clsx from "clsx"
 
 import { HtmlPreview } from "@/frontend/components/HtmlPreview"
+import { AssignmentSummaryBadge } from "@/frontend/features/signatures/AssignmentSummaryBadge"
+import { type TemplateAssignmentSummary } from "@/frontend/features/signatures/summarizeTemplateAssignments"
 import { Template } from "@/frontend/types/firebase"
 import { safeTemplateParse } from "@/shared/parseTemplate"
 import { samplePerson } from "@/shared/person.testdata"
@@ -13,13 +15,13 @@ import * as classes from "./SignatureCard.css"
 
 interface SignatureCardProps {
 	template: Template
+	assignmentSummary: TemplateAssignmentSummary
 }
 
 const previewContext = getTemplatePreviewContext(samplePerson)
 
-export function SignatureCard({ template }: SignatureCardProps) {
+export function SignatureCard({ template, assignmentSummary }: SignatureCardProps) {
 	const router = useRouter()
-	const assignedGroup = template.assignedGroup?.trim() || "Unassigned"
 	const isScheduled = template.isScheduled === true
 	const previewHtml = safeTemplateParse(template.content, previewContext)
 
@@ -51,14 +53,7 @@ export function SignatureCard({ template }: SignatureCardProps) {
 				</Button>
 			</Group>
 			<Group gap="xs" mb="md">
-				<Badge
-					size="sm"
-					variant="light"
-					color={ assignedGroup === "Unassigned" ? "gray" : "blue" }
-					leftSection={ <IconUsers size={ 12 } /> }
-				>
-					{ assignedGroup }
-				</Badge>
+				<AssignmentSummaryBadge summary={ assignmentSummary } />
 				<Badge
 					size="sm"
 					variant="light"

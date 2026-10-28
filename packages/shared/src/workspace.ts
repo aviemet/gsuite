@@ -1,13 +1,22 @@
 export const membershipRoles = {
-	owner: "owner",
-	member: "member",
+	superAdmin: "superAdmin",
+	admin: "admin",
+	editor: "editor",
+	viewer: "viewer",
 } as const
 
 export type MembershipRole = typeof membershipRoles[keyof typeof membershipRoles]
 
+export const membershipRoleLabels: Record<MembershipRole, string> = {
+	superAdmin: "Super admin",
+	admin: "Admin",
+	editor: "Editor",
+	viewer: "View only",
+}
+
 export const CUSTOMERS_COLLECTION = "customers"
 export const MEMBERSHIPS_COLLECTION = "memberships"
-export const INVITES_COLLECTION = "invites"
+export const ACCESS_COLLECTION = "accessByEmail"
 
 export const SEED_CUSTOMER_ID = "example-corp"
 export const SEED_USER_EMAIL = "test@test.com"
@@ -45,9 +54,11 @@ export interface MembershipRecord {
 	createdAt: string
 }
 
-export interface CustomerInvite {
+export interface AccessRecord {
 	email: string
+	role: MembershipRole
 	createdAt: string
+	uid: string | null
 }
 
 export interface DirectoryAccount {
@@ -77,5 +88,29 @@ export interface ApiStatusResult {
 }
 
 export function isMembershipRole(value: unknown): value is MembershipRole {
-	return value === membershipRoles.owner || value === membershipRoles.member
+	return value === membershipRoles.superAdmin
+		|| value === membershipRoles.admin
+		|| value === membershipRoles.editor
+		|| value === membershipRoles.viewer
+}
+
+export function normalizeMembershipRole(value: unknown): MembershipRole | undefined {
+	if(isMembershipRole(value)) return value
+	if(value === "owner") return membershipRoles.superAdmin
+	if(value === "member") return membershipRoles.editor
+	return undefined
+}
+
+export function canManageAccess(role: MembershipRole): boolean {
+	return role === membershipRoles.superAdmin || role === membershipRoles.admin
+}
+
+export function canEditSignatures(role: MembershipRole): boolean {
+	return role === membershipRoles.superAdmin
+		|| role === membershipRoles.admin
+		|| role === membershipRoles.editor
+}
+
+export function canManageWorkspaceSettings(role: MembershipRole): boolean {
+	return role === membershipRoles.superAdmin
 }

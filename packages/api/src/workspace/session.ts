@@ -1,5 +1,5 @@
 import {
-	type CustomerInvite,
+	type AccessRecord,
 	type CustomerRecord,
 	type MembershipRecord,
 	workspaceScopes,
@@ -8,7 +8,7 @@ import { type Firestore } from "firebase-admin/firestore"
 
 import { type AuthenticatedUser } from "../firebase/admin"
 import { readWorkspaceClientId } from "../google/serviceAccount"
-import { listInvites, listMembers } from "./invites"
+import { ensureMembershipFromAccess, listAccess } from "./access"
 import { loadAuthorizedMember, loadCustomer, loadMembership } from "./records"
 
 export interface WorkspaceSession {
@@ -16,25 +16,23 @@ export interface WorkspaceSession {
 	scopes: readonly string[]
 	customer: CustomerRecord | null
 	membership: MembershipRecord | null
-	members: MembershipRecord[]
-	invites: CustomerInvite[]
+	access: AccessRecord[]
 }
 
 export async function loadWorkspaceSession(
 	db: Firestore,
 	user: AuthenticatedUser,
 ): Promise<WorkspaceSession> {
+	await ensureMembershipFromAccess(db, user)
 	const authorized = await loadAuthorizedMember(db, user)
 	const membership = authorized ? await loadMembership(db, user.uid) : undefined
 	const customer = authorized ? await loadCustomer(db, authorized.customerId) : undefined
-	const members = authorized ? await listMembers(db, authorized.customerId) : []
-	const invites = authorized ? await listInvites(db, authorized.customerId) : []
+	const access = authorized ? await listAccess(db, authorized.customerId) : []
 	return {
 		clientId: readWorkspaceClientId(),
 		scopes: workspaceScopes,
 		customer: customer ?? null,
 		membership: membership ?? null,
-		members,
-		invites,
+		access,
 	}
 }

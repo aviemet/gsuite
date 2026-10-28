@@ -24,7 +24,10 @@ const authErrorMessages: Record<string, string> = {
 export function getAuthErrorMessage(error: unknown): string {
 	if(error && typeof error === "object" && "code" in error && typeof error.code === "string") {
 		const message = authErrorMessages[error.code]
+
 		if(message) return message
+
+		return `Something went wrong (${error.code}). Please try again`
 	}
 
 	return "Something went wrong. Please try again"
@@ -32,17 +35,21 @@ export function getAuthErrorMessage(error: unknown): string {
 
 export function sanitizeRedirectPath(value: unknown): string {
 	if(typeof value !== "string") return "/"
+
 	if(!value.startsWith("/") || value.startsWith("//")) return "/"
+
 	return value
 }
 
 export async function signInWithEmail(email: string, password: string): Promise<User> {
 	const credential = await signInWithEmailAndPassword(getFirebaseAuth(), email, password)
+
 	return credential.user
 }
 
 export async function signInWithGoogle(): Promise<User> {
 	const credential = await signInWithPopup(getFirebaseAuth(), googleProvider)
+
 	return credential.user
 }
 

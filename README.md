@@ -49,13 +49,14 @@ Client Firebase config comes from `VITE_*` environment variables loaded for the 
 
 ## Deploy
 
-Production is Firebase Hosting plus Cloud Functions. The project must be on the Blaze plan. From the repo root, after `firebase login`:
+Production is Firebase Hosting plus Cloud Functions. The project must be on the Blaze plan. Workspace Directory/Gmail calls need the `GOOGLE_SERVICE_ACCOUNT_JSON` secret (see [docs/google-workspace-setup.mdx](docs/google-workspace-setup.mdx)). From the repo root, after `firebase login`:
 
 ```bash
+firebase functions:secrets:set GOOGLE_SERVICE_ACCOUNT_JSON --project default
 yarn deploy
 ```
 
-That builds the frontend and the functions bundle, then publishes Hosting, Cloud Functions, and the Firestore rules and indexes. Hosting serves the UI and rewrites `/api/**` to the `api` function. The rules are what allow or deny browser access to Firestore. Disconnect the GitHub repository from Vercel before relying on this deploy; Firebase does not replace that connection by itself.
+That builds the frontend and the functions bundle, then publishes Hosting, Cloud Functions, and the Firestore rules and indexes. Hosting serves the UI and rewrites `/api/**` to the `api` function. The rules are what allow or deny browser access to Firestore.
 
 ## Stack
 

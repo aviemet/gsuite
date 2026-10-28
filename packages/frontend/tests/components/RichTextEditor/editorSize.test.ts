@@ -6,6 +6,7 @@ import {
 	EDITOR_MIN_HEIGHT_PX,
 	getEditorPlugins,
 	getEditorSizeOptions,
+	getPasteRetentionOptions,
 	syncEditorOverflowScroll,
 } from "@/frontend/components/RichTextEditor/editorSize"
 
@@ -14,13 +15,21 @@ describe("editorSize", () => {
 		expect(getEditorPlugins()).toBe("link lists autoresize")
 	})
 
-	it("enables manual resize with statusbar and height bounds", () => {
+	it("enables manual resize with a bottom toolbar and height bounds", () => {
 		expect(getEditorSizeOptions()).toEqual({
-			statusbar: true,
+			statusbar: false,
 			resize: true,
 			min_height: EDITOR_MIN_HEIGHT_PX,
 			max_height: EDITOR_MAX_HEIGHT_PX,
 			autoresize_bottom_margin: 0,
+			toolbar_location: "bottom",
+		})
+	})
+
+	it("keeps all pasted inline styles on webkit browsers", () => {
+		expect(getPasteRetentionOptions()).toEqual({
+			paste_webkit_styles: "all",
+			paste_remove_styles_if_webkit: false,
 		})
 	})
 

@@ -2,9 +2,7 @@ import {
 	Box,
 	Grid,
 	Group,
-	Paper,
 	SegmentedControl,
-	Stack,
 	Text,
 	TextInput,
 	VisuallyHidden,
@@ -17,11 +15,14 @@ import { ChangeEvent, useRef, useState } from "react"
 import { HtmlEditor, type HtmlEditorHandle } from "@/frontend/components/HtmlEditor"
 import { HtmlPreview } from "@/frontend/components/HtmlPreview"
 import { RichTextEditor, type RichTextEditorHandle } from "@/frontend/components/RichTextEditor"
+import * as richTextClasses from "@/frontend/components/RichTextEditor/RichTextEditor.css"
 import { PlaceholderPicker } from "@/frontend/features/signatures/PlaceholderPicker"
 import { safeTemplateParse } from "@/shared/parseTemplate"
 import { samplePerson } from "@/shared/person.testdata"
 import { getTemplatePreviewContext } from "@/shared/templatePlaceholders"
 
+import { ComposeEditorShell } from "./ComposeEditorShell"
+import { EmailPreviewFrame } from "./EmailPreviewFrame"
 import * as classes from "./SignatureTemplateForm.css"
 
 type EditorPreviewLayout = "side-by-side" | "stacked"
@@ -137,16 +138,16 @@ export function SignatureTemplateForm({
 			</Grid.Col>
 
 			<Grid.Col span={ editorPreviewColumnSpan }>
-				<Stack>
+				<Box className={ clsx(classes.paneCard) }>
 					<Group justify="space-between" align="center" wrap="nowrap" className={ clsx(classes.paneHeader) }>
-						<Text className={ classes.paneTitle } size="sm">Signature Content</Text>
+						<Text className={ classes.paneTitle } size="sm">Editor</Text>
 						<SegmentedControl
 							size="xs"
 							value={ editorMode }
 							onChange={ handleEditorModeChange }
 							data={ [
-								{ value: "visual", label: "Visual Editor" },
-								{ value: "code", label: "Code Editor" },
+								{ value: "visual", label: "Visual" },
+								{ value: "code", label: "Code" },
 							] }
 						/>
 					</Group>
@@ -159,33 +160,36 @@ export function SignatureTemplateForm({
 							/>
 						)
 						: (
-							<RichTextEditor
-								ref={ richTextEditorRef }
-								value={ content }
-								onChange={ onContentChange }
-							/>
+							<ComposeEditorShell
+								to={ samplePerson.primaryEmail }
+								subject="Signature template preview"
+							>
+								<RichTextEditor
+									ref={ richTextEditorRef }
+									className={ richTextClasses.embedded }
+									value={ content }
+									onChange={ onContentChange }
+								/>
+							</ComposeEditorShell>
 						) }
 					{ contentError && (
 						<Text c="red" size="sm">{ contentError }</Text>
 					) }
-
-				</Stack>
+				</Box>
 			</Grid.Col>
 
 			<Grid.Col span={ editorPreviewColumnSpan }>
-				<Stack>
+				<Box className={ clsx(classes.paneCard) }>
 					<Group justify="space-between" align="center" wrap="nowrap" className={ clsx(classes.paneHeader) }>
-						<Text className={ classes.paneTitle } size="sm">
-							<span className={ classes.previewMark } aria-hidden />
-							Live Preview
-						</Text>
+						<Text className={ classes.paneTitle } size="sm">Preview</Text>
 					</Group>
-					<Box className={ classes.previewWell }>
-						<Paper className={ classes.previewSheet } radius="sm">
-							<HtmlPreview html={ previewHtml } />
-						</Paper>
-					</Box>
-				</Stack>
+					<EmailPreviewFrame
+						senderName={ samplePerson.organization }
+						senderEmail={ samplePerson.primaryEmail }
+					>
+						<HtmlPreview html={ previewHtml } />
+					</EmailPreviewFrame>
+				</Box>
 			</Grid.Col>
 
 			<Grid.Col>

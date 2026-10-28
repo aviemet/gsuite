@@ -2,11 +2,11 @@
 
 ## Workspace
 
-Each user has one membership, and that membership is the customer they can access. The customer link stores the primary domain and the Workspace admin email. Directory calls impersonate that admin. Signature updates impersonate each mailbox. The API resolves the customer from the membership because it writes with the Admin SDK.
+Each user has one membership, and that membership is the customer they can access. Site access is granted by email from the Workspace Directory as super admin, admin, editor, or viewer; signing in with that Google account links the membership. The customer link stores the primary domain and the Workspace admin email. Directory calls impersonate that admin. Signature updates impersonate each mailbox. The API resolves the customer from the membership because it writes with the Admin SDK.
 
 ## Data
 
-Wizard Save goes through the API, which writes templates and assignments in Firestore and enqueues one signature deploy. That job reads the template once and the directory once, sets each signature in-process, and writes one deploy log when it finishes. People, groups, and OUs for assignment come from the Workspace Directory API (`GET /api/directory`); local/dev uses the mock Directory client seeded with fixtures.
+Wizard Save goes through the API, which writes templates and assignments in Firestore and enqueues signature deploys. That job reads the template once and the directory once, sets each signature in-process, and writes one deploy log when it finishes. People, groups, and OUs for assignment come from the Workspace Directory API (`GET /api/directory`); local/dev uses the mock Directory client seeded with fixtures. Each person, group, or OU target id is exclusive to one template per customer. Mailbox resolution is Person, then Group, then deepest OU, then Default.
 
 ## Signatures
 

@@ -23,7 +23,10 @@ describe("getAuthErrorMessage", () => {
 	})
 
 	it("falls back for unknown errors", () => {
-		expect(getAuthErrorMessage({ code: "auth/something-new" })).toBe("Something went wrong. Please try again")
+		expect(getAuthErrorMessage({ code: "auth/something-new" })).toBe(
+			"Something went wrong (auth/something-new). Please try again",
+		)
 		expect(getAuthErrorMessage(new Error("nope"))).toBe("Something went wrong. Please try again")
 	})
 })
+

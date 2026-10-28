@@ -9,10 +9,11 @@ export interface Template {
 	variables: string[]
 	conditions: string[]
 	assignedGroup?: string | null
+	isDefault?: boolean
 	isScheduled?: boolean
 	createdBy: string
-	createdAt: Timestamp
-	updatedAt: Timestamp
+	createdAt: string | Timestamp
+	updatedAt: string | Timestamp
 	isActive: boolean
 	customerId: string
 }
@@ -32,8 +33,8 @@ export interface TemplateAssignment {
 	priority: number
 	conditions?: string[]
 	createdBy: string
-	createdAt: Timestamp
-	updatedAt: Timestamp
+	createdAt: string | Timestamp
+	updatedAt: string | Timestamp
 	isActive: boolean
 	customerId: string
 }

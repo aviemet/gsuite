@@ -1,10 +1,10 @@
 import {
 	type CustomerRecord,
 	CUSTOMERS_COLLECTION,
-	isMembershipRole,
 	type MembershipRecord,
 	type MembershipRole,
 	MEMBERSHIPS_COLLECTION,
+	normalizeMembershipRole,
 } from "@gsuite/shared"
 import { type Firestore } from "firebase-admin/firestore"
 
@@ -49,8 +49,8 @@ export function parseMembership(uid: string, value: unknown): MembershipRecord |
 	const email = readString(data, "email")
 	const createdAt = readString(data, "createdAt")
 	if(!Object.hasOwn(data, "role")) return undefined
-	const role = Reflect.get(data, "role")
-	if(!customerId || !email || !createdAt || !isMembershipRole(role)) return undefined
+	const role = normalizeMembershipRole(Reflect.get(data, "role"))
+	if(!customerId || !email || !createdAt || !role) return undefined
 	return { uid, customerId, role, email, createdAt }
 }
 

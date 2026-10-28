@@ -1,5 +1,6 @@
 import { Box } from "@mantine/core"
 import { Editor as TinyMceReactEditor } from "@tinymce/tinymce-react"
+import clsx from "clsx"
 import {
 	ReactNode,
 	type Ref,
@@ -23,8 +24,14 @@ import "tinymce/skins/ui/oxide/content.js"
 import "tinymce/skins/ui/oxide/skin.js"
 import "tinymce/themes/silver/theme.min.js"
 
-import { getEditorPlugins, getEditorSizeOptions, syncEditorOverflowScroll } from "./editorSize"
-import { normalizePastedSignatureHtml } from "./normalizePastedSignatureHtml"
+import { resolveEditorChangeEmission } from "./editorChangeEmission"
+import { getEditorPlugins, getEditorSizeOptions, getPasteRetentionOptions, syncEditorOverflowScroll } from "./editorSize"
+import {
+	type EditorSelectionBookmark,
+	insertTextAtEditorSelection,
+	readEditorSelectionBookmark,
+} from "./insertTextAtEditorSelection"
+import { preparePastedSignatureHtml } from "./preparePastedSignatureHtml"
 import * as classes from "./RichTextEditor.css"
 import { registerTextColorButton } from "./textColorButton"
 import { TextColorPopover } from "./TextColorPopover"
@@ -130,7 +137,7 @@ export function RichTextEditor({
 	const editorRef = useRef<TinyMCEEditor | null>(null)
 	const lastEmittedHtmlRef = useRef(initialHtml)
 	const skipNextChangeRef = useRef(true)
-	const bookmarkRef = useRef<ReturnType<TinyMCEEditor["selection"]["getBookmark"]> | null>(null)
+	const bookmarkRef = useRef<EditorSelectionBookmark | null>(null)
 	const onChangeRef = useRef(onChange)
 	const [editorInstance, setEditorInstance] = useState<TinyMCEEditor | null>(null)
 	const [colorPickerOpened, setColorPickerOpened] = useState(false)
@@ -141,28 +148,25 @@ export function RichTextEditor({
 	}, [onChange])
 
 	const emitChange = useCallback((editor: TinyMCEEditor) => {
-		if(skipNextChangeRef.current) {
-			skipNextChangeRef.current = false
-			lastEmittedHtmlRef.current = readPersistedHtml(editor)
-			return
+		const resolved = resolveEditorChangeEmission({
+			skipNext: skipNextChangeRef.current,
+			html: readPersistedHtml(editor),
+			lastEmittedHtml: lastEmittedHtmlRef.current,
+		})
+		skipNextChangeRef.current = resolved.skipNext
+		lastEmittedHtmlRef.current = resolved.lastEmittedHtml
+		if(resolved.emitHtml !== null) {
+			onChangeRef.current(resolved.emitHtml)
 		}
-
-		const html = readPersistedHtml(editor)
-		if(html === lastEmittedHtmlRef.current) {
-			return
-		}
-
-		lastEmittedHtmlRef.current = html
-		onChangeRef.current(html)
 	}, [])
 
 	const rememberSelection = useCallback(() => {
 		const editor = editorRef.current
-		if(!editor || editor.destroyed) {
+		if(!editor) {
 			return
 		}
 
-		bookmarkRef.current = editor.selection.getBookmark(2, true)
+		bookmarkRef.current = readEditorSelectionBookmark(editor)
 	}, [])
 
 	const restoreSelection = useCallback(() => {
@@ -206,11 +210,14 @@ export function RichTextEditor({
 				return
 			}
 
-			restoreSelection()
-			editor.insertContent(text)
+			bookmarkRef.current = insertTextAtEditorSelection(
+				editor,
+				text,
+				bookmarkRef.current,
+			)
 			emitChange(editor)
 		},
-	}), [emitChange, restoreSelection])
+	}), [emitChange])
 
 	useEffect(() => {
 		const editor = editorRef.current
@@ -247,8 +254,9 @@ export function RichTextEditor({
 		entity_encoding: "raw" as const,
 		valid_elements: "*[*]",
 		extended_valid_elements: "*[*]",
-		paste_preprocess: (_plugin: unknown, args: { content: string }) => {
-			args.content = normalizePastedSignatureHtml(args.content)
+		...getPasteRetentionOptions(),
+		paste_preprocess: (_editor: TinyMCEEditor, args: { content: string }) => {
+			args.content = preparePastedSignatureHtml(args.content)
 		},
 		setup: (editor: TinyMCEEditor) => {
 			registerTextTransformButtons(editor)
@@ -265,10 +273,15 @@ export function RichTextEditor({
 			editor.on("init", () => {
 				registerTextTransformFormats(editor)
 				scheduleOverflowSync()
+				bookmarkRef.current = readEditorSelectionBookmark(editor)
 			})
 			editor.on("NodeChange SetContent keyup ResizeEditor ResizeContent", scheduleOverflowSync)
-			editor.on("blur", () => {
-				bookmarkRef.current = editor.selection.getBookmark(2, true)
+			editor.on("NodeChange mouseup keyup", () => {
+				if(!editor.hasFocus()) {
+					return
+				}
+
+				bookmarkRef.current = readEditorSelectionBookmark(editor)
 			})
 			editor.on("input change SetContent Undo Redo", () => {
 				emitChange(editor)
@@ -277,22 +290,20 @@ export function RichTextEditor({
 	}), [emitChange])
 
 	return (
-		<Box className={ className } data-signature-rich-text-editor="">
+		<Box className={ clsx(classes.editor, className) } data-signature-rich-text-editor="">
 			{ children ?? (
 				<>
-					<Box className={ classes.editor }>
-						<TinyMceReactEditor
-							licenseKey="gpl"
-							initialValue={ initialHtml }
-							init={ initOptions }
-							onInit={ (_event, editor) => {
-								editorRef.current = editor
-								setEditorInstance(editor)
-								lastEmittedHtmlRef.current = readPersistedHtml(editor)
-								skipNextChangeRef.current = true
-							} }
-						/>
-					</Box>
+					<TinyMceReactEditor
+						licenseKey="gpl"
+						initialValue={ initialHtml }
+						init={ initOptions }
+						onInit={ (_event, editor) => {
+							editorRef.current = editor
+							setEditorInstance(editor)
+							lastEmittedHtmlRef.current = readPersistedHtml(editor)
+							skipNextChangeRef.current = false
+						} }
+					/>
 					<TextColorPopover
 						editor={ editorInstance }
 						opened={ colorPickerOpened }

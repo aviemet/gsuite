@@ -1,4 +1,9 @@
-import { membershipRoles } from "@gsuite/shared"
+import {
+	canEditSignatures,
+	canManageAccess,
+	canManageWorkspaceSettings,
+	membershipRoles,
+} from "@gsuite/shared"
 
 import { getAdminFirestore, verifyIdToken } from "../firebase/admin"
 import { HttpError } from "../http/errors"
@@ -15,8 +20,26 @@ export async function authorizeMember(
 	return member
 }
 
-export function requireOwner(member: AuthorizedMember): void {
-	if(member.role !== membershipRoles.owner) {
-		throw new HttpError("Owner access required", 403)
+export function requireAccessManager(member: AuthorizedMember): void {
+	if(!canManageAccess(member.role)) {
+		throw new HttpError("Admin access required", 403)
+	}
+}
+
+export function requireWorkspaceSettingsManager(member: AuthorizedMember): void {
+	if(!canManageWorkspaceSettings(member.role)) {
+		throw new HttpError("Super admin access required", 403)
+	}
+}
+
+export function requireSignatureEditor(member: AuthorizedMember): void {
+	if(!canEditSignatures(member.role)) {
+		throw new HttpError("Editor access required", 403)
+	}
+}
+
+export function requireSuperAdmin(member: AuthorizedMember): void {
+	if(member.role !== membershipRoles.superAdmin) {
+		throw new HttpError("Super admin access required", 403)
 	}
 }

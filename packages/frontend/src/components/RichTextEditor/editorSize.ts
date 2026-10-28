@@ -3,16 +3,24 @@ export const EDITOR_MAX_HEIGHT_PX = 720
 
 export function getEditorSizeOptions() {
 	return {
-		statusbar: true,
+		statusbar: false,
 		resize: true as const,
 		min_height: EDITOR_MIN_HEIGHT_PX,
 		max_height: EDITOR_MAX_HEIGHT_PX,
 		autoresize_bottom_margin: 0,
+		toolbar_location: "bottom" as const,
 	}
 }
 
 export function getEditorPlugins(): string {
 	return "link lists autoresize"
+}
+
+export function getPasteRetentionOptions() {
+	return {
+		paste_webkit_styles: "all" as const,
+		paste_remove_styles_if_webkit: false,
+	}
 }
 
 interface OverflowScrollEditor {

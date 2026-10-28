@@ -1,4 +1,5 @@
 import {
+	ACCESS_COLLECTION,
 	CUSTOMERS_COLLECTION,
 	membershipRoles,
 	MEMBERSHIPS_COLLECTION,
@@ -101,6 +102,7 @@ async function seedData() {
 	try {
 		const user = await seedUser()
 		const nowIso = new Date().toISOString()
+
 		await db.collection(CUSTOMERS_COLLECTION).doc(SEED_CUSTOMER_ID).set({
 			id: SEED_CUSTOMER_ID,
 			primaryDomain: SEED_PRIMARY_DOMAIN,
@@ -108,16 +110,27 @@ async function seedData() {
 			createdAt: nowIso,
 			updatedAt: nowIso,
 		})
+
 		await db.collection(MEMBERSHIPS_COLLECTION).doc(user.uid).set({
 			uid: user.uid,
 			customerId: SEED_CUSTOMER_ID,
-			role: membershipRoles.owner,
+			role: membershipRoles.superAdmin,
 			email: SEED_USER_EMAIL,
 			createdAt: nowIso,
 		})
+
+		await db.collection(ACCESS_COLLECTION).doc(SEED_USER_EMAIL).set({
+			email: SEED_USER_EMAIL,
+			customerId: SEED_CUSTOMER_ID,
+			role: membershipRoles.superAdmin,
+			createdAt: nowIso,
+			uid: user.uid,
+		})
+
 		for(const template of templates) {
 			await db.collection("templates").doc(template.id).set(template)
 		}
+
 	} catch{
 		process.exitCode = 1
 	} finally {
