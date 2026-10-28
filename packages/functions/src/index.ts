@@ -1,11 +1,13 @@
 import {
 	apiRoutes,
 	dispatchApiRequest,
+	handleScheduledDeploys,
 	handleSignatureUpdate,
 } from "@gsuite/api"
 import { type SignatureUpdateMessage } from "@gsuite/shared"
 import { defineSecret } from "firebase-functions/params"
 import { onRequest } from "firebase-functions/v2/https"
+import { onSchedule } from "firebase-functions/v2/scheduler"
 import { onTaskDispatched } from "firebase-functions/v2/tasks"
 
 const region = "us-central1"
@@ -57,4 +59,14 @@ export const updateSignature = onTaskDispatched<SignatureUpdateMessage>({
 }, async (request) => {
 	applyProductionWorkspaceEnv()
 	await handleSignatureUpdate(request.data)
+})
+
+export const redeployScheduledSignatures = onSchedule({
+	schedule: "every 24 hours",
+	region,
+	timeoutSeconds: 540,
+	secrets: [googleServiceAccountJson],
+}, async () => {
+	applyProductionWorkspaceEnv()
+	await handleScheduledDeploys()
 })

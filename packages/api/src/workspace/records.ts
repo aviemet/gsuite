@@ -60,6 +60,16 @@ export async function loadCustomer(db: Firestore, customerId: string): Promise<C
 	return parseCustomer(snapshot.id, snapshot.data())
 }
 
+export async function listCustomers(db: Firestore): Promise<CustomerRecord[]> {
+	const snapshot = await db.collection(CUSTOMERS_COLLECTION).get()
+	const customers: CustomerRecord[] = []
+	for(const document of snapshot.docs) {
+		const customer = parseCustomer(document.id, document.data())
+		if(customer) customers.push(customer)
+	}
+	return customers
+}
+
 export async function findCustomerByDomain(
 	db: Firestore,
 	primaryDomain: string,

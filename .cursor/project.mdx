@@ -6,7 +6,7 @@ Each user has one membership, and that membership is the customer they can acces
 
 ## Data
 
-Wizard Save goes through the API, which writes templates and assignments in Firestore and enqueues signature deploys. That job reads the template once and the directory once, sets each signature in-process, and writes one deploy log when it finishes. People, groups, and OUs for assignment come from the Workspace Directory API (`GET /api/directory`); local/dev uses the mock Directory client seeded with fixtures. Each person, group, or OU target id is exclusive to one template per customer. Mailbox resolution is Person, then Group, then deepest OU, then Default.
+Wizard Save goes through the API, which writes templates and assignments in Firestore and enqueues signature deploys. Templates marked for 24-hour apply are redeployed by a scheduled Function that enqueues the same deploy jobs. That job reads the template once and the directory once, sets each signature in-process, and writes one deploy log when it finishes. People, groups, and OUs for assignment come from the Workspace Directory API (`GET /api/directory`); local/dev uses the mock Directory client seeded with fixtures. Each person, group, or OU target id is exclusive to one template per customer. Mailbox resolution is Person, then Group, then deepest OU, then Default.
 
 ## Signatures
 

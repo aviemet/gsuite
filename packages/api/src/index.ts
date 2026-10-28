@@ -3,11 +3,19 @@ export { type DirectoryClient, type DirectorySnapshot } from "./directory/client
 export { getSharedMockDirectoryClient, MockDirectoryClient } from "./directory/mockClient"
 export { RealDirectoryClient } from "./directory/realClient"
 export { directoryHandler } from "./directoryHandler"
+export {
+	enqueueScheduledDeploys,
+	type EnqueueScheduledDeploysDependencies,
+	enqueueScheduledDeploysForCustomer,
+	type EnqueueScheduledDeploysResult,
+	type ScheduledCustomerDeployResult,
+} from "./enqueueScheduledDeploys"
 export { getAdminApp, getAdminAuth, getAdminFirestore, verifyIdToken } from "./firebase/admin"
 export { createGmailClient } from "./gmail"
 export { type GmailClient, type SignatureUpdate } from "./gmail/client"
 export { getSharedMockGmailClient, MockGmailClient } from "./gmail/mockClient"
 export { RealGmailClient } from "./gmail/realClient"
+export { handleScheduledDeploys } from "./handleScheduledDeploys"
 export { handleSignatureUpdate } from "./handleSignatureUpdate"
 export {
 	type ApiHandler,
