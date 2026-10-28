@@ -16,9 +16,6 @@
       "path": "./packages/shared"
     },
     {
-      "path": "./packages/firebase"
-    },
-    {
       "path": "./packages/api"
     }
   ]
