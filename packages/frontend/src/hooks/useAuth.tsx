@@ -10,7 +10,6 @@ import {
 
 import {
 	getAuthErrorMessage,
-	signInWithEmail,
 	signInWithGoogle,
 	signOutCurrentUser,
 } from "@/frontend/lib/auth"
@@ -20,7 +19,6 @@ export interface AuthState {
 	user: User | null
 	isAuthenticated: boolean
 	isLoading: boolean
-	signInWithEmail: (email: string, password: string) => Promise<User>
 	signInWithGoogle: () => Promise<User>
 	signOut: () => Promise<void>
 	getAuthErrorMessage: (error: unknown) => string
@@ -50,7 +48,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
 		user,
 		isAuthenticated: user !== null,
 		isLoading,
-		signInWithEmail,
 		signInWithGoogle,
 		signOut: signOutCurrentUser,
 		getAuthErrorMessage,

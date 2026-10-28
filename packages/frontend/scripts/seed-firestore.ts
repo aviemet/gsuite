@@ -92,7 +92,6 @@ async function seedUser() {
 	} catch{
 		return auth.createUser({
 			email: SEED_USER_EMAIL,
-			password: "password",
 			emailVerified: true,
 		})
 	}

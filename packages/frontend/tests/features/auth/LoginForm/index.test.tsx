@@ -9,12 +9,10 @@ import { LoginForm } from "@/frontend/features/auth/LoginForm"
 import { type AuthState } from "@/frontend/hooks/useAuth"
 
 const {
-	signInWithEmail,
 	signInWithGoogle,
 	invalidate,
 	push,
 } = vi.hoisted(() => ({
-	signInWithEmail: vi.fn(),
 	signInWithGoogle: vi.fn(),
 	invalidate: vi.fn(async () => undefined),
 	push: vi.fn(),
@@ -25,12 +23,11 @@ vi.mock("@/frontend/hooks/useAuth", () => ({
 		user: null,
 		isAuthenticated: false,
 		isLoading: false,
-		signInWithEmail,
 		signInWithGoogle,
 		signOut: vi.fn(),
 		getAuthErrorMessage: (error: unknown) => {
-			if(error && typeof error === "object" && "code" in error && error.code === "auth/invalid-credential") {
-				return "Invalid email or password"
+			if(error && typeof error === "object" && "code" in error && error.code === "auth/popup-closed-by-user") {
+				return "Sign-in was cancelled"
 			}
 			return "Something went wrong. Please try again"
 		},
@@ -49,7 +46,6 @@ afterEach(() => {
 })
 
 beforeEach(() => {
-	signInWithEmail.mockReset()
 	signInWithGoogle.mockReset()
 	invalidate.mockClear()
 	push.mockClear()
@@ -64,45 +60,38 @@ function renderLoginForm(redirectTo = "/signatures") {
 }
 
 describe("LoginForm", () => {
-	it("signs in with email and password then redirects", async () => {
-		const user = userEvent.setup()
-		signInWithEmail.mockResolvedValue({ uid: "1" })
+	it("shows sign-in copy and a Continue with Google button", () => {
 		renderLoginForm()
 
-		await user.type(screen.getByLabelText("Email"), "test@test.com")
-		await user.type(screen.getByLabelText("Password"), "password")
-		await user.click(screen.getByRole("button", { name: "Sign in" }))
-
-		await waitFor(() => {
-			expect(signInWithEmail).toHaveBeenCalledWith("test@test.com", "password")
-			expect(invalidate).toHaveBeenCalled()
-			expect(push).toHaveBeenCalledWith("/signatures")
-		})
+		expect(screen.getByRole("heading", { name: "Sign in" })).toBeInTheDocument()
+		expect(screen.getByText(
+			"Access Signature Manager for Gmail with your corporate Google account.",
+		)).toBeInTheDocument()
+		expect(screen.getByRole("button", { name: "Continue with Google" })).toBeInTheDocument()
 	})
 
-	it("signs in with Google", async () => {
+	it("signs in with Google then redirects", async () => {
 		const user = userEvent.setup()
 		signInWithGoogle.mockResolvedValue({ uid: "1" })
-		renderLoginForm("/")
+		renderLoginForm()
 
 		await user.click(screen.getByRole("button", { name: "Continue with Google" }))
 
 		await waitFor(() => {
 			expect(signInWithGoogle).toHaveBeenCalled()
-			expect(push).toHaveBeenCalledWith("/")
+			expect(invalidate).toHaveBeenCalled()
+			expect(push).toHaveBeenCalledWith("/signatures")
 		})
 	})
 
-	it("shows an error when email sign-in fails", async () => {
+	it("shows an error when Google sign-in fails", async () => {
 		const user = userEvent.setup()
-		signInWithEmail.mockRejectedValue({ code: "auth/invalid-credential" })
-		renderLoginForm()
+		signInWithGoogle.mockRejectedValue({ code: "auth/popup-closed-by-user" })
+		renderLoginForm("/")
 
-		await user.type(screen.getByLabelText("Email"), "test@test.com")
-		await user.type(screen.getByLabelText("Password"), "wrong")
-		await user.click(screen.getByRole("button", { name: "Sign in" }))
+		await user.click(screen.getByRole("button", { name: "Continue with Google" }))
 
-		expect(await screen.findByText("Invalid email or password")).toBeInTheDocument()
+		expect(await screen.findByText("Sign-in was cancelled")).toBeInTheDocument()
 		expect(push).not.toHaveBeenCalled()
 	})
 })
