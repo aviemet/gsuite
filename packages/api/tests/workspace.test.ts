@@ -219,7 +219,29 @@ describe("connectWorkspace", () => {
 					"sam.lee@example.com": { isAdmin: false, primaryDomain: "example.com" },
 				}),
 			},
-		)).rejects.toThrow("Workspace admin must be a super admin")
+		)).rejects.toThrow("That account is not a Workspace Super Admin")
+	})
+
+	it("explains when domain-wide delegation is missing", async () => {
+		const database = createMemoryFirestore()
+		await expect(connectWorkspace(
+			database as never,
+			{ uid: "user-1", email: "owner@example.com" },
+			"admin@example.com",
+			{
+				createDirectory: () => ({
+					async listDirectory() {
+						return { users: [], groups: [], organizationalUnits: [] }
+					},
+					async getUser() {
+						throw new Error("unauthorized_client: Client is unauthorized to retrieve access tokens using this method, or client not authorized for any of the scopes requested.")
+					},
+					async checkUsers() {},
+					async checkGroups() {},
+					async checkOrganizationalUnits() {},
+				}),
+			},
+		)).rejects.toThrow("Google has not authorized this app for your Workspace yet")
 	})
 
 	it("rejects a domain that is already connected", async () => {

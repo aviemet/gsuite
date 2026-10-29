@@ -68,7 +68,9 @@ vi.mock("@/frontend/queries/directory", () => ({
 
 vi.mock("@/frontend/queries/workspace", () => ({
 	useWorkspaceQuery: () => ({
+		isPending: false,
 		isLoading: false,
+		isError: false,
 		error: null,
 		data: {
 			clientId: "mock-client-id",
@@ -137,9 +139,12 @@ describe("WorkspaceSettings", () => {
 		renderSettings()
 
 		expect(screen.getByRole("heading", { name: "Connect Workspace" })).toBeInTheDocument()
+		expect(screen.getByRole("heading", { name: /Step 1: Authorize Suite Desk in Google Admin/ })).toBeInTheDocument()
+		expect(screen.getByRole("heading", { name: "Step 2: Connect with a Super Admin email" })).toBeInTheDocument()
 		expect(screen.getByRole("button", { name: "Connect" })).toBeInTheDocument()
 		expect(screen.getByRole("tab", { name: "Workspace" })).toHaveAttribute("aria-selected", "true")
 		expect(screen.getByLabelText("Workspace admin email")).toHaveValue("test@test.com")
+		expect(screen.getByLabelText("Client ID")).toHaveValue("mock-client-id")
 	})
 
 	it("keeps each settings section on its own tab", async () => {
@@ -189,7 +194,7 @@ describe("WorkspaceSettings", () => {
 		await user.click(screen.getByRole("tab", { name: "API status" }))
 
 		expect(screen.getByText("Delegation denied")).toBeInTheDocument()
-		expect(screen.getByRole("heading", { name: "Authorize Suite Desk" })).toBeInTheDocument()
+		expect(screen.getByRole("heading", { name: "Authorize Suite Desk in Google Admin" })).toBeInTheDocument()
 		expect(screen.getByLabelText("Client ID")).toHaveValue("mock-client-id")
 	})
 

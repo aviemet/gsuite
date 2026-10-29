@@ -6,6 +6,7 @@ import {
 	type MembershipRecord,
 	membershipRoles,
 	MEMBERSHIPS_COLLECTION,
+	WORKSPACE_DELEGATION_UNAUTHORIZED_MESSAGE,
 } from "@gsuite/shared"
 import { type Firestore } from "firebase-admin/firestore"
 
@@ -36,13 +37,20 @@ export async function readSuperAdmin(
 	}
 	try {
 		const account = await directory.getUser(normalized)
-		if(!account) throw new HttpError("Workspace user was not found", 404)
-		if(!account.isAdmin) throw new HttpError("Workspace admin must be a super admin", 403)
+		if(!account) {
+			throw new HttpError("No Workspace user was found with that email.", 404)
+		}
+		if(!account.isAdmin) {
+			throw new HttpError(
+				"That account is not a Workspace Super Admin. Enter a Super Admin email from your domain.",
+				403,
+			)
+		}
 		return account
 	} catch (error) {
 		if(error instanceof HttpError) throw error
 		if(isDelegationError(error)) {
-			throw new HttpError("Domain-wide delegation is not authorized for this user", 403)
+			throw new HttpError(WORKSPACE_DELEGATION_UNAUTHORIZED_MESSAGE, 403)
 		}
 		throw error
 	}

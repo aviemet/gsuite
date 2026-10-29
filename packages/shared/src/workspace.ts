@@ -38,6 +38,21 @@ export const directoryScopes = [
 
 export const gmailSettingsScope = workspaceScopes[3]
 
+export const WORKSPACE_DELEGATION_ADMIN_URL
+	= "https://admin.google.com/ac/owl/domainwidedelegation"
+
+export const WORKSPACE_DELEGATION_UNAUTHORIZED_MESSAGE
+	= "Google has not authorized this app for your Workspace yet. Finish Step 1 on this page, wait about a minute, then try Connect again."
+
+export function workspaceScopesForAdminConsole(scopes: readonly string[]): string {
+	return scopes.join(",")
+}
+
+export function isWorkspaceDelegationUnauthorizedMessage(message: string): boolean {
+	return message === WORKSPACE_DELEGATION_UNAUTHORIZED_MESSAGE
+		|| message.toLowerCase().includes("domain-wide delegation")
+}
+
 export interface CustomerRecord {
 	id: string
 	primaryDomain: string
