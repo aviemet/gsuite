@@ -7,14 +7,17 @@ import {
 } from "@tanstack/react-router"
 
 import { type AuthState } from "@/frontend/hooks/useAuth"
-import { AppLayout } from "@/frontend/layouts"
+import { AppLayout, PublicLayout } from "@/frontend/layouts"
 import { sanitizeRedirectPath } from "@/frontend/lib/auth"
 
 import { DashboardPage } from "../pages/Dashboard"
+import { HomePage } from "../pages/Home"
 import { LoginPage } from "../pages/Login"
+import { PrivacyPage } from "../pages/Privacy"
 import { SettingsPage } from "../pages/Settings"
 import { SignatureEditPage } from "../pages/Signatures/Edit"
 import { SignaturesListPage } from "../pages/Signatures/Index"
+import { TermsPage } from "../pages/Terms"
 
 export interface RouterContext {
 	auth: AuthState
@@ -22,6 +25,30 @@ export interface RouterContext {
 
 const rootRoute = createRootRouteWithContext<RouterContext>()({
 	component: Outlet,
+})
+
+const publicRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	id: "_public",
+	component: PublicLayout,
+})
+
+const homeRoute = createRoute({
+	getParentRoute: () => publicRoute,
+	path: "/",
+	component: HomePage,
+})
+
+const privacyRoute = createRoute({
+	getParentRoute: () => publicRoute,
+	path: "/privacy",
+	component: PrivacyPage,
+})
+
+const termsRoute = createRoute({
+	getParentRoute: () => publicRoute,
+	path: "/terms",
+	component: TermsPage,
 })
 
 const loginRoute = createRoute({
@@ -32,7 +59,7 @@ const loginRoute = createRoute({
 	}),
 	beforeLoad: ({ context }) => {
 		if(context.auth.isAuthenticated) {
-			throw redirect({ to: "/" })
+			throw redirect({ to: "/admin" })
 		}
 	},
 	component: function LoginRoute() {
@@ -43,7 +70,7 @@ const loginRoute = createRoute({
 
 const authenticatedRoute = createRoute({
 	getParentRoute: () => rootRoute,
-	id: "_authenticated",
+	path: "admin",
 	beforeLoad: ({ context, location }) => {
 		if(!context.auth.isAuthenticated) {
 			throw redirect({
@@ -65,29 +92,34 @@ const indexRoute = createRoute({
 
 const settingsRoute = createRoute({
 	getParentRoute: () => authenticatedRoute,
-	path: "/settings",
+	path: "settings",
 	component: SettingsPage,
 })
 
 const signaturesRoute = createRoute({
 	getParentRoute: () => authenticatedRoute,
-	path: "/signatures",
+	path: "signatures",
 	component: SignaturesListPage,
 })
 
 const signatureEditRoute = createRoute({
 	getParentRoute: () => authenticatedRoute,
-	path: "/signatures/edit",
+	path: "signatures/edit",
 	component: SignatureEditPage,
 })
 
 const signatureEditWithIdRoute = createRoute({
 	getParentRoute: () => authenticatedRoute,
-	path: "/signatures/edit/$id",
+	path: "signatures/edit/$id",
 	component: SignatureEditPage,
 })
 
 const routeTree = rootRoute.addChildren([
+	publicRoute.addChildren([
+		homeRoute,
+		privacyRoute,
+		termsRoute,
+	]),
 	loginRoute,
 	authenticatedRoute.addChildren([
 		indexRoute,

@@ -29,9 +29,9 @@ export function getAuthErrorMessage(error: unknown): string {
 }
 
 export function sanitizeRedirectPath(value: unknown): string {
-	if(typeof value !== "string") return "/"
+	if(typeof value !== "string") return "/admin"
 
-	if(!value.startsWith("/") || value.startsWith("//")) return "/"
+	if(!value.startsWith("/") || value.startsWith("//")) return "/admin"
 
 	return value
 }

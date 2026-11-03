@@ -176,15 +176,14 @@ const superAdmin: AuthorizedMember = {
 }
 
 describe("connectWorkspace", () => {
-	it("creates a customer and a super admin membership", async () => {
+	it("creates a customer and a super admin membership from the signed-in email", async () => {
 		const database = createMemoryFirestore()
 		const customer = await connectWorkspace(
 			database as never,
-			{ uid: "user-1", email: "owner@example.com" },
-			"Admin@example.com",
+			{ uid: "user-1", email: "Owner@example.com" },
 			{
 				createDirectory: () => directoryWith({
-					"admin@example.com": { isAdmin: true, primaryDomain: "example.com" },
+					"owner@example.com": { isAdmin: true, primaryDomain: "example.com" },
 				}),
 				now: () => new Date("2026-01-01T00:00:00.000Z"),
 				createId: () => "customer-1",
@@ -194,7 +193,7 @@ describe("connectWorkspace", () => {
 		expect(customer).toMatchObject({
 			id: "customer-1",
 			primaryDomain: "example.com",
-			workspaceAdminEmail: "admin@example.com",
+			workspaceAdminEmail: "owner@example.com",
 		})
 		expect(database.documents.get(`${MEMBERSHIPS_COLLECTION}/user-1`)).toMatchObject({
 			customerId: "customer-1",
@@ -208,26 +207,24 @@ describe("connectWorkspace", () => {
 		})
 	})
 
-	it("rejects an account that is not a Workspace super admin", async () => {
+	it("rejects a signed-in account that is not a Workspace super admin", async () => {
 		const database = createMemoryFirestore()
 		await expect(connectWorkspace(
 			database as never,
-			{ uid: "user-1", email: "owner@example.com" },
-			"sam.lee@example.com",
+			{ uid: "user-1", email: "sam.lee@example.com" },
 			{
 				createDirectory: () => directoryWith({
 					"sam.lee@example.com": { isAdmin: false, primaryDomain: "example.com" },
 				}),
 			},
-		)).rejects.toThrow("That account is not a Workspace Super Admin")
+		)).rejects.toThrow("Sign in with a Workspace Super Admin account to connect.")
 	})
 
-	it("explains when domain-wide delegation is missing", async () => {
+	it("explains when the Marketplace install is missing", async () => {
 		const database = createMemoryFirestore()
 		await expect(connectWorkspace(
 			database as never,
 			{ uid: "user-1", email: "owner@example.com" },
-			"admin@example.com",
 			{
 				createDirectory: () => ({
 					async listDirectory() {
@@ -241,7 +238,7 @@ describe("connectWorkspace", () => {
 					async checkOrganizationalUnits() {},
 				}),
 			},
-		)).rejects.toThrow("Google has not authorized this app for your Workspace yet")
+		)).rejects.toThrow("Google has not finished installing the app for your Workspace")
 	})
 
 	it("rejects a domain that is already connected", async () => {
@@ -256,8 +253,7 @@ describe("connectWorkspace", () => {
 
 		await expect(connectWorkspace(
 			database as never,
-			{ uid: "user-2", email: "other@example.com" },
-			"admin@example.com",
+			{ uid: "user-2", email: "admin@example.com" },
 			{
 				createDirectory: () => directoryWith({
 					"admin@example.com": { isAdmin: true, primaryDomain: "example.com" },

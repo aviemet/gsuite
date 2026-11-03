@@ -13,12 +13,12 @@ export function settingsPathWhenUnconnected(
 	if(!isAuthenticated) return null
 	if(!isMembershipResolved) return null
 	if(hasMembership) return null
-	if(pathname === "/settings" || pathname.startsWith("/settings/")) return null
-	return "/settings"
+	if(pathname === "/admin/settings" || pathname.startsWith("/admin/settings/")) return null
+	return "/admin/settings"
 }
 
 export function isSettingsPath(pathname: string): boolean {
-	return pathname === "/settings" || pathname.startsWith("/settings/")
+	return pathname === "/admin/settings" || pathname.startsWith("/admin/settings/")
 }
 
 export function useWorkspaceConnectionGate() {

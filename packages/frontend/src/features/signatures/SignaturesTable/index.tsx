@@ -138,7 +138,7 @@ export function SignaturesTable({ templates, assignmentSummaries }: SignaturesTa
 					sortable: true,
 					render: (record) => (
 						<Link
-							to="/signatures/edit/$id"
+							to="/admin/signatures/edit/$id"
 							params={ { id: record.id } }
 							style={ { textDecoration: "none", color: "inherit" } }
 						>
@@ -190,7 +190,7 @@ export function SignaturesTable({ templates, assignmentSummaries }: SignaturesTa
 								size="sm"
 								aria-label={ `Edit ${ record.name }` }
 								onClick={ () => router.navigate({
-									to: "/signatures/edit/$id",
+									to: "/admin/signatures/edit/$id",
 									params: { id: record.id },
 								}) }
 							>

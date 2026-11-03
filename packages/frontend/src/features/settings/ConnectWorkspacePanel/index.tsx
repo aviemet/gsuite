@@ -1,13 +1,13 @@
-import { Alert, Button, Loader, Stack, Text, TextInput, Title } from "@mantine/core"
-import { type ChangeEvent, useState } from "react"
+import { Alert, Button, Loader, Stack, Text, Title } from "@mantine/core"
+import { useState } from "react"
 
 import { useAuth } from "@/frontend/hooks/useAuth"
 import { APP_NAME } from "@/frontend/lib/appName"
 import { useConnectWorkspace, useWorkspaceQuery } from "@/frontend/queries/workspace"
-import { isWorkspaceDelegationUnauthorizedMessage } from "@/shared/workspace"
+import { isWorkspaceNotInstalledMessage } from "@/shared/workspace"
 
 import * as classes from "../ApiStatusPanel/ApiStatusPanel.css"
-import { DelegationSetup } from "../DelegationSetup"
+import { MarketplaceInstall } from "../MarketplaceInstall"
 import { notifySettingsSuccess } from "../notifySettingsError"
 
 function connectErrorMessage(error: unknown): string {
@@ -19,21 +19,15 @@ export function ConnectWorkspacePanel() {
 	const { user } = useAuth()
 	const workspace = useWorkspaceQuery()
 	const connect = useConnectWorkspace()
-	const [adminEmail, setAdminEmail] = useState<string | undefined>(undefined)
 	const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined)
-	const connectEmail = adminEmail ?? user?.email ?? ""
-	const isDelegationError = errorMessage
-		? isWorkspaceDelegationUnauthorizedMessage(errorMessage)
+	const signedInEmail = user?.email ?? ""
+	const isInstallPending = errorMessage
+		? isWorkspaceNotInstalledMessage(errorMessage)
 		: false
-
-	function handleConnectEmailChange(event: ChangeEvent<HTMLInputElement>) {
-		setAdminEmail(event.currentTarget.value)
-		setErrorMessage(undefined)
-	}
 
 	function handleConnect() {
 		setErrorMessage(undefined)
-		connect.mutate({ workspaceAdminEmail: connectEmail }, {
+		connect.mutate({}, {
 			onSuccess: () => notifySettingsSuccess("Workspace connected"),
 			onError: (error) => setErrorMessage(connectErrorMessage(error)),
 		})
@@ -45,37 +39,30 @@ export function ConnectWorkspacePanel() {
 		return <Alert color="red">{ workspace.error.message }</Alert>
 	}
 
-	const clientId = workspace.data?.clientId ?? ""
-	const scopes = workspace.data?.scopes ?? []
+	const marketplaceUrl = workspace.data?.marketplaceUrl ?? ""
 
 	return (
 		<Stack gap="lg">
 			<Stack gap="sm">
 				<Title order={ 2 } size="h4">Connect Workspace</Title>
 				<Text>
-					Link { APP_NAME } to your Google Workspace in two steps. Authorize the app in Google Admin first, then connect with a Super Admin email from your domain.
+					Link { APP_NAME } to your Google Workspace in two steps. Install the app from the Google Workspace Marketplace first, then connect with the Super Admin account you are signed in as.
 				</Text>
 			</Stack>
 
-			<DelegationSetup clientId={ clientId } scopes={ scopes } stepLabel="Step 1" />
+			<MarketplaceInstall marketplaceUrl={ marketplaceUrl } stepLabel="Step 1" />
 
 			<Stack gap="sm" className={ classes.section }>
-				<Title order={ 2 } size="h4">Step 2: Connect with a Super Admin email</Title>
+				<Title order={ 2 } size="h4">Step 2: Connect as { signedInEmail || "your Super Admin account" }</Title>
 				<Text>
-					Enter a Super Admin from your domain. Directory and Gmail calls will authenticate as that account. Prefer an account in an organizational unit where Directory and Gmail are turned on.
+					Directory and Gmail calls will authenticate as this account. Prefer an account in an organizational unit where Directory and Gmail are turned on.
 				</Text>
-				<TextInput
-					label="Workspace admin email"
-					description="Must be a Workspace Super Admin on your domain."
-					value={ connectEmail }
-					onChange={ handleConnectEmailChange }
-				/>
 				{ errorMessage
 					? (
-						<Alert color="red" title={ isDelegationError ? "Authorization is not finished" : "Could not connect" }>
+						<Alert color="red" title={ isInstallPending ? "Installation is not finished" : "Could not connect" }>
 							{ errorMessage }
-							{ isDelegationError
-								? " Use the Client ID and scopes in Step 1, then try Connect again."
+							{ isInstallPending
+								? " Use the Install button in Step 1, then try Connect again."
 								: null }
 						</Alert>
 					)

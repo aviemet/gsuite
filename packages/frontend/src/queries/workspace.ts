@@ -10,8 +10,7 @@ import {
 } from "@/shared/workspace"
 
 export interface WorkspaceSession {
-	clientId: string
-	scopes: readonly string[]
+	marketplaceUrl: string
 	customer: CustomerRecord | null
 	membership: MembershipRecord | null
 	access: AccessRecord[]
@@ -51,18 +50,14 @@ export async function fetchWorkspace(): Promise<WorkspaceSession> {
 	if(!payload || typeof payload !== "object") {
 		throw new Error("Failed to load Workspace settings")
 	}
-	const clientId = readString(payload, "clientId") ?? ""
-	const scopes = hasKey(payload, "scopes") && Array.isArray(Reflect.get(payload, "scopes"))
-		? Reflect.get(payload, "scopes").filter((scope: unknown): scope is string => typeof scope === "string")
-		: []
+	const marketplaceUrl = readString(payload, "marketplaceUrl") ?? ""
 	const customer = hasKey(payload, "customer") ? Reflect.get(payload, "customer") : null
 	const membership = hasKey(payload, "membership") ? Reflect.get(payload, "membership") : null
 	const access = hasKey(payload, "access") && Array.isArray(Reflect.get(payload, "access"))
 		? Reflect.get(payload, "access") as AccessRecord[]
 		: []
 	return {
-		clientId,
-		scopes,
+		marketplaceUrl,
 		customer: customer && typeof customer === "object" ? customer as CustomerRecord : null,
 		membership: membership && typeof membership === "object" ? membership as MembershipRecord : null,
 		access,
@@ -92,7 +87,7 @@ function useWorkspaceMutation<TBody extends object, TResult>(
 }
 
 export function useConnectWorkspace() {
-	return useWorkspaceMutation<{ workspaceAdminEmail: string }, CustomerRecord>(
+	return useWorkspaceMutation<Record<string, never>, CustomerRecord>(
 		"/api/workspace/connect",
 		"Failed to connect Workspace",
 	)

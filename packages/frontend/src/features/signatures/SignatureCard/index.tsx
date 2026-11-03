@@ -34,7 +34,7 @@ export function SignatureCard({ template, assignmentSummary }: SignatureCardProp
 		>
 			<Group justify="space-between" align="flex-start" mb="sm">
 				<Link
-					to="/signatures/edit/$id"
+					to="/admin/signatures/edit/$id"
 					params={ { id: template.id } }
 					style={ { textDecoration: "none", color: "inherit" } }
 				>
@@ -47,7 +47,7 @@ export function SignatureCard({ template, assignmentSummary }: SignatureCardProp
 					size="xs"
 					className={ clsx(classes.editButton) }
 					aria-label={ `Edit ${ template.name }` }
-					onClick={ () => router.navigate({ to: "/signatures/edit/$id", params: { id: template.id } }) }
+					onClick={ () => router.navigate({ to: "/admin/signatures/edit/$id", params: { id: template.id } }) }
 				>
 					<IconPencil size={ 16 } aria-hidden />
 				</Button>

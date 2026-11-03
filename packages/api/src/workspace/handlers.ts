@@ -29,9 +29,8 @@ export const workspaceSessionHandler = withSignedInAuth(async ({ user }) => {
 	return ok(session)
 })
 
-export const connectWorkspaceHandler = withSignedInAuth(async ({ user, body }) => {
-	const workspaceAdminEmail = requireEmail(body, "workspaceAdminEmail")
-	const customer = await connectWorkspace(getAdminFirestore(), user, workspaceAdminEmail, {
+export const connectWorkspaceHandler = withSignedInAuth(async ({ user }) => {
+	const customer = await connectWorkspace(getAdminFirestore(), user, {
 		createDirectory: (subjectEmail) => createDirectoryClient(subjectEmail),
 	})
 	return ok(customer)

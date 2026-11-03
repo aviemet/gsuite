@@ -1,4 +1,4 @@
-# Suite Desk
+# SuiteOcean
 
 Centralized email signature management for Google Workspace.
 

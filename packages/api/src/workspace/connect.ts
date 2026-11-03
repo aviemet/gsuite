@@ -6,7 +6,7 @@ import {
 	type MembershipRecord,
 	membershipRoles,
 	MEMBERSHIPS_COLLECTION,
-	WORKSPACE_DELEGATION_UNAUTHORIZED_MESSAGE,
+	WORKSPACE_NOT_INSTALLED_MESSAGE,
 } from "@gsuite/shared"
 import { type Firestore } from "firebase-admin/firestore"
 
@@ -42,7 +42,7 @@ export async function readSuperAdmin(
 		}
 		if(!account.isAdmin) {
 			throw new HttpError(
-				"That account is not a Workspace Super Admin. Enter a Super Admin email from your domain.",
+				"Sign in with a Workspace Super Admin account to connect.",
 				403,
 			)
 		}
@@ -50,7 +50,7 @@ export async function readSuperAdmin(
 	} catch (error) {
 		if(error instanceof HttpError) throw error
 		if(isDelegationError(error)) {
-			throw new HttpError(WORKSPACE_DELEGATION_UNAUTHORIZED_MESSAGE, 403)
+			throw new HttpError(WORKSPACE_NOT_INSTALLED_MESSAGE, 403)
 		}
 		throw error
 	}
@@ -59,7 +59,6 @@ export async function readSuperAdmin(
 export async function connectWorkspace(
 	db: Firestore,
 	user: AuthenticatedUser,
-	workspaceAdminEmail: string,
 	dependencies: {
 		createDirectory: (subjectEmail: string) => DirectoryClient
 		now?: () => Date
@@ -71,8 +70,10 @@ export async function connectWorkspace(
 		throw new HttpError("This account is already connected to a Workspace", 409)
 	}
 
-	const normalized = workspaceAdminEmail.trim().toLowerCase()
-	const account = await readSuperAdmin(dependencies.createDirectory(normalized), normalized)
+	const email = (user.email ?? "").trim().toLowerCase()
+	if(!email) throw new HttpError("Signed-in account has no email", 400)
+
+	const account = await readSuperAdmin(dependencies.createDirectory(email), email)
 	const existingCustomer = await findCustomerByDomain(db, account.primaryDomain)
 	if(existingCustomer) {
 		throw new HttpError("This Workspace domain is already connected", 409)
@@ -80,8 +81,6 @@ export async function connectWorkspace(
 
 	const nowIso = (dependencies.now?.() ?? new Date()).toISOString()
 	const customerId = dependencies.createId?.() ?? crypto.randomUUID()
-	const email = (user.email ?? "").toLowerCase()
-	if(!email) throw new HttpError("Signed-in account has no email", 400)
 
 	const customer: CustomerRecord = {
 		id: customerId,

@@ -1,5 +1,5 @@
 import { Box, Paper } from "@mantine/core"
-import { IconDesk } from "@tabler/icons-react"
+import { IconWaveSine } from "@tabler/icons-react"
 import clsx from "clsx"
 import { type ReactNode } from "react"
 
@@ -17,7 +17,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
 			<main className={ clsx(classes.panel) }>
 				<Box className={ clsx(classes.brand) }>
 					<span className={ clsx(classes.brandMark) } aria-hidden>
-						<IconDesk size={ 20 } />
+						<IconWaveSine size={ 20 } />
 					</span>
 					<span className={ clsx(classes.brandName) }>{ APP_NAME }</span>
 				</Box>

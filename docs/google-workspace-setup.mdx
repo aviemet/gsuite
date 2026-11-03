@@ -1,6 +1,6 @@
 # Google Workspace connection
 
-The app signs users in with Google for access to the dashboard. Workspace API calls use a service account with domain-wide delegation. Each customer stores the primary domain and the Workspace admin email. Directory calls impersonate that admin. Signature updates impersonate each mailbox.
+The app signs users in with Google for access to the dashboard. Workspace API calls use a service account. A Super Admin installs the SuiteOcean listing from the Google Workspace Marketplace once for their domain. That install grants domain-wide access for the scopes listed below. Each customer stores the primary domain and the Workspace admin email. Directory calls impersonate that admin. Signature updates impersonate each mailbox.
 
 Use the same Google Cloud project as the Firebase app (`gsuite-b63f0`).
 
@@ -9,35 +9,45 @@ Use the same Google Cloud project as the Firebase app (`gsuite-b63f0`).
 1. Open [Google Cloud Console](https://console.cloud.google.com) and select the Firebase project.
 2. Enable the **Admin SDK API** and the **Gmail API**.
 3. Confirm the Firebase project is on the **Blaze** plan (Billing). Cloud Functions and Cloud Tasks require it.
-4. Create a service account (IAM & Admin → Service Accounts → Create).
-5. Open the service account → Advanced settings → enable **Domain-wide delegation**. Copy the numeric **Client ID**.
+4. Create a service account (IAM & Admin → Service Accounts → Create) in this same project. The Marketplace install only grants access to a service account in the same Cloud project as the Marketplace SDK listing.
+5. Open the service account → Advanced settings → enable **Domain-wide delegation**.
 6. Keys → Add key → Create new key → JSON. Do not commit the file.
 
-## Production Functions secret
+## Production Functions configuration
 
-Cloud Functions read the key from Secret Manager. From the repo root:
+Functions use [parameterized configuration](https://firebase.google.com/docs/functions/config-env). Sensitive values are Secret parameters; the Marketplace listing URL is a String parameter.
+
+### Service account secret
 
 ```bash
 firebase functions:secrets:set GOOGLE_SERVICE_ACCOUNT_JSON --project default
 ```
 
-Paste the full JSON key when prompted, then deploy Functions:
+Paste the full JSON key when prompted. The Functions entry binds this secret on `api`, `updateSignature`, and `redeployScheduledSignatures`.
+
+### Marketplace listing URL
+
+After the Marketplace listing is published, set `WORKSPACE_MARKETPLACE_URL` for the Functions codebase (`packages/functions`):
+
+1. Copy [`packages/functions/.env.example`](../packages/functions/.env.example) to `packages/functions/.env.gsuite-b63f0` (or `.env`).
+2. Set `WORKSPACE_MARKETPLACE_URL` to the published listing URL.
+3. Deploy:
 
 ```bash
 yarn deploy
 ```
 
-Production sets `GMAIL_MODE=real` and `DIRECTORY_MODE=real` in the Functions entry. Local `yarn dev` keeps mock Directory/Gmail unless you override those vars and put the same JSON in `packages/.env`.
+On deploy, the Firebase CLI loads that file for the String parameter. If the value is missing and has no default, the CLI prompts and can write `.env.<projectId>` under `packages/functions`.
 
-## Domain-wide delegation
+Local `yarn dev` does not use the Functions package. Put the same URL in `packages/.env` so the local API can serve Connect Workspace. Production sets `GMAIL_MODE=real` and `DIRECTORY_MODE=real` in the Functions `onInit` hook.
 
-This project's Workspace service account is `signature-manager@gsuite-b63f0.iam.gserviceaccount.com`. In Google Cloud Console → IAM → Service Accounts → that account → Advanced settings, enable **Google Workspace Domain-wide Delegation** if it is not already on.
+## Marketplace listing
 
-A super admin of the customer domain authorizes the service account:
-
-1. Open the Admin console at [admin.google.com](https://admin.google.com).
-2. Go to Security → Access and data control → API controls → Domain-wide delegation.
-3. Add Client ID `112775791895278687783` with these scopes:
+1. Enable the **Google Workspace Marketplace SDK** in `gsuite-b63f0`.
+2. Open the Marketplace SDK → App Configuration.
+3. Set visibility to **Public** (listed or unlisted). Set installation to **Admin only install**.
+4. Add a **Web app** integration. Use `https://suiteocean.com/admin` as the universal navigation URL.
+5. List these OAuth scopes:
 
 ```
 https://www.googleapis.com/auth/admin.directory.user.readonly
@@ -46,12 +56,12 @@ https://www.googleapis.com/auth/admin.directory.orgunit.readonly
 https://www.googleapis.com/auth/gmail.settings.basic
 ```
 
-Some Workspace editions require a second super admin to approve a new delegation client.
-
-After sign-in, open Settings → Workspace, connect with the Workspace admin email, then Settings → API status. Failed checks show the Client ID and scopes to copy.
+6. Fill in the Store Listing (name, description, icons, screenshots, support, privacy, and terms links).
+7. Complete OAuth verification and Marketplace review. `gmail.settings.basic` is a restricted Gmail scope, so Google may require a CASA security assessment before approval.
+8. Put the published listing URL in `WORKSPACE_MARKETPLACE_URL` (Functions `.env` / `.env.gsuite-b63f0`, and `packages/.env` for local) and deploy.
 
 ## Workspace admin
 
-In the app, Settings → Workspace stores the super admin the Directory calls impersonate. Use a dedicated super admin in an organizational unit where Directory and Gmail are turned on.
+In the app, Settings → Workspace stores the super admin the Directory calls impersonate. Connect uses the signed-in Google account. Use a dedicated super admin in an organizational unit where Directory and Gmail are turned on.
 
 `GMAIL_MODE=mock` uses the fixture directory and does not call Google. `GMAIL_MODE=real` reads `GOOGLE_SERVICE_ACCOUNT_JSON`.

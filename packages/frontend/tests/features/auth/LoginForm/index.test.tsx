@@ -52,7 +52,7 @@ beforeEach(() => {
 	push.mockClear()
 })
 
-function renderLoginForm(redirectTo = "/signatures") {
+function renderLoginForm(redirectTo = "/admin/signatures") {
 	render(
 		<MantineProvider>
 			<LoginForm redirectTo={ redirectTo } />
@@ -81,7 +81,7 @@ describe("LoginForm", () => {
 		await waitFor(() => {
 			expect(signInWithGoogle).toHaveBeenCalled()
 			expect(invalidate).toHaveBeenCalled()
-			expect(push).toHaveBeenCalledWith("/signatures")
+			expect(push).toHaveBeenCalledWith("/admin/signatures")
 		})
 	})
 

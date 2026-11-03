@@ -2,18 +2,16 @@ import {
 	type AccessRecord,
 	type CustomerRecord,
 	type MembershipRecord,
-	workspaceScopes,
 } from "@gsuite/shared"
 import { type Firestore } from "firebase-admin/firestore"
 
 import { type AuthenticatedUser } from "../firebase/admin"
-import { readWorkspaceClientId } from "../google/serviceAccount"
+import { readWorkspaceMarketplaceUrl } from "../google/serviceAccount"
 import { ensureMembershipFromAccess, listAccess } from "./access"
 import { loadAuthorizedMember, loadCustomer, loadMembership } from "./records"
 
 export interface WorkspaceSession {
-	clientId: string
-	scopes: readonly string[]
+	marketplaceUrl: string
 	customer: CustomerRecord | null
 	membership: MembershipRecord | null
 	access: AccessRecord[]
@@ -29,8 +27,7 @@ export async function loadWorkspaceSession(
 	const customer = authorized ? await loadCustomer(db, authorized.customerId) : undefined
 	const access = authorized ? await listAccess(db, authorized.customerId) : []
 	return {
-		clientId: readWorkspaceClientId(),
-		scopes: workspaceScopes,
+		marketplaceUrl: readWorkspaceMarketplaceUrl(),
 		customer: customer ?? null,
 		membership: membership ?? null,
 		access,

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import { buildDirectorySnapshot, organizationalUnitPaths } from "../src/directory/snapshot"
-import { parseServiceAccount } from "../src/google/serviceAccount"
+import { parseServiceAccount, readWorkspaceMarketplaceUrl } from "../src/google/serviceAccount"
 
 describe("organizationalUnitPaths", () => {
 	it("includes every ancestor", () => {
@@ -47,5 +47,23 @@ describe("parseServiceAccount", () => {
 
 	it("returns undefined when the key is missing", () => {
 		expect(parseServiceAccount({ client_email: "app@project.iam.gserviceaccount.com" })).toBeUndefined()
+	})
+})
+
+describe("readWorkspaceMarketplaceUrl", () => {
+	it("returns the configured Marketplace listing URL", () => {
+		expect(readWorkspaceMarketplaceUrl({
+			WORKSPACE_MARKETPLACE_URL: "https://workspace.google.com/marketplace/app/suiteocean",
+		})).toBe("https://workspace.google.com/marketplace/app/suiteocean")
+	})
+
+	it("falls back to a mock URL outside real mode", () => {
+		expect(readWorkspaceMarketplaceUrl({ GMAIL_MODE: "mock" })).toBe(
+			"https://workspace.google.com/marketplace",
+		)
+	})
+
+	it("returns an empty string in real mode when unset", () => {
+		expect(readWorkspaceMarketplaceUrl({ GMAIL_MODE: "real" })).toBe("")
 	})
 })

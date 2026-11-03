@@ -1,8 +1,8 @@
-# Suite Desk
+# SuiteOcean
 
 ## Workspace
 
-Each user has one membership, and that membership is the customer they can access. Site access is granted by email from the Workspace Directory as super admin, admin, editor, or viewer; signing in with that Google account links the membership. The customer link stores the primary domain and the Workspace admin email. Directory calls impersonate that admin. Signature updates impersonate each mailbox. The API resolves the customer from the membership because it writes with the Admin SDK.
+Each user has one membership, and that membership is the customer they can access. Site access is granted by email from the Workspace Directory as super admin, admin, editor, or viewer; signing in with that Google account links the membership. The customer link stores the primary domain and the Workspace admin email. Directory calls impersonate that admin. Signature updates impersonate each mailbox. The API resolves the customer from the membership because it writes with the Admin SDK. Workspace API access comes from a domain-wide Marketplace install, which grants delegation only to the service account in the same Cloud project as the Marketplace SDK listing.
 
 ## Data
 
