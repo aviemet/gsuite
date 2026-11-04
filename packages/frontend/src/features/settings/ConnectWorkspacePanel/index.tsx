@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useAuth } from "@/frontend/hooks/useAuth"
 import { APP_NAME } from "@/frontend/lib/appName"
 import { useConnectWorkspace, useWorkspaceQuery } from "@/frontend/queries/workspace"
-import { isWorkspaceNotInstalledMessage } from "@/shared/workspace"
+import { isWorkspaceNotInstalledMessage, SEED_WORKSPACE_ADMIN_EMAIL } from "@/shared/workspace"
 
 import * as classes from "../ApiStatusPanel/ApiStatusPanel.css"
 import { MarketplaceInstall } from "../MarketplaceInstall"
@@ -39,7 +39,38 @@ export function ConnectWorkspacePanel() {
 		return <Alert color="red">{ workspace.error.message }</Alert>
 	}
 
+	const isMockDirectory = workspace.data?.directoryMode === "mock"
 	const marketplaceUrl = workspace.data?.marketplaceUrl ?? ""
+
+	if(isMockDirectory) {
+		return (
+			<Stack gap="lg">
+				<Stack gap="sm">
+					<Title order={ 2 } size="h4">Connect Workspace</Title>
+					<Text>
+						Local mock Directory is on. Marketplace install is skipped. Sign in as { SEED_WORKSPACE_ADMIN_EMAIL }, then connect.
+					</Text>
+				</Stack>
+
+				<Stack gap="sm" className={ classes.section }>
+					<Title order={ 2 } size="h4">Connect as { signedInEmail || SEED_WORKSPACE_ADMIN_EMAIL }</Title>
+					<Text>
+						The mock Directory treats { SEED_WORKSPACE_ADMIN_EMAIL } as the Super Admin. Other emails are not in the fixture directory.
+					</Text>
+					{ errorMessage
+						? (
+							<Alert color="red" title="Could not connect">
+								{ errorMessage }
+							</Alert>
+						)
+						: null }
+					<Button loading={ connect.isPending } onClick={ handleConnect }>
+						Connect
+					</Button>
+				</Stack>
+			</Stack>
+		)
+	}
 
 	return (
 		<Stack gap="lg">

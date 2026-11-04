@@ -5,12 +5,14 @@ import {
 } from "@gsuite/shared"
 import { type Firestore } from "firebase-admin/firestore"
 
+import { type DirectoryMode, readDirectoryMode } from "../directory"
 import { type AuthenticatedUser } from "../firebase/admin"
 import { readWorkspaceMarketplaceUrl } from "../google/serviceAccount"
 import { ensureMembershipFromAccess, listAccess } from "./access"
 import { loadAuthorizedMember, loadCustomer, loadMembership } from "./records"
 
 export interface WorkspaceSession {
+	directoryMode: DirectoryMode
 	marketplaceUrl: string
 	customer: CustomerRecord | null
 	membership: MembershipRecord | null
@@ -27,6 +29,7 @@ export async function loadWorkspaceSession(
 	const customer = authorized ? await loadCustomer(db, authorized.customerId) : undefined
 	const access = authorized ? await listAccess(db, authorized.customerId) : []
 	return {
+		directoryMode: readDirectoryMode(),
 		marketplaceUrl: readWorkspaceMarketplaceUrl(),
 		customer: customer ?? null,
 		membership: membership ?? null,

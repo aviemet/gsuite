@@ -73,6 +73,7 @@ vi.mock("@/frontend/queries/workspace", () => ({
 		isError: false,
 		error: null,
 		data: {
+			directoryMode: "real" as const,
 			marketplaceUrl: "https://workspace.google.com/marketplace/app/suiteocean",
 			customer: {
 				id: "example-corp",

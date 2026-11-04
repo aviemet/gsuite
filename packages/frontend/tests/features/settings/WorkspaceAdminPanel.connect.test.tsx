@@ -6,9 +6,16 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 import "@testing-library/jest-dom/vitest"
 
 import { ConnectWorkspacePanel } from "@/frontend/features/settings/ConnectWorkspacePanel"
-import { WORKSPACE_NOT_INSTALLED_MESSAGE } from "@/shared/workspace"
+import { SEED_WORKSPACE_ADMIN_EMAIL, WORKSPACE_NOT_INSTALLED_MESSAGE } from "@/shared/workspace"
 
 const connectMutate = vi.hoisted(() => vi.fn())
+const workspaceData = vi.hoisted(() => ({
+	directoryMode: "real" as "mock" | "real",
+	marketplaceUrl: "https://workspace.google.com/marketplace/app/suiteocean",
+	customer: null,
+	membership: null,
+	access: [] as [],
+}))
 
 vi.mock("@/frontend/hooks/useAuth", () => ({
 	useAuth: () => ({ user: { email: "avram@thebatterysf.com" } }),
@@ -19,12 +26,7 @@ vi.mock("@/frontend/queries/workspace", () => ({
 		isPending: false,
 		isError: false,
 		error: null,
-		data: {
-			marketplaceUrl: "https://workspace.google.com/marketplace/app/suiteocean",
-			customer: null,
-			membership: null,
-			access: [],
-		},
+		data: workspaceData,
 	}),
 	useConnectWorkspace: () => ({ isPending: false, mutate: connectMutate }),
 }))
@@ -32,6 +34,8 @@ vi.mock("@/frontend/queries/workspace", () => ({
 afterEach(() => {
 	cleanup()
 	connectMutate.mockReset()
+	workspaceData.directoryMode = "real"
+	workspaceData.marketplaceUrl = "https://workspace.google.com/marketplace/app/suiteocean"
 })
 
 describe("ConnectWorkspacePanel", () => {
@@ -51,6 +55,22 @@ describe("ConnectWorkspacePanel", () => {
 		)
 		expect(screen.getByRole("button", { name: "Connect" })).toBeInTheDocument()
 		expect(screen.queryByLabelText("Workspace admin email")).not.toBeInTheDocument()
+	})
+
+	it("skips Marketplace install when Directory is mock", () => {
+		workspaceData.directoryMode = "mock"
+		workspaceData.marketplaceUrl = ""
+
+		render(
+			<MantineProvider>
+				<ConnectWorkspacePanel />
+			</MantineProvider>,
+		)
+
+		expect(screen.getByText(/Local mock Directory is on/)).toBeInTheDocument()
+		expect(screen.getAllByText(new RegExp(SEED_WORKSPACE_ADMIN_EMAIL)).length).toBeGreaterThan(0)
+		expect(screen.queryByRole("link", { name: "Install from Google Workspace Marketplace" })).not.toBeInTheDocument()
+		expect(screen.getByRole("button", { name: "Connect" })).toBeInTheDocument()
 	})
 
 	it("shows an on-page explanation when the Marketplace install is missing", async () => {

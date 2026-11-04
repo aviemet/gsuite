@@ -8,13 +8,16 @@ import "@testing-library/jest-dom/vitest"
 import { LoginForm } from "@/frontend/features/auth/LoginForm"
 import { type AuthState } from "@/frontend/hooks/useAuth"
 import { APP_NAME } from "@/frontend/lib/appName"
+import { SEED_WORKSPACE_ADMIN_EMAIL } from "@/shared/workspace"
 
 const {
 	signInWithGoogle,
+	signInAsMockWorkspaceAdmin,
 	invalidate,
 	push,
 } = vi.hoisted(() => ({
 	signInWithGoogle: vi.fn(),
+	signInAsMockWorkspaceAdmin: vi.fn(),
 	invalidate: vi.fn(async () => undefined),
 	push: vi.fn(),
 }))
@@ -25,6 +28,7 @@ vi.mock("@/frontend/hooks/useAuth", () => ({
 		isAuthenticated: false,
 		isLoading: false,
 		signInWithGoogle,
+		signInAsMockWorkspaceAdmin,
 		signOut: vi.fn(),
 		getAuthErrorMessage: (error: unknown) => {
 			if(error && typeof error === "object" && "code" in error && error.code === "auth/popup-closed-by-user") {
@@ -48,6 +52,7 @@ afterEach(() => {
 
 beforeEach(() => {
 	signInWithGoogle.mockReset()
+	signInAsMockWorkspaceAdmin.mockReset()
 	invalidate.mockClear()
 	push.mockClear()
 })
@@ -69,6 +74,8 @@ describe("LoginForm", () => {
 			`Access ${ APP_NAME } with your corporate Google account.`,
 		)).toBeInTheDocument()
 		expect(screen.getByRole("button", { name: "Continue with Google" })).toBeInTheDocument()
+		expect(screen.getByRole("button", { name: "Continue as Jane Doe (local mock)" })).toBeInTheDocument()
+		expect(screen.getByText(new RegExp(SEED_WORKSPACE_ADMIN_EMAIL))).toBeInTheDocument()
 	})
 
 	it("signs in with Google then redirects", async () => {
@@ -80,6 +87,20 @@ describe("LoginForm", () => {
 
 		await waitFor(() => {
 			expect(signInWithGoogle).toHaveBeenCalled()
+			expect(invalidate).toHaveBeenCalled()
+			expect(push).toHaveBeenCalledWith("/admin/signatures")
+		})
+	})
+
+	it("signs in as the mock Workspace admin then redirects", async () => {
+		const user = userEvent.setup()
+		signInAsMockWorkspaceAdmin.mockResolvedValue({ uid: "jane" })
+		renderLoginForm()
+
+		await user.click(screen.getByRole("button", { name: "Continue as Jane Doe (local mock)" }))
+
+		await waitFor(() => {
+			expect(signInAsMockWorkspaceAdmin).toHaveBeenCalled()
 			expect(invalidate).toHaveBeenCalled()
 			expect(push).toHaveBeenCalledWith("/admin/signatures")
 		})

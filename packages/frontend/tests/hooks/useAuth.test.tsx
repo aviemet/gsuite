@@ -18,6 +18,7 @@ vi.mock("@/frontend/lib/firebase", () => ({
 vi.mock("@/frontend/lib/auth", () => ({
 	getAuthErrorMessage: vi.fn(),
 	signInWithGoogle: vi.fn(),
+	signInAsMockWorkspaceAdmin: vi.fn(),
 	signOutCurrentUser: vi.fn(),
 }))
 

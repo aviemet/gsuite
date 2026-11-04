@@ -5,7 +5,6 @@ import {
 	MEMBERSHIPS_COLLECTION,
 	SEED_CUSTOMER_ID,
 	SEED_PRIMARY_DOMAIN,
-	SEED_USER_EMAIL,
 	SEED_WORKSPACE_ADMIN_EMAIL,
 } from "@gsuite/shared"
 import { type Firestore } from "firebase-admin/firestore"
@@ -17,7 +16,7 @@ export async function ensureEmulatorTenant(db: Firestore): Promise<void> {
 
 	let user
 	try {
-		user = await getAdminAuth().getUserByEmail(SEED_USER_EMAIL)
+		user = await getAdminAuth().getUserByEmail(SEED_WORKSPACE_ADMIN_EMAIL)
 	} catch{
 		return
 	}
@@ -35,7 +34,7 @@ export async function ensureEmulatorTenant(db: Firestore): Promise<void> {
 		})
 	}
 
-	const email = (user.email ?? SEED_USER_EMAIL).toLowerCase()
+	const email = SEED_WORKSPACE_ADMIN_EMAIL
 	const membershipRef = db.collection(MEMBERSHIPS_COLLECTION).doc(user.uid)
 	const membership = await membershipRef.get()
 	if(!membership.exists) {

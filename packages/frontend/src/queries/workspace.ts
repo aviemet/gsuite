@@ -9,7 +9,10 @@ import {
 	type MembershipRole,
 } from "@/shared/workspace"
 
+export type DirectoryMode = "mock" | "real"
+
 export interface WorkspaceSession {
+	directoryMode: DirectoryMode
 	marketplaceUrl: string
 	customer: CustomerRecord | null
 	membership: MembershipRecord | null
@@ -50,6 +53,8 @@ export async function fetchWorkspace(): Promise<WorkspaceSession> {
 	if(!payload || typeof payload !== "object") {
 		throw new Error("Failed to load Workspace settings")
 	}
+	const directoryModeValue = readString(payload, "directoryMode")
+	const directoryMode: DirectoryMode = directoryModeValue === "real" ? "real" : "mock"
 	const marketplaceUrl = readString(payload, "marketplaceUrl") ?? ""
 	const customer = hasKey(payload, "customer") ? Reflect.get(payload, "customer") : null
 	const membership = hasKey(payload, "membership") ? Reflect.get(payload, "membership") : null
@@ -57,6 +62,7 @@ export async function fetchWorkspace(): Promise<WorkspaceSession> {
 		? Reflect.get(payload, "access") as AccessRecord[]
 		: []
 	return {
+		directoryMode,
 		marketplaceUrl,
 		customer: customer && typeof customer === "object" ? customer as CustomerRecord : null,
 		membership: membership && typeof membership === "object" ? membership as MembershipRecord : null,

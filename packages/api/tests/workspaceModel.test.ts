@@ -57,13 +57,8 @@ describe("readWorkspaceMarketplaceUrl", () => {
 		})).toBe("https://workspace.google.com/marketplace/app/suiteocean")
 	})
 
-	it("falls back to a mock URL outside real mode", () => {
-		expect(readWorkspaceMarketplaceUrl({ GMAIL_MODE: "mock" })).toBe(
-			"https://workspace.google.com/marketplace",
-		)
-	})
-
-	it("returns an empty string in real mode when unset", () => {
+	it("returns an empty string when unset", () => {
+		expect(readWorkspaceMarketplaceUrl({ GMAIL_MODE: "mock" })).toBe("")
 		expect(readWorkspaceMarketplaceUrl({ GMAIL_MODE: "real" })).toBe("")
 	})
 })

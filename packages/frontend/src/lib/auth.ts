@@ -1,11 +1,13 @@
 import {
 	GoogleAuthProvider,
+	signInWithCredential,
 	signInWithPopup,
 	signOut,
 	type User,
 } from "firebase/auth"
 
 import { getFirebaseAuth } from "@/frontend/lib/firebase"
+import { SEED_WORKSPACE_ADMIN_EMAIL } from "@/shared/workspace"
 
 const googleProvider = new GoogleAuthProvider()
 
@@ -40,6 +42,18 @@ export async function signInWithGoogle(): Promise<User> {
 	const credential = await signInWithPopup(getFirebaseAuth(), googleProvider)
 
 	return credential.user
+}
+
+export async function signInAsMockWorkspaceAdmin(): Promise<User> {
+	const credential = GoogleAuthProvider.credential(JSON.stringify({
+		sub: "mock-workspace-admin",
+		email: SEED_WORKSPACE_ADMIN_EMAIL,
+		email_verified: true,
+		name: "Jane Doe",
+	}))
+	const result = await signInWithCredential(getFirebaseAuth(), credential)
+
+	return result.user
 }
 
 export async function signOutCurrentUser(): Promise<void> {

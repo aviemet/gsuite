@@ -41,6 +41,5 @@ export function requireServiceAccount(
 export function readWorkspaceMarketplaceUrl(env: NodeJS.ProcessEnv = process.env): string {
 	const configured = env.WORKSPACE_MARKETPLACE_URL?.trim()
 	if(configured) return configured
-	if((env.GMAIL_MODE ?? "mock") === "real") return ""
-	return "https://workspace.google.com/marketplace"
+	return ""
 }
