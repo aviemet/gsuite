@@ -1,0 +1,34 @@
+import { describe, expect, it } from "vitest"
+
+import {
+	formatColumnFilterValue,
+	isColumnFilterActive,
+} from "@/frontend/lib/tableView/columnFilterState"
+
+describe("isColumnFilterActive", () => {
+	it("is inactive when query is blank and all values are selected", () => {
+		expect(isColumnFilterActive({
+			query: "",
+			selectedValues: null,
+		}, ["a", "b"])).toBe(false)
+	})
+
+	it("is active for a query or a subset of values", () => {
+		expect(isColumnFilterActive({
+			query: "a",
+			selectedValues: null,
+		}, ["a", "b"])).toBe(true)
+
+		expect(isColumnFilterActive({
+			query: "",
+			selectedValues: ["a"],
+		}, ["a", "b"])).toBe(true)
+	})
+})
+
+describe("formatColumnFilterValue", () => {
+	it("labels blank values", () => {
+		expect(formatColumnFilterValue("")).toBe("(Blank)")
+		expect(formatColumnFilterValue("Engineering")).toBe("Engineering")
+	})
+})

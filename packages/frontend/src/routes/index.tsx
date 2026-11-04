@@ -11,6 +11,9 @@ import { AppLayout, PublicLayout } from "@/frontend/layouts"
 import { sanitizeRedirectPath } from "@/frontend/lib/auth"
 
 import { DashboardPage } from "../pages/Dashboard"
+import { DirectoryGroupsPage } from "../pages/Directory/Groups"
+import { DirectoryOrganizationalUnitsPage } from "../pages/Directory/OrganizationalUnits"
+import { DirectoryUsersPage } from "../pages/Directory/Users"
 import { HomePage } from "../pages/Home"
 import { LoginPage } from "../pages/Login"
 import { PrivacyPage } from "../pages/Privacy"
@@ -121,6 +124,32 @@ const signatureEditWithIdRoute = createRoute({
 	component: SignatureEditPage,
 })
 
+const directoryRoute = createRoute({
+	getParentRoute: () => authenticatedRoute,
+	path: "directory",
+	beforeLoad: () => {
+		throw redirect({ to: "/admin/directory/users" })
+	},
+})
+
+const directoryUsersRoute = createRoute({
+	getParentRoute: () => authenticatedRoute,
+	path: "directory/users",
+	component: DirectoryUsersPage,
+})
+
+const directoryGroupsRoute = createRoute({
+	getParentRoute: () => authenticatedRoute,
+	path: "directory/groups",
+	component: DirectoryGroupsPage,
+})
+
+const directoryOrganizationalUnitsRoute = createRoute({
+	getParentRoute: () => authenticatedRoute,
+	path: "directory/ous",
+	component: DirectoryOrganizationalUnitsPage,
+})
+
 const routeTree = rootRoute.addChildren([
 	publicRoute.addChildren([
 		homeRoute,
@@ -135,6 +164,10 @@ const routeTree = rootRoute.addChildren([
 		signaturesRoute,
 		signatureEditRoute,
 		signatureEditWithIdRoute,
+		directoryRoute,
+		directoryUsersRoute,
+		directoryGroupsRoute,
+		directoryOrganizationalUnitsRoute,
 	]),
 ])
 

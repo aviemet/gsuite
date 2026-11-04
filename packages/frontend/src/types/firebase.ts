@@ -18,13 +18,6 @@ export interface Template {
 	customerId: string
 }
 
-export interface UserSettings {
-	userId: string
-	selectedTemplate: string | null
-	lastUpdated: Timestamp
-	customVariables: Record<string, string>
-}
-
 export interface TemplateAssignment {
 	id: string
 	templateId: string

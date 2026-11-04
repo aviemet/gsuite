@@ -21,8 +21,16 @@ export const navbar = css`
 export const brand = css`
 	display: flex;
 	align-items: center;
+	justify-content: space-between;
 	gap: ${ vars.spacing.sm };
 	padding: ${ vars.spacing.md } ${ vars.spacing.md } ${ vars.spacing.sm };
+`
+
+export const brandIdentity = css`
+	display: flex;
+	align-items: center;
+	gap: ${ vars.spacing.sm };
+	min-width: 0;
 `
 
 export const brandMark = css`
