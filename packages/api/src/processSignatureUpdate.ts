@@ -1,5 +1,5 @@
 import {
-	getTemplatePreviewContext,
+	buildTemplateContext,
 	safeTemplateParse,
 	type SignatureUpdateMessage,
 } from "@gsuite/shared"
@@ -30,6 +30,7 @@ export async function processSignatureUpdate(
 
 	const content = String(templateSnap.data()?.content ?? "")
 	const person = getPersonForEmail(userEmail, new Map())
-	const html = safeTemplateParse(content, getTemplatePreviewContext(person))
+	const html = safeTemplateParse(content, buildTemplateContext(person))
 	await dependencies.gmail.updateSignature(userEmail, html)
 }
+

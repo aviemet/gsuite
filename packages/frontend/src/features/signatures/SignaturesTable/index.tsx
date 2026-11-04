@@ -10,8 +10,7 @@ import { AssignmentSummaryBadge } from "@/frontend/features/signatures/Assignmen
 import { type TemplateAssignmentSummary } from "@/frontend/features/signatures/summarizeTemplateAssignments"
 import { Template } from "@/frontend/types/firebase"
 import { safeTemplateParse } from "@/shared/parseTemplate"
-import { samplePerson } from "@/shared/person.testdata"
-import { getTemplatePreviewContext } from "@/shared/templatePlaceholders"
+import { buildPreviewTemplateContext } from "@/shared/templatePlaceholders"
 
 import { formatTemplateCreatedAt } from "./formatTemplateCreatedAt"
 import * as classes from "./SignaturesTable.css"
@@ -29,7 +28,7 @@ const unassignedSummary: TemplateAssignmentSummary = {
 	hasDetailTooltip: false,
 }
 
-const previewContext = getTemplatePreviewContext(samplePerson)
+const previewContext = buildPreviewTemplateContext()
 
 const defaultSortStatus: DataTableSortStatus<Template> = {
 	columnAccessor: "name",

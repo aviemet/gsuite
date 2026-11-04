@@ -1,4 +1,4 @@
-import { Person } from "./person.testdata"
+import { type Person, samplePerson } from "./person.testdata"
 
 export const placeholderCategories = ["details", "company", "social"] as const
 
@@ -10,6 +10,11 @@ export interface TemplatePlaceholder {
 	category: PlaceholderCategory
 	directoryField: string
 	description: string
+	read: (person: Person) => string
+}
+
+function phoneNumber(person: Person, type: Person["phoneNumbers"][number]["type"]): string {
+	return person.phoneNumbers.find((entry) => entry.type === type)?.number ?? ""
 }
 
 export const templatePlaceholders = [
@@ -19,6 +24,7 @@ export const templatePlaceholders = [
 		category: "details",
 		directoryField: "name.fullName",
 		description: "Given name and family name from the Directory profile",
+		read: (person) => person.displayName,
 	},
 	{
 		token: "givenName",
@@ -26,6 +32,7 @@ export const templatePlaceholders = [
 		category: "details",
 		directoryField: "name.givenName",
 		description: "Given name on the Directory profile",
+		read: (person) => person.firstName,
 	},
 	{
 		token: "familyName",
@@ -33,6 +40,7 @@ export const templatePlaceholders = [
 		category: "details",
 		directoryField: "name.familyName",
 		description: "Family name on the Directory profile",
+		read: (person) => person.lastName,
 	},
 	{
 		token: "employeeId",
@@ -40,6 +48,7 @@ export const templatePlaceholders = [
 		category: "details",
 		directoryField: "externalIds[type=organization]",
 		description: "Organization employee ID on the Directory profile",
+		read: (person) => person.employeeId,
 	},
 	{
 		token: "email",
@@ -47,6 +56,7 @@ export const templatePlaceholders = [
 		category: "details",
 		directoryField: "primaryEmail",
 		description: "Primary Workspace email address",
+		read: (person) => person.primaryEmail,
 	},
 	{
 		token: "address",
@@ -54,6 +64,7 @@ export const templatePlaceholders = [
 		category: "details",
 		directoryField: "addresses[primary].formatted",
 		description: "Primary formatted address on the Directory profile",
+		read: (person) => person.address,
 	},
 	{
 		token: "jobTitle",
@@ -61,6 +72,7 @@ export const templatePlaceholders = [
 		category: "details",
 		directoryField: "organizations[primary].title",
 		description: "Title on the user's primary organization",
+		read: (person) => person.jobTitle,
 	},
 	{
 		token: "department",
@@ -68,6 +80,7 @@ export const templatePlaceholders = [
 		category: "details",
 		directoryField: "organizations[primary].department",
 		description: "Department on the user's primary organization",
+		read: (person) => person.department,
 	},
 	{
 		token: "workPhone",
@@ -75,6 +88,7 @@ export const templatePlaceholders = [
 		category: "details",
 		directoryField: "phones[type=work]",
 		description: "Work phone number on the Directory profile",
+		read: (person) => phoneNumber(person, "work"),
 	},
 	{
 		token: "homePhone",
@@ -82,6 +96,7 @@ export const templatePlaceholders = [
 		category: "details",
 		directoryField: "phones[type=home]",
 		description: "Home phone number on the Directory profile",
+		read: (person) => phoneNumber(person, "home"),
 	},
 	{
 		token: "mobile",
@@ -89,6 +104,7 @@ export const templatePlaceholders = [
 		category: "details",
 		directoryField: "phones[type=mobile]",
 		description: "Mobile phone number on the Directory profile",
+		read: (person) => phoneNumber(person, "mobile"),
 	},
 	{
 		token: "photoUrl",
@@ -96,6 +112,7 @@ export const templatePlaceholders = [
 		category: "details",
 		directoryField: "thumbnailPhotoUrl",
 		description: "Directory thumbnail photo URL",
+		read: (person) => person.photoUrl,
 	},
 	{
 		token: "company",
@@ -103,6 +120,7 @@ export const templatePlaceholders = [
 		category: "company",
 		directoryField: "organizations[primary].name",
 		description: "Name of the user's primary organization",
+		read: (person) => person.organization,
 	},
 	{
 		token: "costCenter",
@@ -110,6 +128,7 @@ export const templatePlaceholders = [
 		category: "company",
 		directoryField: "organizations[primary].costCenter",
 		description: "Cost center on the user's primary organization",
+		read: (person) => person.costCenter,
 	},
 	{
 		token: "companyLocation",
@@ -117,6 +136,7 @@ export const templatePlaceholders = [
 		category: "company",
 		directoryField: "organizations[primary].location",
 		description: "Location on the user's primary organization",
+		read: (person) => person.location,
 	},
 	{
 		token: "companyDescription",
@@ -124,13 +144,15 @@ export const templatePlaceholders = [
 		category: "company",
 		directoryField: "organizations[primary].description",
 		description: "Description on the user's primary organization",
+		read: (person) => person.companyDescription,
 	},
 	{
 		token: "companyDomain",
 		label: "Domain",
 		category: "company",
-		directoryField: "organizations[primary].domain",
-		description: "Domain on the user's primary organization",
+		directoryField: "primaryEmail domain",
+		description: "Domain portion of the primary Workspace email",
+		read: (person) => person.companyDomain,
 	},
 	{
 		token: "managerEmail",
@@ -138,6 +160,7 @@ export const templatePlaceholders = [
 		category: "company",
 		directoryField: "relations[type=manager]",
 		description: "Manager relation on the Directory profile",
+		read: (person) => person.managerEmail,
 	},
 	{
 		token: "buildingId",
@@ -145,6 +168,7 @@ export const templatePlaceholders = [
 		category: "company",
 		directoryField: "locations[].buildingId",
 		description: "Building ID from Directory locations",
+		read: (person) => person.buildingId,
 	},
 	{
 		token: "floorName",
@@ -152,6 +176,7 @@ export const templatePlaceholders = [
 		category: "company",
 		directoryField: "locations[].floorName",
 		description: "Floor name from Directory locations",
+		read: (person) => person.floorName,
 	},
 	{
 		token: "floorSection",
@@ -159,6 +184,7 @@ export const templatePlaceholders = [
 		category: "company",
 		directoryField: "locations[].floorSection",
 		description: "Floor section from Directory locations",
+		read: (person) => person.floorSection,
 	},
 	{
 		token: "deskCode",
@@ -166,6 +192,7 @@ export const templatePlaceholders = [
 		category: "company",
 		directoryField: "locations[].deskCode",
 		description: "Desk code from Directory locations",
+		read: (person) => person.deskCode,
 	},
 	{
 		token: "website",
@@ -173,6 +200,7 @@ export const templatePlaceholders = [
 		category: "social",
 		directoryField: "websites[primary]",
 		description: "Primary website on the Directory profile",
+		read: (person) => person.website,
 	},
 	{
 		token: "workWebsite",
@@ -180,6 +208,7 @@ export const templatePlaceholders = [
 		category: "social",
 		directoryField: "websites[type=work]",
 		description: "Work website on the Directory profile",
+		read: (person) => person.workWebsite,
 	},
 	{
 		token: "homeWebsite",
@@ -187,6 +216,7 @@ export const templatePlaceholders = [
 		category: "social",
 		directoryField: "websites[type=home]",
 		description: "Home website on the Directory profile",
+		read: (person) => person.homeWebsite,
 	},
 	{
 		token: "blog",
@@ -194,6 +224,7 @@ export const templatePlaceholders = [
 		category: "social",
 		directoryField: "websites[type=blog]",
 		description: "Blog website on the Directory profile",
+		read: (person) => person.blog,
 	},
 	{
 		token: "profileUrl",
@@ -201,6 +232,7 @@ export const templatePlaceholders = [
 		category: "social",
 		directoryField: "websites[type=profile]",
 		description: "Profile website on the Directory profile",
+		read: (person) => person.profileUrl,
 	},
 ] as const satisfies readonly TemplatePlaceholder[]
 
@@ -219,39 +251,10 @@ export function getPlaceholderInsertValue(
 	return `{{${ placeholder.token }}}`
 }
 
-function phoneNumber(person: Person, type: Person["phoneNumbers"][number]["type"]): string {
-	return person.phoneNumbers.find((entry) => entry.type === type)?.number ?? ""
-}
-
-export function getTemplatePreviewContext(person: Person): Record<string, string> {
-	const values: Record<PlaceholderToken, string> = {
-		fullName: person.displayName,
-		givenName: person.firstName,
-		familyName: person.lastName,
-		employeeId: person.employeeId,
-		email: person.primaryEmail,
-		address: person.address,
-		jobTitle: person.jobTitle,
-		department: person.department,
-		workPhone: phoneNumber(person, "work"),
-		homePhone: phoneNumber(person, "home"),
-		mobile: phoneNumber(person, "mobile"),
-		photoUrl: person.photoUrl,
-		company: person.organization,
-		costCenter: person.costCenter,
-		companyLocation: person.location,
-		companyDescription: person.companyDescription,
-		companyDomain: person.companyDomain,
-		managerEmail: person.managerEmail,
-		buildingId: person.buildingId,
-		floorName: person.floorName,
-		floorSection: person.floorSection,
-		deskCode: person.deskCode,
-		website: person.website,
-		workWebsite: person.workWebsite,
-		homeWebsite: person.homeWebsite,
-		blog: person.blog,
-		profileUrl: person.profileUrl,
+export function buildTemplateContext(person: Person): Record<string, string> {
+	const values = {} as Record<PlaceholderToken, string>
+	for(const placeholder of templatePlaceholders) {
+		values[placeholder.token] = placeholder.read(person)
 	}
 
 	return {
@@ -264,4 +267,8 @@ export function getTemplatePreviewContext(person: Person): Record<string, string
 		displayName: values.fullName,
 		primaryEmail: values.email,
 	}
+}
+
+export function buildPreviewTemplateContext(): Record<string, string> {
+	return buildTemplateContext(samplePerson)
 }

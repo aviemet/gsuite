@@ -5,8 +5,7 @@ import { ChangeEvent, useEffect, useRef, useState } from "react"
 
 import { HtmlPreview } from "@/frontend/components/HtmlPreview"
 import { safeTemplateParse } from "@/shared/parseTemplate"
-import { samplePerson } from "@/shared/person.testdata"
-import { getTemplatePreviewContext } from "@/shared/templatePlaceholders"
+import { buildPreviewTemplateContext } from "@/shared/templatePlaceholders"
 
 import { type StartTemplate } from "./startTemplates"
 import * as classes from "./TemplatePickerModal.css"
@@ -21,7 +20,7 @@ interface TemplatePickerModalProps {
 	onCancel: () => void
 }
 
-const previewContext = getTemplatePreviewContext(samplePerson)
+const previewContext = buildPreviewTemplateContext()
 
 function filterTemplates(templates: StartTemplate[], searchQuery: string): StartTemplate[] {
 	const normalizedQuery = searchQuery.trim().toLowerCase()

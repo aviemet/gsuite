@@ -4,6 +4,7 @@ import { google } from "googleapis"
 
 import { requireServiceAccount } from "../google/serviceAccount"
 import { type DirectoryClient, type DirectorySnapshot } from "./client"
+import { mapDirectoryUserProfile } from "./mapDirectoryUserProfile"
 import { buildDirectorySnapshot, type RawDirectoryGroup, type RawDirectoryMember, type RawDirectoryUser } from "./snapshot"
 
 function createJwt(subject: string, scopes: readonly string[]): JWT {
@@ -51,14 +52,16 @@ export class RealDirectoryClient implements DirectoryClient {
 				customer: "my_customer",
 				maxResults: 500,
 				pageToken,
-				projection: "basic",
+				projection: "full",
 			})
 			const items = (response.data.users ?? []).flatMap((user) => {
 				if(!user.primaryEmail) return []
+				const profile = mapDirectoryUserProfile(user)
 				return [{
 					email: user.primaryEmail,
 					displayName: user.name?.fullName ?? user.primaryEmail,
 					orgUnitPath: user.orgUnitPath ?? "/",
+					...profile,
 				}]
 			})
 			return { items, nextPageToken: response.data.nextPageToken ?? undefined }

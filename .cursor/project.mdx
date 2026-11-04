@@ -14,6 +14,8 @@ Signature fonts are inline font stacks. Gmail and Outlook strip `@font-face`.
 
 The rich text editor uses TinyMCE's oxide skin. That skin is what makes the canvas visible after init.
 
+Signature variables live in one shared registry (`templatePlaceholders`). That registry drives the editor helper list and `buildTemplateContext`, which is the only way templates are filled for Gmail writes. Preview calls `buildPreviewTemplateContext`, which alone may use the dummy person. Deploy must never import or spread the dummy person.
+
 ## Runtime
 
 Client Firebase config is the `VITE_*` variables Vite loads from `packages/.env` (see `packages/.env.example`), via the frontend Vite config. The local API and seed script read `VITE_FIREBASE_PROJECT_ID` from that same file. Emulators and deploy use the project id in `.firebaserc`. Deploy passes `--project default` so that alias wins over a previously selected project on this directory. Those two ids have to match. `yarn dev` starts Auth/Firestore emulators, a local API server on port 3000, and Vite together. Vite proxies `/api` to that API process.

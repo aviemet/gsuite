@@ -1,4 +1,10 @@
-import { type DirectoryGroup, type DirectoryOrganizationalUnit, type DirectoryUser } from "@gsuite/shared"
+import {
+	type DirectoryGroup,
+	type DirectoryOrganizationalUnit,
+	type DirectoryPhoneNumber,
+	type DirectoryUser,
+	emptyDirectoryProfile,
+} from "@gsuite/shared"
 
 import { type DirectorySnapshot } from "./client"
 
@@ -6,6 +12,28 @@ export interface RawDirectoryUser {
 	email: string
 	displayName: string
 	orgUnitPath: string
+	givenName?: string
+	familyName?: string
+	jobTitle?: string
+	department?: string
+	organization?: string
+	location?: string
+	employeeId?: string
+	address?: string
+	photoUrl?: string
+	costCenter?: string
+	companyDescription?: string
+	managerEmail?: string
+	buildingId?: string
+	floorName?: string
+	floorSection?: string
+	deskCode?: string
+	website?: string
+	workWebsite?: string
+	homeWebsite?: string
+	blog?: string
+	profileUrl?: string
+	phoneNumbers?: DirectoryPhoneNumber[]
 }
 
 export interface RawDirectoryGroup {
@@ -45,13 +73,39 @@ export function buildDirectorySnapshot(input: {
 		groupIdsByEmail.set(email, groupIds)
 	}
 
-	const users: DirectoryUser[] = input.users.map((user) => ({
-		email: user.email.toLowerCase(),
-		displayName: user.displayName || user.email,
-		signatureHtml: "",
-		groupIds: groupIdsByEmail.get(user.email.toLowerCase()) ?? [],
-		organizationalUnitPaths: organizationalUnitPaths(user.orgUnitPath),
-	}))
+	const users: DirectoryUser[] = input.users.map((user) => {
+		const empty = emptyDirectoryProfile()
+		return {
+			...empty,
+			email: user.email.toLowerCase(),
+			displayName: user.displayName || user.email,
+			givenName: user.givenName ?? empty.givenName,
+			familyName: user.familyName ?? empty.familyName,
+			signatureHtml: "",
+			groupIds: groupIdsByEmail.get(user.email.toLowerCase()) ?? [],
+			organizationalUnitPaths: organizationalUnitPaths(user.orgUnitPath),
+			jobTitle: user.jobTitle ?? empty.jobTitle,
+			department: user.department ?? empty.department,
+			organization: user.organization ?? empty.organization,
+			location: user.location ?? empty.location,
+			employeeId: user.employeeId ?? empty.employeeId,
+			address: user.address ?? empty.address,
+			photoUrl: user.photoUrl ?? empty.photoUrl,
+			costCenter: user.costCenter ?? empty.costCenter,
+			companyDescription: user.companyDescription ?? empty.companyDescription,
+			managerEmail: user.managerEmail ?? empty.managerEmail,
+			buildingId: user.buildingId ?? empty.buildingId,
+			floorName: user.floorName ?? empty.floorName,
+			floorSection: user.floorSection ?? empty.floorSection,
+			deskCode: user.deskCode ?? empty.deskCode,
+			website: user.website ?? empty.website,
+			workWebsite: user.workWebsite ?? empty.workWebsite,
+			homeWebsite: user.homeWebsite ?? empty.homeWebsite,
+			blog: user.blog ?? empty.blog,
+			profileUrl: user.profileUrl ?? empty.profileUrl,
+			phoneNumbers: user.phoneNumbers ?? empty.phoneNumbers,
+		}
+	})
 
 	const groups: DirectoryGroup[] = input.groups.map((group) => ({
 		id: group.id,

@@ -26,6 +26,7 @@ onInit(() => {
 
 export const api = onRequest({
 	region,
+	memory: "512MiB",
 	invoker: "public",
 	timeoutSeconds: 60,
 	secrets: [googleServiceAccountJson],
@@ -51,6 +52,7 @@ export const api = onRequest({
 
 export const updateSignature = onTaskDispatched<SignatureUpdateMessage>({
 	region,
+	memory: "512MiB",
 	timeoutSeconds: 1800,
 	secrets: [googleServiceAccountJson],
 	retryConfig: {
@@ -67,6 +69,7 @@ export const updateSignature = onTaskDispatched<SignatureUpdateMessage>({
 export const redeployScheduledSignatures = onSchedule({
 	schedule: "every 24 hours",
 	region,
+	memory: "512MiB",
 	timeoutSeconds: 540,
 	secrets: [googleServiceAccountJson],
 }, async () => {

@@ -5,8 +5,7 @@ import { HtmlPreview } from "@/frontend/components/HtmlPreview"
 import { type DirectorySnapshot } from "@/frontend/queries/directory"
 import { Template } from "@/frontend/types/firebase"
 import { safeTemplateParse } from "@/shared/parseTemplate"
-import { samplePerson } from "@/shared/person.testdata"
-import { getTemplatePreviewContext } from "@/shared/templatePlaceholders"
+import { buildPreviewTemplateContext } from "@/shared/templatePlaceholders"
 
 import {
 	findDirectoryGroup,
@@ -22,7 +21,7 @@ interface ConfirmStepProps {
 	directory: DirectorySnapshot
 }
 
-const previewContext = getTemplatePreviewContext(samplePerson)
+const previewContext = buildPreviewTemplateContext()
 
 function SummaryRow({ label, children }: { label: string, children: ReactNode }) {
 	return (

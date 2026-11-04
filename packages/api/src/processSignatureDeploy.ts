@@ -1,6 +1,6 @@
 import {
+	buildTemplateContext,
 	type DirectoryUser,
-	getTemplatePreviewContext,
 	safeTemplateParse,
 	SIGNATURE_DEPLOY_LOGS_COLLECTION,
 	type SignatureDeployLog,
@@ -86,7 +86,7 @@ export async function processSignatureDeploy(
 		isFirstUser = false
 
 		const person = getPersonForEmail(userEmail, usersByEmail)
-		const html = safeTemplateParse(content, getTemplatePreviewContext(person))
+		const html = safeTemplateParse(content, buildTemplateContext(person))
 
 		for(let attempt = 1; attempt <= maxAttempts; attempt += 1) {
 			try {
