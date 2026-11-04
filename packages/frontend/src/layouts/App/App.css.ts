@@ -26,15 +26,11 @@ export const brand = css`
 `
 
 export const brandMark = css`
-	display: flex;
-	align-items: center;
-	justify-content: center;
+	display: block;
 	flex-shrink: 0;
 	width: 1.75rem;
 	height: 1.75rem;
-	border-radius: ${ vars.radius.sm };
-	background: ${ vars.colors.copper[4] };
-	color: ${ vars.colors.harbor[9] };
+	object-fit: contain;
 `
 
 export const brandName = css`

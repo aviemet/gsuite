@@ -17,6 +17,7 @@ import { PrivacyPage } from "../pages/Privacy"
 import { SettingsPage } from "../pages/Settings"
 import { SignatureEditPage } from "../pages/Signatures/Edit"
 import { SignaturesListPage } from "../pages/Signatures/Index"
+import { SupportPage } from "../pages/Support"
 import { TermsPage } from "../pages/Terms"
 
 export interface RouterContext {
@@ -49,6 +50,12 @@ const termsRoute = createRoute({
 	getParentRoute: () => publicRoute,
 	path: "/terms",
 	component: TermsPage,
+})
+
+const supportRoute = createRoute({
+	getParentRoute: () => publicRoute,
+	path: "/support",
+	component: SupportPage,
 })
 
 const loginRoute = createRoute({
@@ -119,6 +126,7 @@ const routeTree = rootRoute.addChildren([
 		homeRoute,
 		privacyRoute,
 		termsRoute,
+		supportRoute,
 	]),
 	loginRoute,
 	authenticatedRoute.addChildren([

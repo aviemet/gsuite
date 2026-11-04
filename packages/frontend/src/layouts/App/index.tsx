@@ -1,9 +1,10 @@
 import { AppShell, Box, Burger, Center, Group, Loader, NavLink, Stack } from "@mantine/core"
 import { useDisclosure } from "@mantine/hooks"
-import { IconDashboard, IconSettings, IconSignature, IconWaveSine } from "@tabler/icons-react"
+import { IconDashboard, IconSettings, IconSignature } from "@tabler/icons-react"
 import { Link, Outlet, useNavigate } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
 
+import { BrandLogo } from "@/frontend/components/BrandLogo"
 import { PAGE_TITLE_PORTAL_ID } from "@/frontend/components/Page"
 import { useWorkspaceConnectionGate } from "@/frontend/components/RequireWorkspaceConnection"
 import { UserMenu } from "@/frontend/components/UserMenu"
@@ -68,9 +69,7 @@ export function AppLayout() {
 
 			<AppShell.Navbar className={ classes.navbar } aria-label="Primary">
 				<div className={ classes.brand }>
-					<span className={ classes.brandMark } aria-hidden>
-						<IconWaveSine size={ 16 } />
-					</span>
+					<BrandLogo className={ classes.brandMark } size={ 28 } />
 					<span className={ classes.brandName }>{ APP_NAME }</span>
 				</div>
 
