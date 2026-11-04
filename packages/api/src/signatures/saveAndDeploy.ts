@@ -17,8 +17,9 @@ import {
 } from "@gsuite/shared"
 import { type Firestore } from "firebase-admin/firestore"
 
-import { HttpError } from "./http/errors"
-import { type QueuePublisher } from "./queue/publisher"
+import { HttpError } from "../http/errors"
+import { type QueuePublisher } from "../queue/publisher"
+import { readBoolean, readString } from "./recordFields"
 
 export interface SaveAndDeployDependencies {
 	db: Firestore
@@ -37,15 +38,6 @@ export interface SaveActor {
 function assignedGroupName(groupIds: string[], groups: DirectoryGroup[]): string | null {
 	if(groupIds.length !== 1) return null
 	return groups.find((group) => group.id === groupIds[0])?.name ?? null
-}
-
-function readString(value: Record<string, unknown> | undefined, key: string): string {
-	const field = value?.[key]
-	return typeof field === "string" ? field : ""
-}
-
-function readBoolean(value: Record<string, unknown> | undefined, key: string): boolean {
-	return value?.[key] === true
 }
 
 function emailsFromAssignments(

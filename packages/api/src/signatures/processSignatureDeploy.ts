@@ -9,8 +9,9 @@ import {
 } from "@gsuite/shared"
 import { type Firestore } from "firebase-admin/firestore"
 
-import { type GmailClient } from "./gmail/client"
-import { getPersonForEmail } from "./targets/people"
+import { type GmailClient } from "../gmail/client"
+import { errorMessage } from "./errorMessage"
+import { getPersonForEmail } from "./people"
 
 const DEFAULT_INTERVAL_MS = 200
 const DEFAULT_MAX_ATTEMPTS = 3
@@ -41,11 +42,6 @@ function configuredNumber(
 	const parsed = Number(envValue)
 	if(!Number.isInteger(parsed) || parsed < 0) return fallback
 	return parsed
-}
-
-function errorMessage(error: unknown): string {
-	if(error instanceof Error && error.message) return error.message
-	return "Signature update failed"
 }
 
 export async function processSignatureDeploy(
@@ -104,7 +100,7 @@ export async function processSignatureDeploy(
 						userEmail,
 						status: "error",
 						attempts: attempt,
-						error: errorMessage(error),
+						error: errorMessage(error, "Signature update failed"),
 						finishedAt: now().toISOString(),
 					})
 					break

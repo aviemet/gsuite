@@ -7,9 +7,11 @@ import {
 } from "@gsuite/shared"
 import { type Firestore } from "firebase-admin/firestore"
 
-import { type DirectoryClient } from "./directory/client"
-import { type QueuePublisher } from "./queue/publisher"
-import { listCustomers } from "./workspace/records"
+import { type DirectoryClient } from "../directory/client"
+import { type QueuePublisher } from "../queue/publisher"
+import { listCustomers } from "../workspace/records"
+import { errorMessage } from "./errorMessage"
+import { readBoolean, readString } from "./recordFields"
 
 export interface EnqueueScheduledDeploysDependencies {
 	db: Firestore
@@ -27,20 +29,6 @@ export interface ScheduledCustomerDeployResult {
 export interface EnqueueScheduledDeploysResult {
 	customers: ScheduledCustomerDeployResult[]
 	queuedUserCount: number
-}
-
-function readString(value: Record<string, unknown> | undefined, key: string): string {
-	const field = value?.[key]
-	return typeof field === "string" ? field : ""
-}
-
-function readBoolean(value: Record<string, unknown> | undefined, key: string): boolean {
-	return value?.[key] === true
-}
-
-function errorMessage(error: unknown): string {
-	if(error instanceof Error && error.message) return error.message
-	return "Scheduled deploy failed"
 }
 
 export async function enqueueScheduledDeploysForCustomer(
@@ -131,7 +119,7 @@ export async function enqueueScheduledDeploys(
 			results.push({
 				customerId: customer.id,
 				queuedUserCount: 0,
-				error: errorMessage(error),
+				error: errorMessage(error, "Scheduled deploy failed"),
 			})
 		}
 	}

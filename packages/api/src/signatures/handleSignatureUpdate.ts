@@ -1,10 +1,10 @@
 import { type SignatureUpdateMessage } from "@gsuite/shared"
 
-import { createDirectoryClient } from "./directory"
-import { getAdminFirestore } from "./firebase/admin"
-import { createGmailClient } from "./gmail"
+import { createDirectoryClient } from "../directory"
+import { getAdminFirestore } from "../firebase/admin"
+import { createGmailClient } from "../gmail"
+import { loadCustomer } from "../workspace/records"
 import { processSignatureDeploy } from "./processSignatureDeploy"
-import { loadCustomer } from "./workspace/records"
 
 export async function handleSignatureUpdate(message: SignatureUpdateMessage): Promise<void> {
 	const db = getAdminFirestore()

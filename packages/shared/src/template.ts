@@ -58,6 +58,15 @@ export interface SaveAndDeployResponse {
 	queuedUserCount: number
 }
 
+export interface DeployTemplateRequest {
+	templateId: string
+}
+
+export interface DeployTemplateResponse {
+	templateId: string
+	queuedUserCount: number
+}
+
 export interface SignatureUpdateMessage {
 	deployId: string
 	templateId: string

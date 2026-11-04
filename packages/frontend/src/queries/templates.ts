@@ -140,9 +140,13 @@ export function useTemplatesQuery() {
 	}
 }
 
+export function templateQueryKey(id: string | undefined) {
+	return [TEMPLATES_QUERY_KEY, "detail", id] as const
+}
+
 export function useTemplateQuery(id: string | undefined) {
 	return useQuery({
-		queryKey: ["template", id],
+		queryKey: templateQueryKey(id),
 		queryFn: () => (id ? fetchTemplate(id) : Promise.resolve(undefined)),
 		enabled: !!id,
 		staleTime: 1000 * 60 * 5,

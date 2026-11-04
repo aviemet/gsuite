@@ -1,23 +1,17 @@
-import { createDirectoryClient } from "./directory"
+import { createDirectoryClient } from "../directory"
+import { getAdminFirestore } from "../firebase/admin"
+import { createSignatureQueue } from "./createSignatureQueue"
 import {
 	enqueueScheduledDeploys,
 	type EnqueueScheduledDeploysResult,
 } from "./enqueueScheduledDeploys"
-import { getAdminFirestore } from "./firebase/admin"
 import { handleSignatureUpdate } from "./handleSignatureUpdate"
-import {
-	createCloudTasksPublisher,
-	createInlineQueuePublisher,
-	shouldEnqueueCloudTask,
-} from "./queue/publisher"
 
 export async function handleScheduledDeploys(): Promise<EnqueueScheduledDeploysResult> {
 	const db = getAdminFirestore()
-	const queue = shouldEnqueueCloudTask(process.env)
-		? createCloudTasksPublisher()
-		: createInlineQueuePublisher(async (message) => {
-			await handleSignatureUpdate(message)
-		})
+	const queue = createSignatureQueue(async (message) => {
+		await handleSignatureUpdate(message)
+	})
 
 	return enqueueScheduledDeploys({
 		db,

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { getPersonForEmail, personFromDirectoryUser } from "../src/targets/people"
+import { getPersonForEmail, personFromDirectoryUser } from "../src/signatures/people"
 
 describe("personFromDirectoryUser", () => {
 	it("maps Directory profile fields without sample fixture values", () => {

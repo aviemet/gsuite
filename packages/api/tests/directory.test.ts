@@ -21,7 +21,7 @@ vi.mock("../src/workspace/authorize", () => ({
 	}),
 }))
 
-import { directoryHandler } from "../src/directoryHandler"
+import { directoryHandler } from "../src/directory/handler"
 
 describe("directoryHandler", () => {
 	beforeEach(() => {

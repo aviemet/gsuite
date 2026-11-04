@@ -1,5 +1,5 @@
 import { MantineProvider } from "@mantine/core"
-import { cleanup, render, screen, within } from "@testing-library/react"
+import { cleanup, render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { type ReactNode } from "react"
 import { afterEach, describe, expect, it, vi } from "vitest"
@@ -16,6 +16,24 @@ vi.mock("@tanstack/react-router", () => ({
 	useRouter: () => ({
 		navigate: vi.fn(),
 	}),
+}))
+
+vi.mock("@/frontend/queries/templates", () => ({
+	useTemplatesQuery: () => ({ data: [] }),
+	useTemplateAssignmentsQuery: () => ({ data: [] }),
+}))
+
+vi.mock("@/frontend/queries/directory", () => ({
+	useDirectoryQuery: () => ({ data: { users: [], groups: [], organizationalUnits: [] } }),
+}))
+
+vi.mock("@/frontend/features/signatures/deploySignatureTemplate", () => ({
+	deploySignatureTemplate: vi.fn(),
+}))
+
+vi.mock("@/frontend/features/signatures/notifyDeployResult", () => ({
+	notifyDeploySuccess: vi.fn(),
+	notifyDeployError: vi.fn(),
 }))
 
 afterEach(() => {
@@ -129,5 +147,24 @@ describe("SignaturesTable", () => {
 		const bodyRows = within(screen.getByRole("table")).getAllByRole("row").slice(1)
 		expect(within(bodyRows[0]!).getByText("Professional Signature")).toBeInTheDocument()
 		expect(within(bodyRows[1]!).getByText("Marketing Signature")).toBeInTheDocument()
+	})
+
+	it("exposes deploy and edit actions with tooltips", async () => {
+		const user = userEvent.setup()
+		renderTable([professional])
+
+		const deployButton = screen.getByRole("button", { name: "Deploy Professional Signature" })
+		const editButton = screen.getByRole("button", { name: "Edit Professional Signature" })
+
+		await user.hover(deployButton)
+		expect(await screen.findByRole("tooltip")).toHaveTextContent("Deploy")
+
+		await user.unhover(deployButton)
+		await waitFor(() => {
+			expect(screen.queryByRole("tooltip")).not.toBeInTheDocument()
+		})
+
+		await user.hover(editButton)
+		expect(await screen.findByRole("tooltip")).toHaveTextContent("Edit")
 	})
 })

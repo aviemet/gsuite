@@ -1,4 +1,4 @@
-import { ActionIcon, Badge, Box, Group } from "@mantine/core"
+import { ActionIcon, Badge, Box, Group, Tooltip } from "@mantine/core"
 import { IconChevronDown, IconChevronsDown, IconPencil, IconTrash } from "@tabler/icons-react"
 import { Link, useRouter } from "@tanstack/react-router"
 import clsx from "clsx"
@@ -7,6 +7,7 @@ import { type MouseEvent, useState } from "react"
 
 import { HtmlPreview } from "@/frontend/components/HtmlPreview"
 import { AssignmentSummaryBadge } from "@/frontend/features/signatures/AssignmentSummaryBadge"
+import { DeploySignatureAction } from "@/frontend/features/signatures/DeploySignatureAction"
 import { type TemplateAssignmentSummary } from "@/frontend/features/signatures/summarizeTemplateAssignments"
 import { Template } from "@/frontend/types/firebase"
 import { safeTemplateParse } from "@/shared/parseTemplate"
@@ -183,18 +184,24 @@ export function SignaturesTable({ templates, assignmentSummaries }: SignaturesTa
 					cellsClassName: classes.actionsCell,
 					render: (record) => (
 						<Group gap={ 4 } wrap="nowrap">
-							<ActionIcon
-								variant="subtle"
-								color="harbor"
-								size="sm"
-								aria-label={ `Edit ${ record.name }` }
-								onClick={ () => router.navigate({
-									to: "/admin/signatures/edit/$id",
-									params: { id: record.id },
-								}) }
-							>
-								<IconPencil size={ 16 } aria-hidden />
-							</ActionIcon>
+							<DeploySignatureAction
+								templateId={ record.id }
+								templateName={ record.name }
+							/>
+							<Tooltip label="Edit" withArrow position="top">
+								<ActionIcon
+									variant="subtle"
+									color="harbor"
+									size="sm"
+									aria-label={ `Edit ${ record.name }` }
+									onClick={ () => router.navigate({
+										to: "/admin/signatures/edit/$id",
+										params: { id: record.id },
+									}) }
+								>
+									<IconPencil size={ 16 } aria-hidden />
+								</ActionIcon>
+							</Tooltip>
 							<ActionIcon
 								variant="subtle"
 								color="red"
