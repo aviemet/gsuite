@@ -1,13 +1,14 @@
-import { Box, Button, Collapse, Group, Modal, Paper, Stack, Text, TextInput } from "@mantine/core"
-import { IconChevronDown, IconChevronRight, IconFileText, IconSearch } from "@tabler/icons-react"
+import { Box, Button, Group, Modal, Paper, Stack, Text, TextInput } from "@mantine/core"
+import { IconSearch } from "@tabler/icons-react"
 import clsx from "clsx"
-import { ChangeEvent, useEffect, useRef, useState } from "react"
+import { type ChangeEvent, useEffect, useRef, useState } from "react"
 
 import { HtmlPreview } from "@/frontend/components/HtmlPreview"
 import { safeTemplateParse } from "@/shared/parseTemplate"
 import { buildPreviewTemplateContext } from "@/shared/templatePlaceholders"
 
 import { type StartTemplate } from "./startTemplates"
+import { TemplateGroup } from "./TemplateGroup"
 import * as classes from "./TemplatePickerModal.css"
 
 interface TemplatePickerModalProps {
@@ -27,79 +28,6 @@ function filterTemplates(templates: StartTemplate[], searchQuery: string): Start
 	if(normalizedQuery.length === 0) return templates
 
 	return templates.filter((template) => template.name.toLowerCase().includes(normalizedQuery))
-}
-
-interface TemplateGroupProps {
-	label: string
-	templates: StartTemplate[]
-	selectedId: string | null
-	isExpanded: boolean
-	onToggle: () => void
-	onSelect: (templateId: string) => void
-}
-
-function TemplateGroup({
-	label,
-	templates,
-	selectedId,
-	isExpanded,
-	onToggle,
-	onSelect,
-}: TemplateGroupProps) {
-	const Chevron = isExpanded ? IconChevronDown : IconChevronRight
-
-	function handleSelect(templateId: string) {
-		onSelect(templateId)
-	}
-
-	return (
-		<Stack gap={ 4 }>
-			<UnstyledGroupToggle
-				label={ `${label} (${templates.length})` }
-				isExpanded={ isExpanded }
-				onToggle={ onToggle }
-				Chevron={ Chevron }
-			/>
-			<Collapse expanded={ isExpanded } keepMounted={ false }>
-				<Stack gap={ 2 }>
-					{ templates.map((template) => (
-						<button
-							key={ template.id }
-							type="button"
-							className={ clsx(classes.templateButton) }
-							data-selected={ selectedId === template.id }
-							aria-pressed={ selectedId === template.id }
-							onClick={ () => handleSelect(template.id) }
-						>
-							<IconFileText size={ 16 } aria-hidden />
-							<Text size="sm" truncate>{ template.name }</Text>
-						</button>
-					)) }
-				</Stack>
-			</Collapse>
-		</Stack>
-	)
-}
-
-interface UnstyledGroupToggleProps {
-	label: string
-	isExpanded: boolean
-	onToggle: () => void
-	Chevron: typeof IconChevronDown
-}
-
-function UnstyledGroupToggle({ label, isExpanded, onToggle, Chevron }: UnstyledGroupToggleProps) {
-	return (
-		<button
-			type="button"
-			className={ clsx(classes.groupToggle) }
-			onClick={ onToggle }
-			aria-expanded={ isExpanded }
-		>
-			<Chevron size={ 14 } aria-hidden />
-			<Text size="sm" fw={ 600 }>{ label }</Text>
-		</button>
-	)
 }
 
 export function TemplatePickerModal({

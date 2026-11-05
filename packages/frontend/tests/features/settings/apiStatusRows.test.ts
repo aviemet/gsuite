@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import {
+	apiStatusCatalog,
 	apiStatusNeedsAuthorization,
 	apiStatusRowMessage,
 	apiStatusSummaryMessage,
@@ -12,15 +13,22 @@ import { apiStatusCheckIds, type ApiStatusResult } from "@/shared/workspace"
 const successResults: ApiStatusResult[] = [
 	{ id: apiStatusCheckIds.users, label: "Users", group: "admin", status: "success" },
 	{ id: apiStatusCheckIds.groups, label: "Groups", group: "admin", status: "success" },
+	{ id: apiStatusCheckIds.groupMembers, label: "Group members", group: "admin", status: "success" },
 	{ id: apiStatusCheckIds.organizationalUnits, label: "Organizational units", group: "admin", status: "success" },
 	{ id: apiStatusCheckIds.gmailSettings, label: "Gmail signature settings", group: "user", status: "success" },
 ]
 
 describe("buildApiStatusRows", () => {
+	it("lists a row for every API status check", () => {
+		expect(apiStatusCatalog.map((check) => check.id).sort()).toEqual(
+			Object.values(apiStatusCheckIds).sort(),
+		)
+	})
+
 	it("keeps every check idle until a run starts", () => {
 		const rows = buildApiStatusRows(undefined, false)
 
-		expect(rows.map((row) => row.state)).toEqual(["idle", "idle", "idle", "idle"])
+		expect(rows.map((row) => row.state)).toEqual(["idle", "idle", "idle", "idle", "idle"])
 		expect(apiStatusSummaryMessage(summarizeApiStatus(rows))).toBe("Not checked yet")
 		expect(apiStatusRowMessage(rows[0])).toBe("Not checked")
 	})

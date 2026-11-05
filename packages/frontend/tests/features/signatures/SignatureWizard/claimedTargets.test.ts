@@ -4,7 +4,7 @@ import {
 	assignmentTargetsForTemplate,
 	buildClaimedTargets,
 } from "@/frontend/features/signatures/SignatureWizard/claimedTargets"
-import { getInitialWizardValues } from "@/frontend/features/signatures/SignatureWizard/types"
+import { getInitialAssignmentValues } from "@/frontend/features/signatures/SignatureWizard/types"
 import { type Template, type TemplateAssignment } from "@/frontend/types/firebase"
 import { assignmentTypes } from "@/shared/template"
 
@@ -118,9 +118,9 @@ describe("assignmentTargetsForTemplate", () => {
 	})
 })
 
-describe("getInitialWizardValues", () => {
+describe("getInitialAssignmentValues", () => {
 	it("hydrates targets and default from template assignments", () => {
-		const values = getInitialWizardValues(templates[0], assignments)
+		const values = getInitialAssignmentValues(templates[0], assignments)
 
 		expect(values.isDefault).toBe(false)
 		expect(values.userEmails).toEqual(["jane.doe@example.com"])
@@ -129,6 +129,6 @@ describe("getInitialWizardValues", () => {
 	})
 
 	it("hydrates default from the template flag", () => {
-		expect(getInitialWizardValues(templates[1], []).isDefault).toBe(true)
+		expect(getInitialAssignmentValues(templates[1], []).isDefault).toBe(true)
 	})
 })

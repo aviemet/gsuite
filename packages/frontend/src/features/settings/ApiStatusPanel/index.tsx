@@ -1,90 +1,12 @@
 import { Button, Stack, Text, TextInput, Title } from "@mantine/core"
-import { IconCircle, IconCircleCheck, IconCircleX, IconLoader2 } from "@tabler/icons-react"
-import { type ChangeEvent, type ReactNode } from "react"
+import { type ChangeEvent } from "react"
 
 import { type ApiStatusResult } from "@/shared/workspace"
 
+import { ApiStatusGroup } from "./ApiStatusGroup"
 import * as classes from "./ApiStatusPanel.css"
-import {
-	type ApiStatusRow,
-	apiStatusRowMessage,
-	type ApiStatusRowState,
-	apiStatusSummaryMessage,
-	buildApiStatusRows,
-	summarizeApiStatus,
-} from "./apiStatusRows"
-
-const statusIcons = {
-	idle: IconCircle,
-	checking: IconLoader2,
-	success: IconCircleCheck,
-	error: IconCircleX,
-} as const
-
-interface StatusMarkProps {
-	state: ApiStatusRowState
-}
-
-function StatusMark({ state }: StatusMarkProps) {
-	const Icon = statusIcons[state]
-	return (
-		<span className={ classes.mark } data-state={ state } aria-hidden>
-			<Icon className={ classes.glyph } size={ 22 } stroke={ 1.75 } />
-		</span>
-	)
-}
-
-interface ApiStatusRowViewProps {
-	row: ApiStatusRow
-}
-
-function statusTone(state: ApiStatusRowState) {
-	if(state === "success") return "green"
-	if(state === "error") return "red"
-	return "dimmed"
-}
-
-function ApiStatusRowView({ row }: ApiStatusRowViewProps) {
-	const message = apiStatusRowMessage(row)
-
-	return (
-		<div className={ classes.row }>
-			<StatusMark state={ row.state } />
-			<div>
-				<Text size="sm">{ row.label }</Text>
-				<Text size="xs" c={ statusTone(row.state) }>{ message }</Text>
-			</div>
-		</div>
-	)
-}
-
-interface ApiStatusGroupProps {
-	titleId: string
-	title: string
-	description: string
-	rows: ApiStatusRow[]
-	children?: ReactNode
-}
-
-function ApiStatusGroup({ titleId, title, description, rows, children }: ApiStatusGroupProps) {
-	const state = summarizeApiStatus(rows)
-
-	return (
-		<section className={ classes.section } aria-labelledby={ titleId }>
-			<div className={ classes.groupHeading }>
-				<StatusMark state={ state } />
-				<Title id={ titleId } order={ 3 } size="h5">{ title }</Title>
-			</div>
-			<Text size="sm" c="dimmed">{ description }</Text>
-			{ children }
-			<div className={ classes.list }>
-				{ rows.map((row) => (
-					<ApiStatusRowView key={ row.id } row={ row } />
-				)) }
-			</div>
-		</section>
-	)
-}
+import { apiStatusSummaryMessage, buildApiStatusRows, summarizeApiStatus } from "./apiStatusRows"
+import { StatusMark } from "./StatusMark"
 
 export interface ApiStatusPanelProps {
 	userEmail: string

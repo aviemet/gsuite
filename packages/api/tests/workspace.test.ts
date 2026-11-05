@@ -162,6 +162,7 @@ function directoryWith(accounts: Record<string, { isAdmin: boolean, primaryDomai
 		},
 		async checkUsers() {},
 		async checkGroups() {},
+		async checkGroupMembers() {},
 		async checkOrganizationalUnits() {},
 	}
 }
@@ -235,6 +236,7 @@ describe("connectWorkspace", () => {
 					},
 					async checkUsers() {},
 					async checkGroups() {},
+					async checkGroupMembers() {},
 					async checkOrganizationalUnits() {},
 				}),
 			},
@@ -373,6 +375,7 @@ describe("checkApiStatus", () => {
 		expect(results.map((result) => [result.id, result.status])).toEqual([
 			["users", "success"],
 			["groups", "error"],
+			["groupMembers", "success"],
 			["organizationalUnits", "success"],
 			["gmailSettings", "success"],
 		])

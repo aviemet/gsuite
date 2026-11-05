@@ -1,5 +1,5 @@
 import { ActionIcon, Badge, Box, Group, Tooltip } from "@mantine/core"
-import { IconChevronDown, IconChevronsDown, IconPencil, IconTrash } from "@tabler/icons-react"
+import { IconChevronDown, IconChevronsDown, IconPencil, IconTrash, IconUsers } from "@tabler/icons-react"
 import { Link, useRouter } from "@tanstack/react-router"
 import clsx from "clsx"
 import { DataTable, type DataTableSortStatus } from "mantine-datatable"
@@ -150,23 +150,35 @@ export function SignaturesTable({ templates, assignmentSummaries }: SignaturesTa
 					accessor: "assignedTo",
 					title: "Assigned to",
 					render: (record) => (
-						<AssignmentSummaryBadge
-							summary={ assignmentSummaries.get(record.id) ?? unassignedSummary }
-						/>
+						<Link
+							to="/admin/signatures/$id/assignment"
+							params={ { id: record.id } }
+							style={ { textDecoration: "none" } }
+						>
+							<AssignmentSummaryBadge
+								summary={ assignmentSummaries.get(record.id) ?? unassignedSummary }
+							/>
+						</Link>
 					),
 				},
 				{
 					accessor: "isScheduled",
 					title: "Schedule",
 					sortable: true,
-					render: ({ isScheduled }) => (
-						<Badge
-							size="sm"
-							variant="light"
-							color={ isScheduled ? "violet" : "gray" }
+					render: (record) => (
+						<Link
+							to="/admin/signatures/$id/assignment"
+							params={ { id: record.id } }
+							style={ { textDecoration: "none" } }
 						>
-							{ isScheduled ? "Scheduled" : "Not scheduled" }
-						</Badge>
+							<Badge
+								size="sm"
+								variant="light"
+								color={ record.isScheduled ? "violet" : "gray" }
+							>
+								{ record.isScheduled ? "Scheduled" : "Not scheduled" }
+							</Badge>
+						</Link>
 					),
 				},
 				{
@@ -188,6 +200,20 @@ export function SignaturesTable({ templates, assignmentSummaries }: SignaturesTa
 								templateId={ record.id }
 								templateName={ record.name }
 							/>
+							<Tooltip label="Assignment" withArrow position="top">
+								<ActionIcon
+									variant="subtle"
+									color="harbor"
+									size="sm"
+									aria-label={ `Assignment for ${ record.name }` }
+									onClick={ () => router.navigate({
+										to: "/admin/signatures/$id/assignment",
+										params: { id: record.id },
+									}) }
+								>
+									<IconUsers size={ 16 } aria-hidden />
+								</ActionIcon>
+							</Tooltip>
 							<Tooltip label="Edit" withArrow position="top">
 								<ActionIcon
 									variant="subtle"

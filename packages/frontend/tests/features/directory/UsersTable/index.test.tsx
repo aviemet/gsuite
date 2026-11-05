@@ -1,5 +1,5 @@
 import { MantineProvider } from "@mantine/core"
-import { cleanup, render, screen } from "@testing-library/react"
+import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
 import "@testing-library/jest-dom/vitest"
@@ -58,6 +58,9 @@ describe("UsersTable", () => {
 					columnFilters={ {} }
 					onColumnFilterChange={ vi.fn() }
 					recordLimit={ 25 }
+					canEdit
+					onOpenUser={ vi.fn() }
+					onQuickEditUser={ vi.fn() }
 				/>
 			</MantineProvider>,
 		)
@@ -68,5 +71,39 @@ describe("UsersTable", () => {
 		expect(screen.getByText("Name")).toBeInTheDocument()
 		expect(screen.getByText("Email")).toBeInTheDocument()
 		expect(screen.queryByText("Job title")).not.toBeInTheDocument()
+	})
+
+	it("opens the user from row text and quick edit from the actions button", () => {
+		enableDataTableMediaQueries()
+		const onOpenUser = vi.fn()
+		const onQuickEditUser = vi.fn()
+		const visibleColumns = resolveVisibleColumns(userColumns, ["displayName", "email"])
+		const jane = toDirectoryUserRow(user({
+			email: "jane.doe@example.com",
+			displayName: "Jane Doe",
+		}))
+
+		render(
+			<MantineProvider theme={ theme }>
+				<UsersTable
+					users={ [jane] }
+					columns={ visibleColumns }
+					columnFilters={ {} }
+					onColumnFilterChange={ vi.fn() }
+					recordLimit={ 25 }
+					canEdit
+					onOpenUser={ onOpenUser }
+					onQuickEditUser={ onQuickEditUser }
+				/>
+			</MantineProvider>,
+		)
+
+		fireEvent.click(screen.getByText("Jane Doe"))
+		expect(onOpenUser).toHaveBeenCalledWith(jane)
+		expect(onQuickEditUser).not.toHaveBeenCalled()
+
+		fireEvent.click(screen.getByRole("button", { name: "Quick edit Jane Doe" }))
+		expect(onQuickEditUser).toHaveBeenCalledWith(jane)
+		expect(onOpenUser).toHaveBeenCalledTimes(1)
 	})
 })

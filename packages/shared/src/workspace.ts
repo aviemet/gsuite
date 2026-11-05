@@ -23,20 +23,26 @@ export const SEED_USER_EMAIL = "test@test.com"
 export const SEED_WORKSPACE_ADMIN_EMAIL = "jane.doe@example.com"
 export const SEED_PRIMARY_DOMAIN = "example.com"
 
+export const directoryUserScope = "https://www.googleapis.com/auth/admin.directory.user"
+export const directoryGroupScope = "https://www.googleapis.com/auth/admin.directory.group"
+export const directoryGroupMemberScope = "https://www.googleapis.com/auth/admin.directory.group.member"
+export const directoryOrgUnitScope = "https://www.googleapis.com/auth/admin.directory.orgunit"
+export const gmailSettingsScope = "https://www.googleapis.com/auth/gmail.settings.basic"
+
 export const workspaceScopes = [
-	"https://www.googleapis.com/auth/admin.directory.user.readonly",
-	"https://www.googleapis.com/auth/admin.directory.group.readonly",
-	"https://www.googleapis.com/auth/admin.directory.orgunit.readonly",
-	"https://www.googleapis.com/auth/gmail.settings.basic",
+	directoryUserScope,
+	directoryGroupScope,
+	directoryGroupMemberScope,
+	directoryOrgUnitScope,
+	gmailSettingsScope,
 ] as const
 
 export const directoryScopes = [
-	workspaceScopes[0],
-	workspaceScopes[1],
-	workspaceScopes[2],
+	directoryUserScope,
+	directoryGroupScope,
+	directoryGroupMemberScope,
+	directoryOrgUnitScope,
 ] as const
-
-export const gmailSettingsScope = workspaceScopes[3]
 
 export const WORKSPACE_NOT_INSTALLED_MESSAGE
 	= "Google has not finished installing the app for your Workspace. Install it from the Google Workspace Marketplace, wait a few minutes, then try Connect again."
@@ -80,6 +86,7 @@ export interface DirectoryAccount {
 export const apiStatusCheckIds = {
 	users: "users",
 	groups: "groups",
+	groupMembers: "groupMembers",
 	organizationalUnits: "organizationalUnits",
 	gmailSettings: "gmailSettings",
 } as const

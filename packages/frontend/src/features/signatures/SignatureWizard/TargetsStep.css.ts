@@ -16,17 +16,6 @@ export const defaultCard = css`
 	}
 `
 
-export const rulesCard = css`
+export const tinted = css`
 	background: light-dark(${ vars.colors.harbor[0] }, ${ vars.colors.harbor[9] });
-`
-
-export const rulesTitle = css`
-	font-weight: 650;
-	color: light-dark(${ vars.colors.harbor[9] }, ${ vars.colors.harbor[1] });
-`
-
-export const halfWidthSection = css`
-	@media (min-width: 62em) {
-		width: 50%;
-	}
 `

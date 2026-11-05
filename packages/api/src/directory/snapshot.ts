@@ -1,9 +1,11 @@
 import {
 	type DirectoryGroup,
+	type DirectoryGroupMemberRole,
 	type DirectoryOrganizationalUnit,
 	type DirectoryPhoneNumber,
 	type DirectoryUser,
 	emptyDirectoryProfile,
+	isDirectoryGroupMemberRole,
 } from "@gsuite/shared"
 
 import { type DirectorySnapshot } from "./client"
@@ -40,11 +42,13 @@ export interface RawDirectoryGroup {
 	id: string
 	name: string
 	email: string
+	description?: string
 }
 
 export interface RawDirectoryMember {
 	groupId: string
 	email: string
+	role?: string
 }
 
 export function organizationalUnitPaths(orgUnitPath: string): string[] {
@@ -66,11 +70,16 @@ export function buildDirectorySnapshot(input: {
 	organizationalUnits: DirectoryOrganizationalUnit[]
 }): DirectorySnapshot {
 	const groupIdsByEmail = new Map<string, string[]>()
+	const membersByGroupId = new Map<string, { email: string, role: DirectoryGroupMemberRole }[]>()
 	for(const member of input.members) {
 		const email = member.email.toLowerCase()
 		const groupIds = groupIdsByEmail.get(email) ?? []
 		groupIds.push(member.groupId)
 		groupIdsByEmail.set(email, groupIds)
+		const members = membersByGroupId.get(member.groupId) ?? []
+		const role = isDirectoryGroupMemberRole(member.role) ? member.role : "MEMBER"
+		members.push({ email, role })
+		membersByGroupId.set(member.groupId, members)
 	}
 
 	const users: DirectoryUser[] = input.users.map((user) => {
@@ -111,6 +120,8 @@ export function buildDirectorySnapshot(input: {
 		id: group.id,
 		name: group.name,
 		email: group.email.toLowerCase(),
+		description: group.description ?? "",
+		members: membersByGroupId.get(group.id) ?? [],
 	}))
 
 	const organizationalUnits = [...input.organizationalUnits]

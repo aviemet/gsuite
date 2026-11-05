@@ -33,22 +33,19 @@ export const initializeFirebase = (): void => {
 }
 
 export const getFirebaseApp = (): FirebaseApp => {
-	if(!app) {
-		initializeFirebase()
-	}
+	if(!app) initializeFirebase()
+
 	return app
 }
 
 export const getFirebaseDb = (): Firestore => {
-	if(!db) {
-		initializeFirebase()
-	}
+	if(!db) initializeFirebase()
+
 	return db
 }
 
 export const getFirebaseAuth = (): Auth => {
-	if(!auth) {
-		initializeFirebase()
-	}
+	if(!auth) initializeFirebase()
+
 	return auth
 }

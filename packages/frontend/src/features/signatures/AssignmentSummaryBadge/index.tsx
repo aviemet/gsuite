@@ -1,46 +1,13 @@
-import { Badge, Group, Tooltip } from "@mantine/core"
-import { IconBuilding, IconUser, IconUsers } from "@tabler/icons-react"
+import { Badge, Tooltip } from "@mantine/core"
+import { IconUsers } from "@tabler/icons-react"
 
-import {
-	type AssignmentDetail,
-	type AssignmentDetailKind,
-	type TemplateAssignmentSummary,
-} from "@/frontend/features/signatures/summarizeTemplateAssignments"
+import { type TemplateAssignmentSummary } from "@/frontend/features/signatures/summarizeTemplateAssignments"
 
 import * as classes from "./AssignmentSummaryBadge.css"
+import { DetailBadges } from "./DetailBadges"
 
 interface AssignmentSummaryBadgeProps {
 	summary: TemplateAssignmentSummary
-}
-
-function detailColor(kind: AssignmentDetailKind) {
-	if(kind === "group") return "teal"
-	if(kind === "organizationalUnit") return "grape"
-	return "blue"
-}
-
-function DetailIcon({ kind }: { kind: AssignmentDetailKind }) {
-	if(kind === "group") return <IconUsers size={ 12 } />
-	if(kind === "organizationalUnit") return <IconBuilding size={ 12 } />
-	return <IconUser size={ 12 } />
-}
-
-function DetailBadges({ details }: { details: readonly AssignmentDetail[] }) {
-	return (
-		<Group gap={ 6 } maw={ 280 } style={ { flexWrap: "wrap" } }>
-			{ details.map((detail) => (
-				<Badge
-					key={ `${ detail.kind }:${ detail.label }` }
-					size="sm"
-					variant="light"
-					color={ detailColor(detail.kind) }
-					leftSection={ <DetailIcon kind={ detail.kind } /> }
-				>
-					{ detail.label }
-				</Badge>
-			)) }
-		</Group>
-	)
 }
 
 export function AssignmentSummaryBadge({ summary }: AssignmentSummaryBadgeProps) {

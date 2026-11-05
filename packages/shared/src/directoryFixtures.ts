@@ -60,10 +60,31 @@ export function emptyDirectoryProfile(): Omit<DirectoryUser, "email" | "displayN
 	}
 }
 
+export const directoryGroupMemberRoles = {
+	owner: "OWNER",
+	manager: "MANAGER",
+	member: "MEMBER",
+} as const
+
+export type DirectoryGroupMemberRole = typeof directoryGroupMemberRoles[keyof typeof directoryGroupMemberRoles]
+
+export interface DirectoryGroupMember {
+	email: string
+	role: DirectoryGroupMemberRole
+}
+
+export function isDirectoryGroupMemberRole(value: unknown): value is DirectoryGroupMemberRole {
+	return value === directoryGroupMemberRoles.owner
+		|| value === directoryGroupMemberRoles.manager
+		|| value === directoryGroupMemberRoles.member
+}
+
 export interface DirectoryGroup {
 	id: string
 	name: string
 	email: string
+	description: string
+	members: DirectoryGroupMember[]
 }
 
 export interface DirectoryOrganizationalUnit {
@@ -168,12 +189,51 @@ export const directoryUsers: DirectoryUser[] = [
 	},
 ]
 
+function fixtureGroupMembers(groupId: string): DirectoryGroupMember[] {
+	return directoryUsers
+		.filter((user) => user.groupIds.includes(groupId))
+		.map((user) => ({
+			email: user.email,
+			role: directoryGroupMemberRoles.member,
+		}))
+}
+
 export const directoryGroups: DirectoryGroup[] = [
-	{ id: "engineering", name: "Engineering", email: "engineering@example.com" },
-	{ id: "all-employees", name: "All Employees", email: "everyone@example.com" },
-	{ id: "marketing", name: "Marketing", email: "marketing@example.com" },
-	{ id: "sales", name: "Sales", email: "sales@example.com" },
-	{ id: "product", name: "Product", email: "product@example.com" },
+	{
+		id: "engineering",
+		name: "Engineering",
+		email: "engineering@example.com",
+		description: "",
+		members: fixtureGroupMembers("engineering"),
+	},
+	{
+		id: "all-employees",
+		name: "All Employees",
+		email: "everyone@example.com",
+		description: "",
+		members: fixtureGroupMembers("all-employees"),
+	},
+	{
+		id: "marketing",
+		name: "Marketing",
+		email: "marketing@example.com",
+		description: "",
+		members: fixtureGroupMembers("marketing"),
+	},
+	{
+		id: "sales",
+		name: "Sales",
+		email: "sales@example.com",
+		description: "",
+		members: fixtureGroupMembers("sales"),
+	},
+	{
+		id: "product",
+		name: "Product",
+		email: "product@example.com",
+		description: "",
+		members: fixtureGroupMembers("product"),
+	},
 ]
 
 export const directoryOrganizationalUnits: DirectoryOrganizationalUnit[] = [

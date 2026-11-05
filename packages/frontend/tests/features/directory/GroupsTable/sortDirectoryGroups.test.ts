@@ -7,6 +7,8 @@ const engineering: DirectoryGroupRow = {
 	id: "engineering",
 	name: "Engineering",
 	email: "engineering@example.com",
+	description: "",
+	members: [],
 	memberCount: 3,
 }
 
@@ -14,6 +16,8 @@ const sales: DirectoryGroupRow = {
 	id: "sales",
 	name: "Sales",
 	email: "sales@example.com",
+	description: "",
+	members: [],
 	memberCount: 1,
 }
 

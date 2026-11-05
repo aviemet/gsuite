@@ -32,6 +32,12 @@ export async function checkApiStatus(
 			run: () => directory.checkGroups(),
 		},
 		{
+			id: apiStatusCheckIds.groupMembers,
+			label: "Group members",
+			group: "admin",
+			run: () => directory.checkGroupMembers(),
+		},
+		{
 			id: apiStatusCheckIds.organizationalUnits,
 			label: "Organizational units",
 			group: "admin",

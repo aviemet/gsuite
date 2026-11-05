@@ -117,6 +117,7 @@ function directoryWith(users = directoryUsers): DirectoryClient {
 		},
 		async checkUsers() {},
 		async checkGroups() {},
+		async checkGroupMembers() {},
 		async checkOrganizationalUnits() {},
 	}
 }
@@ -283,7 +284,8 @@ describe("enqueueScheduledDeploys", () => {
 						},
 						async checkUsers() {},
 						async checkGroups() {},
-						async checkOrganizationalUnits() {},
+						async checkGroupMembers() {},
+		async checkOrganizationalUnits() {},
 					}
 				}
 				return directoryWith()

@@ -2,6 +2,7 @@ import { ActionIcon, Tooltip } from "@mantine/core"
 import { IconRocket } from "@tabler/icons-react"
 import { useMemo, useState } from "react"
 
+import { canDeployTemplate } from "@/frontend/features/signatures/canDeployTemplate"
 import { DeployConfirmModal } from "@/frontend/features/signatures/DeployConfirmModal"
 import { deploySignatureTemplate } from "@/frontend/features/signatures/deploySignatureTemplate"
 import { listTemplateRecipientEmails } from "@/frontend/features/signatures/listTemplateRecipients"
@@ -27,6 +28,8 @@ export function DeploySignatureAction({
 	const { data: assignments = [] } = useTemplateAssignmentsQuery()
 	const { data: directory } = useDirectoryQuery()
 
+	const template = templates.find((entry) => entry.id === templateId)
+	const canDeploy = canDeployTemplate(template, assignments, templateId)
 	const recipients = useMemo(() => {
 		if(!directory) return []
 		return listTemplateRecipientEmails(
@@ -38,6 +41,7 @@ export function DeploySignatureAction({
 	}, [templateId, templates, assignments, directory])
 
 	function handleOpenConfirm() {
+		if(!canDeploy) return
 		setIsConfirmOpen(true)
 	}
 
@@ -61,16 +65,19 @@ export function DeploySignatureAction({
 
 	return (
 		<>
-			<Tooltip label="Deploy" withArrow position="top">
-				<ActionIcon
-					variant="subtle"
-					color="harbor"
-					size="sm"
-					aria-label={ `Deploy ${ templateName }` }
-					onClick={ handleOpenConfirm }
-				>
-					<IconRocket size={ 16 } aria-hidden />
-				</ActionIcon>
+			<Tooltip label={ canDeploy ? "Deploy" : "Assign recipients before deploying" } withArrow position="top">
+				<span style={ { display: "inline-flex" } }>
+					<ActionIcon
+						variant="subtle"
+						color="harbor"
+						size="sm"
+						aria-label={ `Deploy ${ templateName }` }
+						disabled={ !canDeploy }
+						onClick={ handleOpenConfirm }
+					>
+						<IconRocket size={ 16 } aria-hidden />
+					</ActionIcon>
+				</span>
 			</Tooltip>
 			<DeployConfirmModal
 				opened={ isConfirmOpen }

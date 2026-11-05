@@ -188,6 +188,7 @@ describe("WorkspaceSettings", () => {
 			results: [
 				{ id: apiStatusCheckIds.users, label: "Users", group: "admin", status: "success" },
 				{ id: apiStatusCheckIds.groups, label: "Groups", group: "admin", status: "success" },
+				{ id: apiStatusCheckIds.groupMembers, label: "Group members", group: "admin", status: "success" },
 				{ id: apiStatusCheckIds.organizationalUnits, label: "Organizational units", group: "admin", status: "success" },
 				failedGmail,
 			],

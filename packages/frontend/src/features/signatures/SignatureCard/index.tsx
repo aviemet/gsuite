@@ -1,5 +1,5 @@
 import { ActionIcon, Badge, Box, Card, Group, Text, Tooltip } from "@mantine/core"
-import { IconCalendarEvent, IconPencil } from "@tabler/icons-react"
+import { IconCalendarEvent, IconPencil, IconUsers } from "@tabler/icons-react"
 import { Link, useRouter } from "@tanstack/react-router"
 import clsx from "clsx"
 
@@ -47,6 +47,20 @@ export function SignatureCard({ template, assignmentSummary }: SignatureCardProp
 						templateId={ template.id }
 						templateName={ template.name }
 					/>
+					<Tooltip label="Assignment" withArrow position="top">
+						<ActionIcon
+							variant="subtle"
+							color="harbor"
+							size="sm"
+							aria-label={ `Assignment for ${ template.name }` }
+							onClick={ () => router.navigate({
+								to: "/admin/signatures/$id/assignment",
+								params: { id: template.id },
+							}) }
+						>
+							<IconUsers size={ 16 } aria-hidden />
+						</ActionIcon>
+					</Tooltip>
 					<Tooltip label="Edit" withArrow position="top">
 						<ActionIcon
 							variant="subtle"
@@ -62,15 +76,27 @@ export function SignatureCard({ template, assignmentSummary }: SignatureCardProp
 				</Group>
 			</Group>
 			<Group gap="xs" mb="md">
-				<AssignmentSummaryBadge summary={ assignmentSummary } />
-				<Badge
-					size="sm"
-					variant="light"
-					color={ isScheduled ? "violet" : "gray" }
-					leftSection={ <IconCalendarEvent size={ 12 } /> }
+				<Link
+					to="/admin/signatures/$id/assignment"
+					params={ { id: template.id } }
+					style={ { textDecoration: "none" } }
 				>
-					{ isScheduled ? "Scheduled" : "Not scheduled" }
-				</Badge>
+					<AssignmentSummaryBadge summary={ assignmentSummary } />
+				</Link>
+				<Link
+					to="/admin/signatures/$id/assignment"
+					params={ { id: template.id } }
+					style={ { textDecoration: "none" } }
+				>
+					<Badge
+						size="sm"
+						variant="light"
+						color={ isScheduled ? "violet" : "gray" }
+						leftSection={ <IconCalendarEvent size={ 12 } /> }
+					>
+						{ isScheduled ? "Scheduled" : "Not scheduled" }
+					</Badge>
+				</Link>
 			</Group>
 			<Box className={ classes.previewFrame }>
 				<Box className={ classes.previewContent }>

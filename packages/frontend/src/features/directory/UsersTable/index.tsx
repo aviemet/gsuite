@@ -1,4 +1,6 @@
 import { type TableRecordLimit } from "@gsuite/shared"
+import { ActionIcon } from "@mantine/core"
+import { IconPencil } from "@tabler/icons-react"
 import clsx from "clsx"
 import { DataTable, type DataTableColumn, type DataTableSortStatus } from "mantine-datatable"
 import { useMemo, useState } from "react"
@@ -27,6 +29,9 @@ interface UsersTableProps {
 	columnFilters: ColumnFilters
 	onColumnFilterChange: (columnId: string, filter: ColumnFilterState) => void
 	recordLimit: TableRecordLimit
+	canEdit: boolean
+	onOpenUser: (user: DirectoryUserRow) => void
+	onQuickEditUser: (user: DirectoryUserRow) => void
 }
 
 const defaultSortStatus: DataTableSortStatus<DirectoryUserRow> = {
@@ -40,6 +45,9 @@ export function UsersTable({
 	columnFilters,
 	onColumnFilterChange,
 	recordLimit,
+	canEdit,
+	onOpenUser,
+	onQuickEditUser,
 }: UsersTableProps) {
 	const [sortStatus, setSortStatus] = useState<DataTableSortStatus<DirectoryUserRow>>(defaultSortStatus)
 	const filteredUsers = useMemo(
@@ -63,8 +71,8 @@ export function UsersTable({
 		return sortedUsers.slice(startIndex, startIndex + recordLimit)
 	}, [sortedUsers, currentPage, recordLimit])
 
-	const tableColumns = useMemo((): DataTableColumn<DirectoryUserRow>[] => (
-		columns.map((column) => {
+	const tableColumns = useMemo((): DataTableColumn<DirectoryUserRow>[] => [
+		...columns.map((column) => {
 			const valuesForColumn = collectColumnValues(
 				filterRowsExcludingColumn(users, columns, columnFilters, column.id),
 				column,
@@ -74,9 +82,9 @@ export function UsersTable({
 				accessor: column.id,
 				title: column.label,
 				sortable: true,
-				textAlign: column.id === "groupCount" ? "right" : undefined,
+				textAlign: column.id === "groupCount" ? "right" as const : undefined,
 				filtering: isColumnFilterActive(filter, valuesForColumn),
-				filter: ({ close }) => (
+				filter: ({ close }: { close: () => void }) => (
 					<ColumnValueFilter
 						label={ column.label }
 						values={ valuesForColumn }
@@ -85,13 +93,35 @@ export function UsersTable({
 						onClose={ close }
 					/>
 				),
-				render: (record) => {
+				render: (record: DirectoryUserRow) => {
 					const value = column.getValue(record)
 					return typeof value === "number" ? value : value || "—"
 				},
 			}
-		})
-	), [columns, columnFilters, onColumnFilterChange, users])
+		}),
+		{
+			accessor: "actions",
+			title: "Actions",
+			width: 72,
+			textAlign: "right",
+			render: (record) => (
+				<span data-row-actions="">
+					<ActionIcon
+						variant="subtle"
+						color="harbor"
+						aria-label={ `Quick edit ${ record.displayName }` }
+						disabled={ !canEdit }
+						onClick={ (event) => {
+							event.stopPropagation()
+							onQuickEditUser(record)
+						} }
+					>
+						<IconPencil size={ 16 } />
+					</ActionIcon>
+				</span>
+			),
+		},
+	], [columns, columnFilters, onColumnFilterChange, users, canEdit, onQuickEditUser])
 
 	return (
 		<DataTable
@@ -110,6 +140,12 @@ export function UsersTable({
 			sortStatus={ sortStatus }
 			onSortStatusChange={ setSortStatus }
 			columns={ tableColumns }
+			pinLastColumn
+			onRowClick={ ({ record, event }) => {
+				const target = event.target
+				if(target instanceof Element && target.closest("[data-row-actions]")) return
+				onOpenUser(record)
+			} }
 			emptyState={ sortedUsers.length === 0 ? "No users found" : undefined }
 		/>
 	)

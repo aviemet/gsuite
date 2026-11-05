@@ -1,4 +1,5 @@
 export * from "./directoryFixtures"
+export * from "./directoryUpdate"
 export * from "./findConflictingAssignments"
 export * from "./firebaseProject"
 export * from "./parseTemplate"

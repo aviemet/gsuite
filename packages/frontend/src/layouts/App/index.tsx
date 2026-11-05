@@ -75,77 +75,84 @@ export function AppLayout() {
 				</Group>
 			</AppShell.Header>
 
-			<AppShell.Navbar className={ classes.navbar } aria-label="Primary">
-				<div className={ classes.brand }>
-					<div className={ classes.brandIdentity }>
-						<BrandLogo className={ classes.brandMark } size={ 28 } />
-						<span className={ classes.brandName }>{ APP_NAME }</span>
+			<AppShell.Navbar className={ classes.navbar } aria-label="Primary" p="sm" >
+
+				<AppShell.Section>
+					<div className={ classes.brand }>
+						<div className={ classes.brandIdentity }>
+							<BrandLogo className={ classes.brandMark } size={ 28 } />
+							<span className={ classes.brandName }>{ APP_NAME }</span>
+						</div>
+						<Burger
+							opened={ opened }
+							onClick={ toggle }
+							hiddenFrom="sm"
+							size="sm"
+							color="gray.0"
+							aria-label={ opened ? "Close navigation" : "Open navigation" }
+						/>
 					</div>
-					<Burger
-						opened={ opened }
-						onClick={ toggle }
-						hiddenFrom="sm"
-						size="sm"
-						color="gray.0"
-						aria-label={ opened ? "Close navigation" : "Open navigation" }
-					/>
-				</div>
+				</AppShell.Section>
 
-				<Stack gap={ 4 } p="sm" pt={ 4 }>
-					{ gate.hasMembership
-						? (
-							<>
-								<NavLink
-									className={ classes.navLink }
-									component={ Link }
-									to="/admin"
-									label="Dashboard"
-									leftSection={ <IconDashboard size="1.2rem" /> }
-									active={ currentPath === "/admin" }
-								/>
-
-								<NavLink
-									className={ classes.navLink }
-									component={ Link }
-									to="/admin/signatures"
-									label="Signatures"
-									leftSection={ <IconSignature size="1.2rem" /> }
-									active={ currentPath.startsWith("/admin/signatures") }
-								/>
-
-								<NavLink
-									className={ classes.navLink }
-									label="Directory"
-									leftSection={ <IconUsers size="1.2rem" /> }
-									active={ currentPath.startsWith("/admin/directory") }
-									defaultOpened={ currentPath.startsWith("/admin/directory") }
-								>
+				<AppShell.Section grow>
+					<Stack gap={ 4 } pt={ 4 }>
+						{ gate.hasMembership
+							? (
+								<>
 									<NavLink
 										className={ classes.navLink }
 										component={ Link }
-										to="/admin/directory/users"
-										label="Users"
-										active={ currentPath === "/admin/directory/users" }
+										to="/admin"
+										label="Dashboard"
+										leftSection={ <IconDashboard size="1.2rem" /> }
+										active={ currentPath === "/admin" }
 									/>
-									<NavLink
-										className={ classes.navLink }
-										component={ Link }
-										to="/admin/directory/groups"
-										label="Groups"
-										active={ currentPath === "/admin/directory/groups" }
-									/>
-									<NavLink
-										className={ classes.navLink }
-										component={ Link }
-										to="/admin/directory/ous"
-										label="OUs"
-										active={ currentPath === "/admin/directory/ous" }
-									/>
-								</NavLink>
-							</>
-						)
-						: null }
 
+									<NavLink
+										className={ classes.navLink }
+										label="Directory"
+										leftSection={ <IconUsers size="1.2rem" /> }
+										active={ currentPath.startsWith("/admin/directory") }
+										defaultOpened={ true }
+									>
+										<NavLink
+											className={ classes.navLink }
+											component={ Link }
+											to="/admin/directory/users"
+											label="Users"
+											active={ currentPath === "/admin/directory/users" }
+										/>
+										<NavLink
+											className={ classes.navLink }
+											component={ Link }
+											to="/admin/directory/groups"
+											label="Groups"
+											active={ currentPath === "/admin/directory/groups" }
+										/>
+										<NavLink
+											className={ classes.navLink }
+											component={ Link }
+											to="/admin/directory/ous"
+											label="OUs"
+											active={ currentPath === "/admin/directory/ous" }
+										/>
+									</NavLink>
+
+									<NavLink
+										className={ classes.navLink }
+										component={ Link }
+										to="/admin/signatures"
+										label="Signatures"
+										leftSection={ <IconSignature size="1.2rem" /> }
+										active={ currentPath.startsWith("/admin/signatures") }
+									/>
+								</>
+							)
+							: null }
+					</Stack>
+				</AppShell.Section>
+
+				<AppShell.Section>
 					<NavLink
 						className={ classes.navLink }
 						component={ Link }
@@ -154,8 +161,10 @@ export function AppLayout() {
 						leftSection={ <IconSettings size="1.2rem" /> }
 						active={ currentPath === "/admin/settings" }
 					/>
-				</Stack>
+				</AppShell.Section>
+
 			</AppShell.Navbar>
+
 			<AppShell.Main id="main-content" className={ classes.main }>
 				{ gate.blocksApp
 					? (

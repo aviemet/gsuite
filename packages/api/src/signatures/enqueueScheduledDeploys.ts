@@ -1,17 +1,15 @@
-import {
-	type CustomerRecord,
-	groupEmailsByResolvedTemplate,
-	isAssignmentType,
-	type ResolvableAssignment,
-	type ResolvableTemplate,
-} from "@gsuite/shared"
+import { type CustomerRecord, groupEmailsByResolvedTemplate } from "@gsuite/shared"
 import { type Firestore } from "firebase-admin/firestore"
 
 import { type DirectoryClient } from "../directory/client"
 import { type QueuePublisher } from "../queue/publisher"
 import { listCustomers } from "../workspace/records"
 import { errorMessage } from "./errorMessage"
-import { readBoolean, readString } from "./recordFields"
+import {
+	readResolvableAssignments,
+	readResolvableTemplates,
+	readScheduledTemplateIds,
+} from "./readSignatureRecords"
 
 export interface EnqueueScheduledDeploysDependencies {
 	db: Firestore
@@ -41,22 +39,7 @@ export async function enqueueScheduledDeploysForCustomer(
 		.where("customerId", "==", customer.id)
 		.get()
 
-	const resolvableTemplates: ResolvableTemplate[] = []
-	const scheduledTemplateIds = new Set<string>()
-
-	for(const doc of templatesSnap.docs) {
-		const data = doc.data() as Record<string, unknown>
-		const isActive = data.isActive !== false
-		const isScheduled = readBoolean(data, "isScheduled")
-		resolvableTemplates.push({
-			id: doc.id,
-			isDefault: readBoolean(data, "isDefault"),
-			isActive,
-			updatedAt: readString(data, "updatedAt"),
-		})
-		if(isActive && isScheduled) scheduledTemplateIds.add(doc.id)
-	}
-
+	const scheduledTemplateIds = readScheduledTemplateIds(templatesSnap.docs)
 	if(scheduledTemplateIds.size === 0) {
 		return { customerId: customer.id, queuedUserCount: 0 }
 	}
@@ -65,19 +48,8 @@ export async function enqueueScheduledDeploysForCustomer(
 		.collection("templateAssignments")
 		.where("customerId", "==", customer.id)
 		.get()
-
-	const resolvableAssignments: ResolvableAssignment[] = []
-	for(const doc of assignmentsSnap.docs) {
-		const data = doc.data() as Record<string, unknown>
-		const assignmentType = readString(data, "assignmentType")
-		if(!isAssignmentType(assignmentType)) continue
-		resolvableAssignments.push({
-			templateId: readString(data, "templateId"),
-			assignmentType,
-			targetId: readString(data, "targetId"),
-			isActive: data.isActive !== false,
-		})
-	}
+	const resolvableTemplates = readResolvableTemplates(templatesSnap.docs)
+	const resolvableAssignments = readResolvableAssignments(assignmentsSnap.docs)
 
 	const directory = await dependencies.createDirectory(customer.workspaceAdminEmail).listDirectory()
 	const emails = directory.users.map((user) => user.email)

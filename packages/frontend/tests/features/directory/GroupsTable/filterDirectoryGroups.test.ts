@@ -7,12 +7,16 @@ const engineering: DirectoryGroup = {
 	id: "engineering",
 	name: "Engineering",
 	email: "engineering@example.com",
+	description: "",
+	members: [],
 }
 
 const sales: DirectoryGroup = {
 	id: "sales",
 	name: "Sales",
 	email: "sales@example.com",
+	description: "",
+	members: [],
 }
 
 describe("filterDirectoryGroups", () => {

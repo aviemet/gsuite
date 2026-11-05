@@ -1,4 +1,4 @@
-import { Alert, Collapse, Paper, SimpleGrid, Stack, Switch, Text } from "@mantine/core"
+import { Alert, Collapse, Paper, Stack, Switch } from "@mantine/core"
 import { UseFormReturnType } from "@mantine/form"
 import { IconInfoCircle } from "@tabler/icons-react"
 import clsx from "clsx"
@@ -15,10 +15,10 @@ import {
 	toUserSelectData,
 } from "./directoryOptions"
 import * as classes from "./TargetsStep.css"
-import { type SignatureWizardValues } from "./types"
+import { type SignatureAssignmentValues } from "./types"
 
 interface TargetsStepProps {
-	form: UseFormReturnType<SignatureWizardValues>
+	form: UseFormReturnType<SignatureAssignmentValues>
 	directory: DirectorySnapshot
 	claimedTargets: ClaimedTargets
 }
@@ -29,7 +29,6 @@ function usedByReason(templateName: string) {
 
 export function TargetsStep({ form, directory, claimedTargets }: TargetsStepProps) {
 	const defaultInputProps = form.getInputProps("isDefault", { type: "checkbox" })
-	const scheduledInputProps = form.getInputProps("isScheduled", { type: "checkbox" })
 	const peopleInputProps = form.getInputProps("userEmails")
 	const groupsInputProps = form.getInputProps("groupIds")
 	const organizationalUnitInputProps = form.getInputProps("organizationalUnitPaths")
@@ -85,64 +84,44 @@ export function TargetsStep({ form, directory, claimedTargets }: TargetsStepProp
 	}
 
 	return (
-		<Stack gap="lg" mt="md">
-			<SimpleGrid cols={ { base: 1, md: 2 } } spacing="lg">
-				<Paper
-					p="md"
-					className={ clsx(classes.section, classes.defaultCard) }
-					data-checked={ form.values.isDefault }
-				>
-					<Switch
-						label="Default signature"
-						description={
-							rivalDefault
-								? `Already set on ${rivalDefault.templateName}. Person, group, and OU targets still override by specificity.`
-								: "Applied to any user who is not matched by a more specific person, group, or OU assignment."
-						}
-						checked={ defaultInputProps.checked }
-						disabled={ isDefaultDisabled }
-						onChange={ handleDefaultChange }
-					/>
-				</Paper>
-				<Paper p="md" className={ clsx(classes.section) }>
-					<Switch
-						label="Apply every 24 hours"
-						description="Re-apply this signature to matched accounts once a day. If off, it is applied only when you save."
-						checked={ scheduledInputProps.checked }
-						onChange={ scheduledInputProps.onChange }
-					/>
-				</Paper>
-			</SimpleGrid>
-
-			<Paper p="md" className={ clsx(classes.section, classes.rulesCard) }>
-				<Stack gap={ 6 }>
-					<Text size="sm" className={ clsx(classes.rulesTitle) }>
-						How signatures are chosen
-					</Text>
-					<Text size="sm">
-						A person, group, or organizational unit can only be assigned to one signature at a time. Choices already used by another signature are grayed out. If someone matches more than one assignment, the most specific one wins: a person beats a group, a group beats an organizational unit, and anything beats the default.
-					</Text>
-				</Stack>
+		<Stack gap="md">
+			<Paper
+				p="md"
+				className={ clsx(classes.section, classes.defaultCard) }
+				data-checked={ form.values.isDefault }
+			>
+				<Switch
+					label="Default signature"
+					description={
+						rivalDefault
+							? `Already set on ${rivalDefault.templateName}. A person, group, or organizational unit still wins over the default.`
+							: "Used when someone is not matched by a person, group, or organizational unit on any signature."
+					}
+					checked={ defaultInputProps.checked }
+					disabled={ isDefaultDisabled }
+					onChange={ handleDefaultChange }
+				/>
 			</Paper>
 
 			<Collapse expanded={ form.values.isDefault } keepMounted={ false }>
 				<Alert icon={ <IconInfoCircle size={ 16 } /> } color="blue">
-					Other targeting choices are hidden while this is the default. Turn default off to assign specific people, groups, or OUs instead.
+					People, groups, and organizational units are off while this is the default. Turn default off to assign them.
 				</Alert>
 			</Collapse>
 
 			<Collapse expanded={ !form.values.isDefault } keepMounted={ false }>
 				<Stack gap="md">
-					<Paper p="md" pt="sm" className={ clsx(classes.section, classes.halfWidthSection) }>
-						<OrganizationalUnitTree
-							label="Organizational units"
-							data={ organizationalUnitTreeData }
-							value={ organizationalUnitInputProps.value }
-							onChange={ handleOrganizationalUnitsChange }
-							error={ organizationalUnitInputProps.error }
-							searchPlaceholder="Search"
-							nothingFoundMessage="No organizational units found"
-							disabledPaths={ disabledOrganizationalUnits }
+					<Paper p="md" pt="sm" className={ clsx(classes.section) }>
+						<TransferList
+							label="People"
+							data={ userSelectData }
+							value={ peopleInputProps.value }
+							onChange={ handlePeopleChange }
+							error={ peopleInputProps.error }
+							searchPlaceholder="Search people"
+							nothingFoundMessage="No people found"
+							choicesSearchLabel="Search people choices"
+							chosenSearchLabel="Search chosen people"
 						/>
 					</Paper>
 					<Paper p="md" pt="sm" className={ clsx(classes.section) }>
@@ -159,16 +138,15 @@ export function TargetsStep({ form, directory, claimedTargets }: TargetsStepProp
 						/>
 					</Paper>
 					<Paper p="md" pt="sm" className={ clsx(classes.section) }>
-						<TransferList
-							label="People"
-							data={ userSelectData }
-							value={ peopleInputProps.value }
-							onChange={ handlePeopleChange }
-							error={ peopleInputProps.error }
-							searchPlaceholder="Search people"
-							nothingFoundMessage="No people found"
-							choicesSearchLabel="Search people choices"
-							chosenSearchLabel="Search chosen people"
+						<OrganizationalUnitTree
+							label="Organizational units"
+							data={ organizationalUnitTreeData }
+							value={ organizationalUnitInputProps.value }
+							onChange={ handleOrganizationalUnitsChange }
+							error={ organizationalUnitInputProps.error }
+							searchPlaceholder="Search"
+							nothingFoundMessage="No organizational units found"
+							disabledPaths={ disabledOrganizationalUnits }
 						/>
 					</Paper>
 				</Stack>

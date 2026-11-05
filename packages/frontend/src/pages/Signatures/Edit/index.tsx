@@ -1,34 +1,37 @@
-import { Center, Loader } from "@mantine/core"
+import { Alert, Center, Loader } from "@mantine/core"
 import { notifications } from "@mantine/notifications"
 import { useQueryClient } from "@tanstack/react-query"
-import { useNavigate, useRouter } from "@tanstack/react-router"
+import { useNavigate } from "@tanstack/react-router"
 import { useState } from "react"
 
 import { Page } from "@/frontend/components/Page"
-import { saveAndDeploySignature } from "@/frontend/features/signatures/saveAndDeploySignature"
-import { SignatureWizard } from "@/frontend/features/signatures/SignatureWizard"
-import { type SignatureWizardValues } from "@/frontend/features/signatures/SignatureWizard/types"
+import { saveTemplate } from "@/frontend/features/signatures/saveTemplate"
+import { SignatureDesign } from "@/frontend/features/signatures/SignatureDesign"
 import { useTemplateQuery } from "@/frontend/queries/templates"
 
-export function SignatureEditPage() {
-	const navigate = useNavigate()
-	const router = useRouter()
-	const queryClient = useQueryClient()
-	const id = router.state.location.pathname.split("/").pop()
-	const isEdit = id && id !== "edit"
-	const { data: template, isLoading } = useTemplateQuery(isEdit ? id : undefined)
-	const [isSubmitting, setIsSubmitting] = useState(false)
-	const title = isEdit ? "Edit Signature Template" : "Create Signature Template"
+interface SignatureEditPageProps {
+	templateId?: string
+}
 
-	async function handleSubmit(values: SignatureWizardValues) {
+export function SignatureEditPage({ templateId }: SignatureEditPageProps) {
+	const navigate = useNavigate()
+	const queryClient = useQueryClient()
+	const { data: template, isLoading } = useTemplateQuery(templateId)
+	const [isSubmitting, setIsSubmitting] = useState(false)
+	const title = templateId ? "Edit Signature" : "Create Signature"
+
+	async function handleSubmit(values: { name: string, content: string }) {
 		setIsSubmitting(true)
 		try {
-			await saveAndDeploySignature(values, isEdit ? id : undefined)
+			await saveTemplate({
+				templateId,
+				name: values.name,
+				content: values.content,
+			})
 			await queryClient.invalidateQueries({ queryKey: ["templates"] })
-			await queryClient.invalidateQueries({ queryKey: ["templateAssignments"] })
 			notifications.show({
 				color: "green",
-				message: "Signature saved and queued for deploy",
+				message: "Signature saved",
 			})
 			navigate({ to: "/admin/signatures" })
 		} catch (error) {
@@ -45,7 +48,7 @@ export function SignatureEditPage() {
 		navigate({ to: "/admin/signatures" })
 	}
 
-	if(isEdit && isLoading) {
+	if(templateId && isLoading) {
 		return (
 			<Page title={ title }>
 				<Center h="100vh">
@@ -55,9 +58,19 @@ export function SignatureEditPage() {
 		)
 	}
 
+	if(templateId && !template) {
+		return (
+			<Page title={ title }>
+				<Alert color="red" title="Signature not found">
+					This signature is not available.
+				</Alert>
+			</Page>
+		)
+	}
+
 	return (
 		<Page title={ title }>
-			<SignatureWizard
+			<SignatureDesign
 				template={ template }
 				onSubmit={ handleSubmit }
 				onCancel={ handleCancel }

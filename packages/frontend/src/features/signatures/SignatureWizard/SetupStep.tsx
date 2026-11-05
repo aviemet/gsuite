@@ -19,10 +19,10 @@ import {
 	toSavedStartTemplate,
 } from "./startTemplates"
 import { TemplatePickerModal } from "./TemplatePickerModal"
-import { isSetupSource, type SignatureWizardValues } from "./types"
+import { isSetupSource, type SignatureDesignValues } from "./types"
 
 interface SetupStepProps {
-	form: UseFormReturnType<SignatureWizardValues>
+	form: UseFormReturnType<SignatureDesignValues>
 	templates: Template[]
 	directory: DirectorySnapshot
 }

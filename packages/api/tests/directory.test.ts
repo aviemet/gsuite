@@ -22,10 +22,12 @@ vi.mock("../src/workspace/authorize", () => ({
 }))
 
 import { directoryHandler } from "../src/directory/handler"
+import { resetSharedMockDirectoryClient } from "../src/directory/mockClient"
 
 describe("directoryHandler", () => {
 	beforeEach(() => {
 		process.env.DIRECTORY_MODE = "mock"
+		resetSharedMockDirectoryClient()
 	})
 
 	it("returns the mock Workspace directory for an admin", async () => {

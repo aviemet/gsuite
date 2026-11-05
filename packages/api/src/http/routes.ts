@@ -1,5 +1,5 @@
-import { directoryHandler } from "../directory"
-import { deployTemplateHandler, saveAndDeployHandler } from "../signatures"
+import { directoryHandler, updateDirectoryGroupHandler, updateDirectoryUserHandler } from "../directory"
+import { deployTemplateHandler, saveAssignmentHandler, saveTemplateHandler } from "../signatures"
 import {
 	apiStatusHandler,
 	connectWorkspaceHandler,
@@ -15,7 +15,10 @@ const healthHandler: ApiHandler = async () => ok({ ok: true })
 export const apiRoutes: ApiRouteDefinition[] = [
 	{ method: "GET", path: "/api/health", handler: healthHandler },
 	{ method: "GET", path: "/api/directory", handler: directoryHandler },
-	{ method: "POST", path: "/api/save-and-deploy", handler: saveAndDeployHandler },
+	{ method: "POST", path: "/api/directory/users/update", handler: updateDirectoryUserHandler },
+	{ method: "POST", path: "/api/directory/groups/update", handler: updateDirectoryGroupHandler },
+	{ method: "POST", path: "/api/templates", handler: saveTemplateHandler },
+	{ method: "POST", path: "/api/template-assignment", handler: saveAssignmentHandler },
 	{ method: "POST", path: "/api/deploy-template", handler: deployTemplateHandler },
 	{ method: "GET", path: "/api/workspace", handler: workspaceSessionHandler },
 	{ method: "POST", path: "/api/workspace/connect", handler: connectWorkspaceHandler },

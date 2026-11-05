@@ -41,21 +41,72 @@ On deploy, the Firebase CLI loads that file for the String parameter. If the val
 
 Local `yarn dev` does not use the Functions package. Put the same URL in `packages/.env` so the local API can serve Connect Workspace. Production sets `GMAIL_MODE=real` and `DIRECTORY_MODE=real` in the Functions `onInit` hook.
 
+## Scopes this app requests
+
+These are the scopes in `workspaceScopes`. Settings → API status checks each one. While the app is in development, the work domain grants them on the service account's domain-wide delegation entry. That entry does not change when the code changes. Local mock mode does not call Google.
+
+```
+https://www.googleapis.com/auth/admin.directory.user
+https://www.googleapis.com/auth/admin.directory.group
+https://www.googleapis.com/auth/admin.directory.group.member
+https://www.googleapis.com/auth/admin.directory.orgunit
+https://www.googleapis.com/auth/gmail.settings.basic
+```
+
+`admin.directory.user`, `admin.directory.group`, `admin.directory.group.member`, and `admin.directory.orgunit` are the write scopes. Each one includes read. Do not also list the `.readonly` variants.
+
+## When the scope list changes
+
+Do these steps in order. API calls keep failing until the work domain's delegation entry lists the scopes below.
+
+### 1. Developer account: OAuth consent screen
+
+Use the Google account that owns Cloud project `gsuite-b63f0`.
+
+1. Open [Google Cloud Console](https://console.cloud.google.com) and select **gsuite-b63f0**.
+2. Open **Google Auth Platform → Data Access**. Older consoles call this **APIs & Services → OAuth consent screen → Edit app → Scopes**.
+3. Add every scope in the list above that is not already there. Remove a scope the list no longer contains, including any `.readonly` scope that a write scope replaced.
+4. Save. New Admin SDK scopes are sensitive. Submit verification if Google asks. `gmail.settings.basic` is restricted and stays as it is.
+
+### 2. Developer account: Marketplace app configuration
+
+The consent screen and the Marketplace listing are different forms. Both must list the same scopes.
+
+1. In `gsuite-b63f0`, open **Google Workspace Marketplace SDK → App Configuration**.
+2. Set the OAuth scopes field to the list above, one scope per line.
+3. Save. If Google requires review, submit it and wait until that configuration is approved. An admin cannot grant scopes that are still in draft.
+4. Leave installation set to **Admin only install**.
+
+### 3. Work account: edit the domain-wide delegation entry
+
+This is the box where the scope strings were pasted. Sign in to [admin.google.com](https://admin.google.com) as a super admin of the work domain.
+
+1. Go to **Security → Access and data control → API controls**. Older consoles call the last step **API controls** directly under Security.
+2. Open **Domain-wide delegation → Manage Domain Wide Delegation**.
+3. Find the row whose Client ID is the service account's numeric client ID. That value is `client_id` in the service account JSON, and **Unique ID** on the service account's Details page in Cloud Console.
+4. Click **Edit**. Replace the OAuth scopes field with this comma-separated list:
+
+```
+https://www.googleapis.com/auth/admin.directory.user,https://www.googleapis.com/auth/admin.directory.group,https://www.googleapis.com/auth/admin.directory.group.member,https://www.googleapis.com/auth/admin.directory.orgunit,https://www.googleapis.com/auth/gmail.settings.basic
+```
+
+5. Click **Authorize**.
+
+Remove `admin.directory.orgunit.readonly` and any other `.readonly` Directory scope from that field. Settings → Workspace does not edit this list.
+
+A published Marketplace install is a separate grant. It matters after the domain installs the listing. It does not update this delegation entry.
+
+### 4. Confirm in the app
+
+Open SuiteOcean → Settings → API status → **Check again**. Every row must say Ready: Users, Groups, Group members, Organizational units, and Gmail signature settings. A failed row is a scope the domain grant does not include yet.
+
 ## Marketplace listing
 
 1. Enable the **Google Workspace Marketplace SDK** in `gsuite-b63f0`.
 2. Open the Marketplace SDK → App Configuration.
 3. Set visibility to **Public** (listed or unlisted). Set installation to **Admin only install**.
 4. Add a **Web app** integration. Use `https://suiteocean.com/admin` as the universal navigation URL.
-5. List these OAuth scopes:
-
-```
-https://www.googleapis.com/auth/admin.directory.user.readonly
-https://www.googleapis.com/auth/admin.directory.group.readonly
-https://www.googleapis.com/auth/admin.directory.orgunit.readonly
-https://www.googleapis.com/auth/gmail.settings.basic
-```
-
+5. List the scopes in [Scopes this app requests](#scopes-this-app-requests).
 6. Fill in the Store Listing (name, description, icons, screenshots, support, privacy, and terms links).
 7. Complete OAuth verification and Marketplace review. `gmail.settings.basic` is a restricted Gmail scope, so Google may require a CASA security assessment before approval.
 8. Put the published listing URL in `WORKSPACE_MARKETPLACE_URL` (Functions `.env` / `.env.gsuite-b63f0`, and `packages/.env` for local) and deploy.

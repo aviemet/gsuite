@@ -2,10 +2,8 @@ import {
 	assignmentTypes,
 	directoryGroups,
 	directoryUsers,
-	type SaveAndDeployRequest,
 	SIGNATURE_DEPLOY_LOGS_COLLECTION,
 	type SignatureDeployLog,
-	type SignatureUpdateMessage,
 } from "@gsuite/shared"
 import { describe, expect, it, vi } from "vitest"
 
@@ -13,7 +11,8 @@ import { type GmailClient, type SignatureUpdate } from "../src/gmail/client"
 import { MockGmailClient } from "../src/gmail/mockClient"
 import { createInlineQueuePublisher } from "../src/queue/publisher"
 import { processSignatureDeploy } from "../src/signatures/processSignatureDeploy"
-import { saveAndDeploy } from "../src/signatures/saveAndDeploy"
+import { saveAssignment } from "../src/signatures/saveAssignment"
+import { saveTemplate } from "../src/signatures/saveTemplate"
 
 function isSignatureDeployLog(
 	value: Record<string, unknown> | SignatureDeployLog,
@@ -155,31 +154,113 @@ function deployDependencies(
 	}
 }
 
-describe("saveAndDeploy", () => {
-	it("writes template and assignments then queues one deploy", async () => {
+describe("saveTemplate", () => {
+	it("writes a template with no assignments and no schedule", async () => {
 		const firestore = createFirestoreMock()
-		const published: SignatureUpdateMessage[] = []
-		const request: SaveAndDeployRequest = {
-			name: "Standard",
-			content: "<p>{{fullName}}</p>",
-			isDefault: false,
-			userEmails: ["jane.doe@example.com"],
-			groupIds: ["marketing"],
-			organizationalUnitPaths: [],
-			isScheduled: false,
-		}
 
-		const result = await saveAndDeploy(
-			request,
+		const result = await saveTemplate(
+			{ name: "Standard", content: "<p>{{fullName}}</p>" },
 			{ uid: "admin-1", customerId: "customer-1" },
 			{
 				db: firestore.db as never,
-				queue: {
-					async publishSignatureUpdate(message) {
-						published.push(message)
-					},
+				now: () => new Date("2026-01-01T00:00:00.000Z"),
+				createId: () => "id-1",
+			},
+		)
+
+		expect(result).toEqual({ templateId: "id-1" })
+		expect(firestore.templates.get("id-1")?.name).toBe("Standard")
+		expect(firestore.templates.get("id-1")?.isDefault).toBe(false)
+		expect(firestore.templates.get("id-1")?.isScheduled).toBe(false)
+		expect(firestore.templates.get("id-1")?.customerId).toBe("customer-1")
+		expect(firestore.assignments.size).toBe(0)
+	})
+
+	it("updates name and content without changing assignment policy", async () => {
+		const firestore = createFirestoreMock({
+			templates: {
+				"template-1": {
+					id: "template-1",
+					name: "Old",
+					content: "<p>old</p>",
+					customerId: "customer-1",
+					isDefault: true,
+					isScheduled: true,
+					isActive: true,
 				},
-				users: directoryUsers,
+			},
+			assignments: {
+				"keep-1": {
+					id: "keep-1",
+					templateId: "template-1",
+					assignmentType: assignmentTypes.group,
+					targetId: "sales",
+					customerId: "customer-1",
+					isActive: true,
+				},
+			},
+		})
+
+		await saveTemplate(
+			{ templateId: "template-1", name: "Standard", content: "<p>x</p>" },
+			{ uid: "admin-1", customerId: "customer-1" },
+			{ db: firestore.db as never },
+		)
+
+		expect(firestore.templates.get("template-1")?.name).toBe("Standard")
+		expect(firestore.templates.get("template-1")?.content).toBe("<p>x</p>")
+		expect(firestore.templates.get("template-1")?.isDefault).toBe(true)
+		expect(firestore.templates.get("template-1")?.isScheduled).toBe(true)
+		expect(firestore.assignments.has("keep-1")).toBe(true)
+	})
+
+	it("rejects a template owned by another customer", async () => {
+		const firestore = createFirestoreMock({
+			templates: {
+				"template-9": {
+					id: "template-9",
+					customerId: "other-customer",
+					content: "<p>x</p>",
+				},
+			},
+		})
+
+		await expect(saveTemplate(
+			{ templateId: "template-9", name: "Standard", content: "<p>x</p>" },
+			{ uid: "admin-1", customerId: "customer-1" },
+			{ db: firestore.db as never },
+		)).rejects.toThrow("Template belongs to another customer")
+	})
+})
+
+describe("saveAssignment", () => {
+	it("writes assignment rows without enqueueing a deploy", async () => {
+		const firestore = createFirestoreMock({
+			templates: {
+				"template-1": {
+					id: "template-1",
+					name: "Standard",
+					content: "<p>x</p>",
+					customerId: "customer-1",
+					isDefault: false,
+					isScheduled: false,
+					isActive: true,
+				},
+			},
+		})
+
+		const result = await saveAssignment(
+			{
+				templateId: "template-1",
+				isDefault: false,
+				userEmails: ["jane.doe@example.com"],
+				groupIds: ["marketing"],
+				organizationalUnitPaths: [],
+				isScheduled: false,
+			},
+			{ uid: "admin-1", customerId: "customer-1" },
+			{
+				db: firestore.db as never,
 				groups: directoryGroups,
 				now: () => new Date("2026-01-01T00:00:00.000Z"),
 				createId: (() => {
@@ -189,19 +270,13 @@ describe("saveAndDeploy", () => {
 			},
 		)
 
-		expect(result.templateId).toBe("id-1")
-		expect(result.queuedUserCount).toBe(2)
-		expect(firestore.templates.get("id-1")?.name).toBe("Standard")
-		expect(firestore.templates.get("id-1")?.isDefault).toBe(false)
+		expect(result).toEqual({ templateId: "template-1" })
 		expect(firestore.assignments.size).toBe(2)
 		expect([...firestore.assignments.values()].map((assignment) => assignment.assignmentType)).toEqual([
 			assignmentTypes.user,
 			assignmentTypes.group,
 		])
-		expect(firestore.templates.get("id-1")?.customerId).toBe("customer-1")
-		expect(published).toHaveLength(1)
-		expect(published[0]?.customerId).toBe("customer-1")
-		expect(published[0]?.userEmails).toEqual(["jane.doe@example.com", "morgan.patel@example.com"])
+		expect(firestore.templates.get("template-1")?.content).toBe("<p>x</p>")
 	})
 
 	it("replaces previous assignments for the same template", async () => {
@@ -227,11 +302,9 @@ describe("saveAndDeploy", () => {
 			},
 		})
 
-		await saveAndDeploy(
+		await saveAssignment(
 			{
 				templateId: "template-1",
-				name: "Standard",
-				content: "<p>x</p>",
 				isDefault: false,
 				userEmails: [],
 				groupIds: ["engineering"],
@@ -241,8 +314,6 @@ describe("saveAndDeploy", () => {
 			{ uid: "admin-1", customerId: "customer-1" },
 			{
 				db: firestore.db as never,
-				queue: { async publishSignatureUpdate() {} },
-				users: directoryUsers,
 				groups: directoryGroups,
 				createId: (() => {
 					let count = 0
@@ -288,11 +359,9 @@ describe("saveAndDeploy", () => {
 			},
 		})
 
-		await saveAndDeploy(
+		await saveAssignment(
 			{
 				templateId: "template-1",
-				name: "Standard",
-				content: "<p>x</p>",
 				isDefault: false,
 				userEmails: [],
 				groupIds: ["engineering", "product", "engineering"],
@@ -302,8 +371,6 @@ describe("saveAndDeploy", () => {
 			{ uid: "admin-1", customerId: "customer-1" },
 			{
 				db: firestore.db as never,
-				queue: { async publishSignatureUpdate() {} },
-				users: directoryUsers,
 				groups: directoryGroups,
 				createId: (() => {
 					let count = 0
@@ -330,6 +397,13 @@ describe("saveAndDeploy", () => {
 					isActive: true,
 					updatedAt: "2025-01-01T00:00:00.000Z",
 				},
+				"template-b": {
+					id: "template-b",
+					customerId: "customer-1",
+					isDefault: false,
+					isActive: true,
+					updatedAt: "2025-01-01T00:00:00.000Z",
+				},
 			},
 			assignments: {
 				"assignment-a": {
@@ -342,10 +416,9 @@ describe("saveAndDeploy", () => {
 			},
 		})
 
-		await expect(saveAndDeploy(
+		await expect(saveAssignment(
 			{
-				name: "Other",
-				content: "<p>x</p>",
+				templateId: "template-b",
 				isDefault: false,
 				userEmails: [],
 				groupIds: ["engineering"],
@@ -355,8 +428,6 @@ describe("saveAndDeploy", () => {
 			{ uid: "admin-1", customerId: "customer-1" },
 			{
 				db: firestore.db as never,
-				queue: { async publishSignatureUpdate() {} },
-				users: directoryUsers,
 				groups: directoryGroups,
 			},
 		)).rejects.toThrow("Target already assigned to another template")
@@ -372,13 +443,20 @@ describe("saveAndDeploy", () => {
 					isActive: true,
 					updatedAt: "2025-01-01T00:00:00.000Z",
 				},
+				"template-b": {
+					id: "template-b",
+					customerId: "customer-1",
+					isDefault: false,
+					isActive: true,
+					content: "<p>x</p>",
+					updatedAt: "2025-01-01T00:00:00.000Z",
+				},
 			},
 		})
 
-		await expect(saveAndDeploy(
+		await expect(saveAssignment(
 			{
-				name: "Other default",
-				content: "<p>x</p>",
+				templateId: "template-b",
 				isDefault: true,
 				userEmails: [],
 				groupIds: [],
@@ -388,14 +466,12 @@ describe("saveAndDeploy", () => {
 			{ uid: "admin-1", customerId: "customer-1" },
 			{
 				db: firestore.db as never,
-				queue: { async publishSignatureUpdate() {} },
-				users: directoryUsers,
 				groups: directoryGroups,
 			},
 		)).rejects.toThrow("Another template is already the default signature")
 	})
 
-	it("deploys the more specific winning template for overlapping memberships", async () => {
+	it("leaves another template's assignments in place", async () => {
 		const firestore = createFirestoreMock({
 			templates: {
 				"group-template": {
@@ -403,8 +479,14 @@ describe("saveAndDeploy", () => {
 					customerId: "customer-1",
 					isDefault: false,
 					isActive: true,
-					updatedAt: "2025-01-01T00:00:00.000Z",
 					content: "<p>group</p>",
+				},
+				"person-template": {
+					id: "person-template",
+					customerId: "customer-1",
+					isDefault: false,
+					isActive: true,
+					content: "<p>person</p>",
 				},
 			},
 			assignments: {
@@ -417,12 +499,10 @@ describe("saveAndDeploy", () => {
 				},
 			},
 		})
-		const published: SignatureUpdateMessage[] = []
 
-		await saveAndDeploy(
+		await saveAssignment(
 			{
-				name: "Jane override",
-				content: "<p>person</p>",
+				templateId: "person-template",
 				isDefault: false,
 				userEmails: ["jane.doe@example.com"],
 				groupIds: [],
@@ -432,24 +512,14 @@ describe("saveAndDeploy", () => {
 			{ uid: "admin-1", customerId: "customer-1" },
 			{
 				db: firestore.db as never,
-				queue: {
-					async publishSignatureUpdate(message) {
-						published.push(message)
-					},
-				},
-				users: directoryUsers,
 				groups: directoryGroups,
-				now: () => new Date("2026-01-01T00:00:00.000Z"),
-				createId: (() => {
-					let count = 0
-					return () => `id-${++count}`
-				})(),
+				createId: () => "person-assignment",
 			},
 		)
 
-		expect(published).toHaveLength(1)
-		expect(published[0]?.templateId).toBe("id-1")
-		expect(published[0]?.userEmails).toEqual(["jane.doe@example.com"])
+		expect(firestore.assignments.has("group-assignment")).toBe(true)
+		expect(firestore.assignments.get("person-assignment")?.targetId).toBe("jane.doe@example.com")
+		expect(firestore.templates.get("group-template")?.content).toBe("<p>group</p>")
 	})
 
 	it("rejects a template owned by another customer", async () => {
@@ -462,24 +532,19 @@ describe("saveAndDeploy", () => {
 				},
 			},
 		})
-		const request: SaveAndDeployRequest = {
-			templateId: "template-9",
-			name: "Standard",
-			content: "<p>x</p>",
-			isDefault: false,
-			userEmails: [],
-			groupIds: [],
-			organizationalUnitPaths: [],
-			isScheduled: false,
-		}
 
-		await expect(saveAndDeploy(
-			request,
+		await expect(saveAssignment(
+			{
+				templateId: "template-9",
+				isDefault: false,
+				userEmails: [],
+				groupIds: [],
+				organizationalUnitPaths: [],
+				isScheduled: false,
+			},
 			{ uid: "admin-1", customerId: "customer-1" },
 			{
 				db: firestore.db as never,
-				queue: { async publishSignatureUpdate() {} },
-				users: directoryUsers,
 				groups: directoryGroups,
 			},
 		)).rejects.toThrow("Template belongs to another customer")

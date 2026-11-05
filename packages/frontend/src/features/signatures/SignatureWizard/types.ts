@@ -7,12 +7,15 @@ export const SETUP_SOURCES = ["blank", "template", "account"] as const
 
 export type SetupSource = typeof SETUP_SOURCES[number]
 
-export interface SignatureWizardValues {
+export interface SignatureDesignValues {
 	setupSource: SetupSource | null
 	sourceTemplateId: string | null
 	sourceAccountEmail: string | null
 	name: string
 	content: string
+}
+
+export interface SignatureAssignmentValues {
 	isDefault: boolean
 	userEmails: string[]
 	groupIds: string[]
@@ -20,36 +23,30 @@ export interface SignatureWizardValues {
 	isScheduled: boolean
 }
 
-export const LAST_WIZARD_STEP = 3
-
-export const SETUP_SOURCE_LABELS: Record<SetupSource, string> = {
-	template: "From template",
-	blank: "Blank canvas",
-	account: "Existing account",
-}
-
 export function isSetupSource(value: string): value is SetupSource {
 	return SETUP_SOURCES.some((source) => source === value)
 }
 
-export function getInitialWizardValues(
-	template?: Template,
-	assignments: readonly TemplateAssignment[] = [],
-): SignatureWizardValues {
-	const targets = template
-		? assignmentTargetsForTemplate(assignments, template.id)
-		: { userEmails: [], groupIds: [], organizationalUnitPaths: [] }
-
+export function getInitialDesignValues(template?: Template): SignatureDesignValues {
 	return {
-		setupSource: template ? "template" : "blank",
+		setupSource: template ? "template" : null,
 		sourceTemplateId: template?.id ?? null,
 		sourceAccountEmail: null,
 		name: template?.name ?? "",
 		content: formatHtmlWithDirectives(template?.content ?? ""),
-		isDefault: template?.isDefault === true,
+	}
+}
+
+export function getInitialAssignmentValues(
+	template: Template,
+	assignments: readonly TemplateAssignment[] = [],
+): SignatureAssignmentValues {
+	const targets = assignmentTargetsForTemplate(assignments, template.id)
+	return {
+		isDefault: template.isDefault === true,
 		userEmails: targets.userEmails,
 		groupIds: targets.groupIds,
 		organizationalUnitPaths: targets.organizationalUnitPaths,
-		isScheduled: template?.isScheduled === true,
+		isScheduled: template.isScheduled === true,
 	}
 }

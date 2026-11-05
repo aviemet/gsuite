@@ -15,6 +15,7 @@ afterEach(() => {
 const successResults: ApiStatusResult[] = [
 	{ id: apiStatusCheckIds.users, label: "Users", group: "admin", status: "success" },
 	{ id: apiStatusCheckIds.groups, label: "Groups", group: "admin", status: "success" },
+	{ id: apiStatusCheckIds.groupMembers, label: "Group members", group: "admin", status: "success" },
 	{ id: apiStatusCheckIds.organizationalUnits, label: "Organizational units", group: "admin", status: "success" },
 	{ id: apiStatusCheckIds.gmailSettings, label: "Gmail signature settings", group: "user", status: "success" },
 ]
@@ -40,7 +41,7 @@ describe("ApiStatusPanel", () => {
 		renderPanel(undefined)
 
 		expect(screen.getByText("Not checked yet")).toBeInTheDocument()
-		expect(screen.getAllByText("Not checked")).toHaveLength(4)
+		expect(screen.getAllByText("Not checked")).toHaveLength(5)
 		expect(document.querySelectorAll("[data-state='idle']").length).toBeGreaterThan(0)
 	})
 
@@ -56,7 +57,7 @@ describe("ApiStatusPanel", () => {
 		const { onCheck } = renderPanel(successResults)
 
 		expect(screen.getByText("All APIs are available")).toBeInTheDocument()
-		expect(screen.getAllByText("Ready")).toHaveLength(4)
+		expect(screen.getAllByText("Ready")).toHaveLength(5)
 		expect(document.querySelectorAll(".tabler-icon-circle-check").length).toBeGreaterThanOrEqual(4)
 		expect(document.querySelectorAll("[data-state='success']").length).toBeGreaterThanOrEqual(4)
 

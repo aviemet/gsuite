@@ -42,10 +42,18 @@ export interface TemplateAssignmentRecord {
 	isActive: boolean
 }
 
-export interface SaveAndDeployRequest {
+export interface SaveTemplateRequest {
 	templateId?: string
 	name: string
 	content: string
+}
+
+export interface SaveTemplateResponse {
+	templateId: string
+}
+
+export interface SaveAssignmentRequest {
+	templateId: string
 	isDefault: boolean
 	userEmails: string[]
 	groupIds: string[]
@@ -53,9 +61,8 @@ export interface SaveAndDeployRequest {
 	isScheduled: boolean
 }
 
-export interface SaveAndDeployResponse {
+export interface SaveAssignmentResponse {
 	templateId: string
-	queuedUserCount: number
 }
 
 export interface DeployTemplateRequest {

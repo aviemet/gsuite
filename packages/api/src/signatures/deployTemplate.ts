@@ -1,15 +1,11 @@
-import {
-	type DirectoryUser,
-	groupEmailsByResolvedTemplate,
-	isAssignmentType,
-	type ResolvableAssignment,
-	type ResolvableTemplate,
-} from "@gsuite/shared"
+import { type DirectoryUser, groupEmailsByResolvedTemplate } from "@gsuite/shared"
 import { type Firestore } from "firebase-admin/firestore"
 
 import { HttpError } from "../http/errors"
 import { type QueuePublisher } from "../queue/publisher"
-import { readBoolean, readString } from "./recordFields"
+import { type AuthorizedMember } from "../workspace/records"
+import { readResolvableAssignments, readResolvableTemplates } from "./readSignatureRecords"
+import { requireCustomerTemplate } from "./requireCustomerTemplate"
 
 export interface DeployTemplateDependencies {
 	db: Firestore
@@ -18,14 +14,9 @@ export interface DeployTemplateDependencies {
 	createId?: () => string
 }
 
-export interface DeployActor {
-	uid: string
-	customerId: string
-}
-
 export async function deployTemplate(
 	templateId: string,
-	actor: DeployActor,
+	actor: Pick<AuthorizedMember, "customerId">,
 	dependencies: DeployTemplateDependencies,
 ): Promise<{ templateId: string, queuedUserCount: number }> {
 	const createId = dependencies.createId ?? (() => crypto.randomUUID())
@@ -34,14 +25,7 @@ export async function deployTemplate(
 		throw new HttpError("Template id is required", 400)
 	}
 
-	const templateRef = dependencies.db.collection("templates").doc(normalizedTemplateId)
-	const existing = await templateRef.get()
-	if(!existing.exists) {
-		throw new HttpError("Template not found", 404)
-	}
-	if(existing.data()?.customerId !== actor.customerId) {
-		throw new HttpError("Template belongs to another customer", 403)
-	}
+	await requireCustomerTemplate(dependencies.db, normalizedTemplateId, actor.customerId)
 
 	const templatesSnap = await dependencies.db
 		.collection("templates")
@@ -52,35 +36,12 @@ export async function deployTemplate(
 		.where("customerId", "==", actor.customerId)
 		.get()
 
-	const resolvableTemplates: ResolvableTemplate[] = templatesSnap.docs.map((doc) => {
-		const data = doc.data() as Record<string, unknown>
-		return {
-			id: doc.id,
-			isDefault: readBoolean(data, "isDefault"),
-			isActive: data.isActive !== false,
-			updatedAt: readString(data, "updatedAt"),
-		}
-	})
-
-	const resolvableAssignments: ResolvableAssignment[] = []
-	for(const doc of assignmentsSnap.docs) {
-		const data = doc.data() as Record<string, unknown>
-		const assignmentType = readString(data, "assignmentType")
-		if(!isAssignmentType(assignmentType)) continue
-		resolvableAssignments.push({
-			templateId: readString(data, "templateId"),
-			assignmentType,
-			targetId: readString(data, "targetId"),
-			isActive: data.isActive !== false,
-		})
-	}
-
 	const emails = dependencies.users.map((user) => user.email)
 	const grouped = groupEmailsByResolvedTemplate(
 		emails,
 		dependencies.users,
-		resolvableTemplates,
-		resolvableAssignments,
+		readResolvableTemplates(templatesSnap.docs),
+		readResolvableAssignments(assignmentsSnap.docs),
 	)
 	const userEmails = grouped.get(normalizedTemplateId) ?? []
 	if(userEmails.length === 0) {

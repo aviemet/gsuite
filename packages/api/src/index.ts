@@ -51,24 +51,4 @@ export {
 	type QueuePublisher,
 	shouldEnqueueCloudTask,
 } from "./queue"
-export {
-	type DeployActor,
-	deployTemplate,
-	type DeployTemplateDependencies,
-	deployTemplateHandler,
-	enqueueScheduledDeploys,
-	type EnqueueScheduledDeploysDependencies,
-	enqueueScheduledDeploysForCustomer,
-	type EnqueueScheduledDeploysResult,
-	getPersonForEmail,
-	handleScheduledDeploys,
-	handleSignatureUpdate,
-	personFromDirectoryUser,
-	processSignatureDeploy,
-	type ProcessSignatureDeployDependencies,
-	type SaveActor,
-	saveAndDeploy,
-	type SaveAndDeployDependencies,
-	saveAndDeployHandler,
-	type ScheduledCustomerDeployResult,
-} from "./signatures"
+export { handleScheduledDeploys, handleSignatureUpdate } from "./signatures"

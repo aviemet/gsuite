@@ -1,0 +1,90 @@
+import { Button, Group, Stack, Tabs, Title } from "@mantine/core"
+import { useState } from "react"
+
+import { type DirectoryGroup, type DirectoryOrganizationalUnit, type DirectoryUser } from "@/shared/directoryFixtures"
+import { type DirectoryUserUpdate } from "@/shared/directoryUpdate"
+
+import { directoryUserUpdateFromUser } from "./directoryUserUpdateFromUser"
+import { UserContactFields } from "./UserContactFields"
+import { UserEmployeeFields } from "./UserEmployeeFields"
+import { UserGroupsFields } from "./UserGroupsFields"
+import { UserProfileFields } from "./UserProfileFields"
+
+interface UserEditorProps {
+	user: DirectoryUser
+	groups: readonly DirectoryGroup[]
+	organizationalUnits: readonly DirectoryOrganizationalUnit[]
+	canSave: boolean
+	isSaving: boolean
+	onCancel: () => void
+	onSave: (update: DirectoryUserUpdate) => void
+}
+
+export function UserEditor({
+	user,
+	groups,
+	organizationalUnits,
+	canSave,
+	isSaving,
+	onCancel,
+	onSave,
+}: UserEditorProps) {
+	const [draft, setDraft] = useState(() => directoryUserUpdateFromUser(user))
+	const fieldsDisabled = !canSave || isSaving
+
+	return (
+		<Stack gap="md">
+			<Title order={ 2 } size="h4">{ user.email }</Title>
+			<Tabs defaultValue="profile">
+				<Tabs.List>
+					<Tabs.Tab value="profile">Profile</Tabs.Tab>
+					<Tabs.Tab value="contact">Contact</Tabs.Tab>
+					<Tabs.Tab value="employee">Employee</Tabs.Tab>
+					<Tabs.Tab value="groups">Groups</Tabs.Tab>
+				</Tabs.List>
+				<Tabs.Panel value="profile" pt="md">
+					<UserProfileFields
+						value={ draft }
+						organizationalUnits={ organizationalUnits }
+						disabled={ fieldsDisabled }
+						onChange={ setDraft }
+					/>
+				</Tabs.Panel>
+				<Tabs.Panel value="contact" pt="md">
+					<UserContactFields
+						value={ draft }
+						disabled={ fieldsDisabled }
+						onChange={ setDraft }
+					/>
+				</Tabs.Panel>
+				<Tabs.Panel value="employee" pt="md">
+					<UserEmployeeFields
+						value={ draft }
+						disabled={ fieldsDisabled }
+						onChange={ setDraft }
+					/>
+				</Tabs.Panel>
+				<Tabs.Panel value="groups" pt="md">
+					<UserGroupsFields
+						value={ draft }
+						groups={ groups }
+						disabled={ fieldsDisabled }
+						onChange={ setDraft }
+					/>
+				</Tabs.Panel>
+			</Tabs>
+			<Group justify="flex-end">
+				<Button variant="default" onClick={ onCancel } disabled={ isSaving }>
+					Cancel
+				</Button>
+				{ canSave
+					? (
+						<Button loading={ isSaving } onClick={ () => onSave(draft) }>
+							Save
+						</Button>
+					)
+					: null }
+			</Group>
+		</Stack>
+	)
+}

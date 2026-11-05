@@ -4,7 +4,7 @@ export {
 	type DirectoryMode,
 	readDirectoryMode,
 } from "./createClient"
-export { directoryHandler } from "./handler"
+export { directoryHandler, updateDirectoryGroupHandler, updateDirectoryUserHandler } from "./handler"
 export { mapDirectoryUserProfile } from "./mapDirectoryUserProfile"
 export { getSharedMockDirectoryClient, MockDirectoryClient } from "./mockClient"
 export { RealDirectoryClient } from "./realClient"

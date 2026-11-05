@@ -12,12 +12,15 @@ import { sanitizeRedirectPath } from "@/frontend/lib/auth"
 
 import { DashboardPage } from "../pages/Dashboard"
 import { DirectoryGroupsPage } from "../pages/Directory/Groups"
+import { DirectoryGroupPage } from "../pages/Directory/Groups/Edit"
 import { DirectoryOrganizationalUnitsPage } from "../pages/Directory/OrganizationalUnits"
 import { DirectoryUsersPage } from "../pages/Directory/Users"
+import { DirectoryUserPage } from "../pages/Directory/Users/Edit"
 import { HomePage } from "../pages/Home"
 import { LoginPage } from "../pages/Login"
 import { PrivacyPage } from "../pages/Privacy"
 import { SettingsPage } from "../pages/Settings"
+import { SignatureAssignmentPage } from "../pages/Signatures/Assignment"
 import { SignatureEditPage } from "../pages/Signatures/Edit"
 import { SignaturesListPage } from "../pages/Signatures/Index"
 import { SupportPage } from "../pages/Support"
@@ -115,13 +118,27 @@ const signaturesRoute = createRoute({
 const signatureEditRoute = createRoute({
 	getParentRoute: () => authenticatedRoute,
 	path: "signatures/edit",
-	component: SignatureEditPage,
+	component: function CreateSignatureRoute() {
+		return <SignatureEditPage />
+	},
 })
 
 const signatureEditWithIdRoute = createRoute({
 	getParentRoute: () => authenticatedRoute,
 	path: "signatures/edit/$id",
-	component: SignatureEditPage,
+	component: function EditSignatureRoute() {
+		const { id } = signatureEditWithIdRoute.useParams()
+		return <SignatureEditPage templateId={ id } />
+	},
+})
+
+const signatureAssignmentRoute = createRoute({
+	getParentRoute: () => authenticatedRoute,
+	path: "signatures/$id/assignment",
+	component: function SignatureAssignmentRoute() {
+		const { id } = signatureAssignmentRoute.useParams()
+		return <SignatureAssignmentPage templateId={ id } />
+	},
 })
 
 const directoryRoute = createRoute({
@@ -144,6 +161,24 @@ const directoryGroupsRoute = createRoute({
 	component: DirectoryGroupsPage,
 })
 
+const directoryUserRoute = createRoute({
+	getParentRoute: () => authenticatedRoute,
+	path: "directory/users/$email",
+	component: function DirectoryUserRoute() {
+		const { email } = directoryUserRoute.useParams()
+		return <DirectoryUserPage email={ email } />
+	},
+})
+
+const directoryGroupRoute = createRoute({
+	getParentRoute: () => authenticatedRoute,
+	path: "directory/groups/$groupId",
+	component: function DirectoryGroupRoute() {
+		const { groupId } = directoryGroupRoute.useParams()
+		return <DirectoryGroupPage groupId={ groupId } />
+	},
+})
+
 const directoryOrganizationalUnitsRoute = createRoute({
 	getParentRoute: () => authenticatedRoute,
 	path: "directory/ous",
@@ -164,9 +199,12 @@ const routeTree = rootRoute.addChildren([
 		signaturesRoute,
 		signatureEditRoute,
 		signatureEditWithIdRoute,
+		signatureAssignmentRoute,
 		directoryRoute,
 		directoryUsersRoute,
+		directoryUserRoute,
 		directoryGroupsRoute,
+		directoryGroupRoute,
 		directoryOrganizationalUnitsRoute,
 	]),
 ])

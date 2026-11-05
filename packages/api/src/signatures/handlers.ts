@@ -1,4 +1,8 @@
-import { type DeployTemplateRequest, type SaveAndDeployRequest } from "@gsuite/shared"
+import {
+	type DeployTemplateRequest,
+	type SaveAssignmentRequest,
+	type SaveTemplateRequest,
+} from "@gsuite/shared"
 
 import { createDirectoryClient } from "../directory"
 import { getAdminFirestore } from "../firebase/admin"
@@ -7,24 +11,35 @@ import { HttpError, ok, withMemberAuth } from "../http"
 import { requireSignatureEditor } from "../workspace/authorize"
 import { createInlineSignatureDeployQueue } from "./createSignatureQueue"
 import { deployTemplate } from "./deployTemplate"
-import { saveAndDeploy } from "./saveAndDeploy"
+import { saveAssignment } from "./saveAssignment"
+import { saveTemplate } from "./saveTemplate"
 
-function isDeployTemplateRequest(value: unknown): value is DeployTemplateRequest {
-	if(!value || typeof value !== "object") return false
-	const record = value as Record<string, unknown>
-	return typeof record.templateId === "string" && record.templateId.trim().length > 0
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return typeof value === "object" && value !== null && !Array.isArray(value)
 }
 
-function isSaveAndDeployRequest(value: unknown): value is SaveAndDeployRequest {
-	if(!value || typeof value !== "object") return false
-	const record = value as Record<string, unknown>
-	return typeof record.name === "string"
-		&& typeof record.content === "string"
-		&& typeof record.isDefault === "boolean"
-		&& typeof record.isScheduled === "boolean"
-		&& Array.isArray(record.userEmails)
-		&& Array.isArray(record.groupIds)
-		&& Array.isArray(record.organizationalUnitPaths)
+function isStringArray(value: unknown): value is string[] {
+	return Array.isArray(value) && value.every((entry) => typeof entry === "string")
+}
+
+function isDeployTemplateRequest(value: unknown): value is DeployTemplateRequest {
+	if(!isRecord(value)) return false
+	return typeof value.templateId === "string" && value.templateId.trim().length > 0
+}
+
+function isSaveTemplateRequest(value: unknown): value is SaveTemplateRequest {
+	if(!isRecord(value)) return false
+	return typeof value.name === "string" && typeof value.content === "string"
+}
+
+function isSaveAssignmentRequest(value: unknown): value is SaveAssignmentRequest {
+	if(!isRecord(value)) return false
+	return typeof value.templateId === "string"
+		&& typeof value.isDefault === "boolean"
+		&& typeof value.isScheduled === "boolean"
+		&& isStringArray(value.userEmails)
+		&& isStringArray(value.groupIds)
+		&& isStringArray(value.organizationalUnitPaths)
 }
 
 export const deployTemplateHandler = withMemberAuth(async ({ member, body }) => {
@@ -51,27 +66,28 @@ export const deployTemplateHandler = withMemberAuth(async ({ member, body }) => 
 	return ok(result)
 })
 
-export const saveAndDeployHandler = withMemberAuth(async ({ member, body }) => {
+export const saveTemplateHandler = withMemberAuth(async ({ member, body }) => {
 	requireSignatureEditor(member)
-	if(!isSaveAndDeployRequest(body)) {
+	if(!isSaveTemplateRequest(body)) {
 		throw new HttpError("Invalid request body", 400)
 	}
 
-	const db = getAdminFirestore()
-	const gmail = createGmailClient()
-	const directory = await createDirectoryClient(member.workspaceAdminEmail).listDirectory()
-	const queue = createInlineSignatureDeployQueue({
-		db,
-		gmail,
-		loadUsers: async () => directory.users,
+	const result = await saveTemplate(body, member, {
+		db: getAdminFirestore(),
 	})
+	return ok(result)
+})
 
-	const result = await saveAndDeploy(body, member, {
-		db,
-		queue,
-		users: directory.users,
+export const saveAssignmentHandler = withMemberAuth(async ({ member, body }) => {
+	requireSignatureEditor(member)
+	if(!isSaveAssignmentRequest(body)) {
+		throw new HttpError("Invalid request body", 400)
+	}
+
+	const directory = await createDirectoryClient(member.workspaceAdminEmail).listDirectory()
+	const result = await saveAssignment(body, member, {
+		db: getAdminFirestore(),
 		groups: directory.groups,
 	})
-
 	return ok(result)
 })

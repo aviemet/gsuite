@@ -12,6 +12,7 @@ export const apiStatusCatalog: ReadonlyArray<{
 }> = [
 	{ id: apiStatusCheckIds.users, label: "Users", group: "admin" },
 	{ id: apiStatusCheckIds.groups, label: "Groups", group: "admin" },
+	{ id: apiStatusCheckIds.groupMembers, label: "Group members", group: "admin" },
 	{ id: apiStatusCheckIds.organizationalUnits, label: "Organizational units", group: "admin" },
 	{ id: apiStatusCheckIds.gmailSettings, label: "Gmail signature settings", group: "user" },
 ]

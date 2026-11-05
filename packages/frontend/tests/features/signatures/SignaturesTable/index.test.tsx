@@ -19,8 +19,20 @@ vi.mock("@tanstack/react-router", () => ({
 }))
 
 vi.mock("@/frontend/queries/templates", () => ({
-	useTemplatesQuery: () => ({ data: [] }),
-	useTemplateAssignmentsQuery: () => ({ data: [] }),
+	useTemplatesQuery: () => ({
+		data: [
+			{ id: "template-1", isDefault: false, isActive: true, updatedAt: "2026-01-01T00:00:00.000Z" },
+			{ id: "template-2", isDefault: true, isActive: true, updatedAt: "2026-01-01T00:00:00.000Z" },
+		],
+	}),
+	useTemplateAssignmentsQuery: () => ({
+		data: [{
+			templateId: "template-1",
+			assignmentType: "group",
+			targetId: "engineering",
+			isActive: true,
+		}],
+	}),
 }))
 
 vi.mock("@/frontend/queries/directory", () => ({
@@ -154,12 +166,21 @@ describe("SignaturesTable", () => {
 		renderTable([professional])
 
 		const deployButton = screen.getByRole("button", { name: "Deploy Professional Signature" })
+		const assignmentButton = screen.getByRole("button", { name: "Assignment for Professional Signature" })
 		const editButton = screen.getByRole("button", { name: "Edit Professional Signature" })
 
 		await user.hover(deployButton)
 		expect(await screen.findByRole("tooltip")).toHaveTextContent("Deploy")
 
 		await user.unhover(deployButton)
+		await waitFor(() => {
+			expect(screen.queryByRole("tooltip")).not.toBeInTheDocument()
+		})
+
+		await user.hover(assignmentButton)
+		expect(await screen.findByRole("tooltip")).toHaveTextContent("Assignment")
+
+		await user.unhover(assignmentButton)
 		await waitFor(() => {
 			expect(screen.queryByRole("tooltip")).not.toBeInTheDocument()
 		})
