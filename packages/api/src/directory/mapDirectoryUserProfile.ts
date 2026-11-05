@@ -1,4 +1,4 @@
-import { type DirectoryPhoneNumber, emptyDirectoryProfile } from "@gsuite/shared"
+import { directoryAccountStatus, type DirectoryPhoneNumber, emptyDirectoryProfile } from "@gsuite/shared"
 
 export interface GoogleDirectoryUserLike {
 	primaryEmail?: string | null
@@ -9,6 +9,8 @@ export interface GoogleDirectoryUserLike {
 	} | null
 	orgUnitPath?: string | null
 	thumbnailPhotoUrl?: string | null
+	archived?: boolean | null
+	suspended?: boolean | null
 	organizations?: Array<{
 		primary?: boolean | null
 		title?: string | null
@@ -119,5 +121,6 @@ export function mapDirectoryUserProfile(user: GoogleDirectoryUserLike) {
 		blog: websiteByType(user, "blog"),
 		profileUrl: websiteByType(user, "profile"),
 		phoneNumbers: mapPhoneNumbers(user),
+		accountStatus: directoryAccountStatus(user),
 	}
 }

@@ -27,6 +27,12 @@ describe("mapDirectoryUserProfile", () => {
 			{ type: "work", number: "+1-415-555-0100" },
 			{ type: "mobile", number: "+1-415-555-0199" },
 		])
+		expect(profile.accountStatus).toBe("Active")
+	})
+
+	it("reads suspended and archived ahead of the active status", () => {
+		expect(mapDirectoryUserProfile({ suspended: true }).accountStatus).toBe("Suspended")
+		expect(mapDirectoryUserProfile({ archived: true, suspended: true }).accountStatus).toBe("Archived")
 	})
 
 	it("returns empty strings when Directory has no organization or phones", () => {

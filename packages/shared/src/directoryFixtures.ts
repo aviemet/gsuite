@@ -3,6 +3,19 @@ export interface DirectoryPhoneNumber {
 	number: string
 }
 
+export const directoryAccountStatuses = ["Active", "Suspended", "Archived"] as const
+
+export type DirectoryAccountStatus = typeof directoryAccountStatuses[number]
+
+export function directoryAccountStatus(flags: {
+	archived?: boolean | null
+	suspended?: boolean | null
+}): DirectoryAccountStatus {
+	if(flags.archived === true) return "Archived"
+	if(flags.suspended === true) return "Suspended"
+	return "Active"
+}
+
 export interface DirectoryUser {
 	email: string
 	displayName: string
@@ -31,6 +44,7 @@ export interface DirectoryUser {
 	blog: string
 	profileUrl: string
 	phoneNumbers: DirectoryPhoneNumber[]
+	accountStatus: DirectoryAccountStatus
 }
 
 export function emptyDirectoryProfile(): Omit<DirectoryUser, "email" | "displayName" | "signatureHtml" | "groupIds" | "organizationalUnitPaths"> {
@@ -57,6 +71,7 @@ export function emptyDirectoryProfile(): Omit<DirectoryUser, "email" | "displayN
 		blog: "",
 		profileUrl: "",
 		phoneNumbers: [],
+		accountStatus: "Active",
 	}
 }
 

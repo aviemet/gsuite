@@ -32,6 +32,7 @@ describe("personFromDirectoryUser", () => {
 			blog: "",
 			profileUrl: "",
 			phoneNumbers: [{ type: "work", number: "+1-415-555-0100" }],
+			accountStatus: "Active",
 		})
 
 		expect(person.displayName).toBe("Avram Walden")

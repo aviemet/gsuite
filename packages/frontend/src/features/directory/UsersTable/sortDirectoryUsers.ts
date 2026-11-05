@@ -24,6 +24,7 @@ const sortableAccessors = [
 	"employeeId",
 	"managerEmail",
 	"workPhone",
+	"accountStatus",
 ] as const
 
 type SortableAccessor = typeof sortableAccessors[number]

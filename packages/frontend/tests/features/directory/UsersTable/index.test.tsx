@@ -76,6 +76,48 @@ describe("UsersTable", () => {
 		expect(screen.queryByText("Job title")).not.toBeInTheDocument()
 	})
 
+	it("shows Active, Suspended, and Archived in the status column", () => {
+		enableDataTableMediaQueries()
+		const visibleColumns = resolveVisibleColumns(userColumns, ["displayName", "accountStatus"])
+
+		render(
+			<MantineProvider theme={ theme }>
+				<UsersTable
+					users={ [
+						toDirectoryUserRow(user({
+							email: "jane.doe@example.com",
+							displayName: "Jane Doe",
+							accountStatus: "Active",
+						})),
+						toDirectoryUserRow(user({
+							email: "sam.lee@example.com",
+							displayName: "Sam Lee",
+							accountStatus: "Suspended",
+						})),
+						toDirectoryUserRow(user({
+							email: "alex.kim@example.com",
+							displayName: "Alex Kim",
+							accountStatus: "Archived",
+						})),
+					] }
+					columns={ visibleColumns }
+					columnFilters={ {} }
+					onColumnFilterChange={ vi.fn() }
+					recordLimit={ 25 }
+					loading={ false }
+					canEdit={ false }
+					onOpenUser={ vi.fn() }
+					onQuickEditUser={ vi.fn() }
+				/>
+			</MantineProvider>,
+		)
+
+		expect(screen.getByText("Status")).toBeInTheDocument()
+		expect(screen.getByText("Active")).toBeInTheDocument()
+		expect(screen.getByText("Suspended")).toBeInTheDocument()
+		expect(screen.getByText("Archived")).toBeInTheDocument()
+	})
+
 	it("opens the user from row text and quick edit from the actions button", () => {
 		enableDataTableMediaQueries()
 		const onOpenUser = vi.fn()

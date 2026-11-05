@@ -83,4 +83,10 @@ export const userColumns: TableColumnDefinition<DirectoryUserRow>[] = [
 		defaultVisible: false,
 		getValue: (row) => row.workPhone,
 	},
+	{
+		id: "accountStatus",
+		label: "Status",
+		defaultVisible: false,
+		getValue: (row) => row.accountStatus,
+	},
 ]

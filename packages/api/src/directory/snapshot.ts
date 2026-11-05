@@ -1,4 +1,5 @@
 import {
+	type DirectoryAccountStatus,
 	type DirectoryGroup,
 	type DirectoryGroupMemberRole,
 	type DirectoryOrganizationalUnit,
@@ -36,6 +37,7 @@ export interface RawDirectoryUser {
 	blog?: string
 	profileUrl?: string
 	phoneNumbers?: DirectoryPhoneNumber[]
+	accountStatus?: DirectoryAccountStatus
 }
 
 export interface RawDirectoryGroup {
@@ -113,6 +115,7 @@ export function buildDirectorySnapshot(input: {
 			blog: user.blog ?? empty.blog,
 			profileUrl: user.profileUrl ?? empty.profileUrl,
 			phoneNumbers: user.phoneNumbers ?? empty.phoneNumbers,
+			accountStatus: user.accountStatus ?? empty.accountStatus,
 		}
 	})
 
