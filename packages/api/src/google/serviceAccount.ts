@@ -38,9 +38,8 @@ export function requireServiceAccount(
 	return account
 }
 
-export function readWorkspaceClientId(env: NodeJS.ProcessEnv = process.env): string {
-	const account = readServiceAccount(env)
-	if(account) return account.clientId
-	if((env.GMAIL_MODE ?? "mock") === "real") return ""
-	return "mock-client-id"
+export function readWorkspaceMarketplaceUrl(env: NodeJS.ProcessEnv = process.env): string {
+	const configured = env.WORKSPACE_MARKETPLACE_URL?.trim()
+	if(configured) return configured
+	return ""
 }

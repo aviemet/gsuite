@@ -248,7 +248,13 @@ function SignatureWizardLoaded({
 					icon={ <IconCircleCheck size={ 18 } /> }
 					allowStepSelect={ shouldAllowSelectStep(3) }
 				>
-					<ConfirmStep values={ form.values } templates={ templates } directory={ directory } />
+					<ConfirmStep
+						templateId={ template?.id ?? "draft-template" }
+						values={ form.values }
+						templates={ templates }
+						assignments={ assignments }
+						directory={ directory }
+					/>
 				</Stepper.Step>
 			</Stepper>
 

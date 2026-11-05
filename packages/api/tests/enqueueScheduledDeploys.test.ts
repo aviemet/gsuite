@@ -7,11 +7,11 @@ import {
 import { describe, expect, it } from "vitest"
 
 import { type DirectoryClient, type DirectorySnapshot } from "../src/directory/client"
+import { type QueuePublisher } from "../src/queue/publisher"
 import {
 	enqueueScheduledDeploys,
 	enqueueScheduledDeploysForCustomer,
-} from "../src/enqueueScheduledDeploys"
-import { type QueuePublisher } from "../src/queue/publisher"
+} from "../src/signatures/enqueueScheduledDeploys"
 
 interface QueryFilter {
 	field: string

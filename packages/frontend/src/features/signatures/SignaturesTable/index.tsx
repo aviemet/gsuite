@@ -1,4 +1,4 @@
-import { ActionIcon, Badge, Box, Group } from "@mantine/core"
+import { ActionIcon, Badge, Box, Group, Tooltip } from "@mantine/core"
 import { IconChevronDown, IconChevronsDown, IconPencil, IconTrash } from "@tabler/icons-react"
 import { Link, useRouter } from "@tanstack/react-router"
 import clsx from "clsx"
@@ -7,11 +7,11 @@ import { type MouseEvent, useState } from "react"
 
 import { HtmlPreview } from "@/frontend/components/HtmlPreview"
 import { AssignmentSummaryBadge } from "@/frontend/features/signatures/AssignmentSummaryBadge"
+import { DeploySignatureAction } from "@/frontend/features/signatures/DeploySignatureAction"
 import { type TemplateAssignmentSummary } from "@/frontend/features/signatures/summarizeTemplateAssignments"
 import { Template } from "@/frontend/types/firebase"
 import { safeTemplateParse } from "@/shared/parseTemplate"
-import { samplePerson } from "@/shared/person.testdata"
-import { getTemplatePreviewContext } from "@/shared/templatePlaceholders"
+import { buildPreviewTemplateContext } from "@/shared/templatePlaceholders"
 
 import { formatTemplateCreatedAt } from "./formatTemplateCreatedAt"
 import * as classes from "./SignaturesTable.css"
@@ -29,7 +29,7 @@ const unassignedSummary: TemplateAssignmentSummary = {
 	hasDetailTooltip: false,
 }
 
-const previewContext = getTemplatePreviewContext(samplePerson)
+const previewContext = buildPreviewTemplateContext()
 
 const defaultSortStatus: DataTableSortStatus<Template> = {
 	columnAccessor: "name",
@@ -138,7 +138,7 @@ export function SignaturesTable({ templates, assignmentSummaries }: SignaturesTa
 					sortable: true,
 					render: (record) => (
 						<Link
-							to="/signatures/edit/$id"
+							to="/admin/signatures/edit/$id"
 							params={ { id: record.id } }
 							style={ { textDecoration: "none", color: "inherit" } }
 						>
@@ -184,18 +184,24 @@ export function SignaturesTable({ templates, assignmentSummaries }: SignaturesTa
 					cellsClassName: classes.actionsCell,
 					render: (record) => (
 						<Group gap={ 4 } wrap="nowrap">
-							<ActionIcon
-								variant="subtle"
-								color="harbor"
-								size="sm"
-								aria-label={ `Edit ${ record.name }` }
-								onClick={ () => router.navigate({
-									to: "/signatures/edit/$id",
-									params: { id: record.id },
-								}) }
-							>
-								<IconPencil size={ 16 } aria-hidden />
-							</ActionIcon>
+							<DeploySignatureAction
+								templateId={ record.id }
+								templateName={ record.name }
+							/>
+							<Tooltip label="Edit" withArrow position="top">
+								<ActionIcon
+									variant="subtle"
+									color="harbor"
+									size="sm"
+									aria-label={ `Edit ${ record.name }` }
+									onClick={ () => router.navigate({
+										to: "/admin/signatures/edit/$id",
+										params: { id: record.id },
+									}) }
+								>
+									<IconPencil size={ 16 } aria-hidden />
+								</ActionIcon>
+							</Tooltip>
 							<ActionIcon
 								variant="subtle"
 								color="red"

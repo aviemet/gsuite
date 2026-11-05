@@ -9,8 +9,7 @@ import { formatHtmlWithDirectives } from "@/frontend/lib"
 import { type DirectorySnapshot } from "@/frontend/queries/directory"
 import { Template } from "@/frontend/types/firebase"
 import { safeTemplateParse } from "@/shared/parseTemplate"
-import { samplePerson } from "@/shared/person.testdata"
-import { getTemplatePreviewContext } from "@/shared/templatePlaceholders"
+import { buildPreviewTemplateContext } from "@/shared/templatePlaceholders"
 
 import { findDirectoryUser, toUserSelectData } from "./directoryOptions"
 import * as classes from "./SetupStep.css"
@@ -28,7 +27,7 @@ interface SetupStepProps {
 	directory: DirectorySnapshot
 }
 
-const previewContext = getTemplatePreviewContext(samplePerson)
+const previewContext = buildPreviewTemplateContext()
 
 const setupOptions = [
 	{

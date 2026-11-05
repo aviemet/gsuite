@@ -21,20 +21,24 @@ export const navbar = css`
 export const brand = css`
 	display: flex;
 	align-items: center;
+	justify-content: space-between;
 	gap: ${ vars.spacing.sm };
 	padding: ${ vars.spacing.md } ${ vars.spacing.md } ${ vars.spacing.sm };
 `
 
-export const brandMark = css`
+export const brandIdentity = css`
 	display: flex;
 	align-items: center;
-	justify-content: center;
+	gap: ${ vars.spacing.sm };
+	min-width: 0;
+`
+
+export const brandMark = css`
+	display: block;
 	flex-shrink: 0;
 	width: 1.75rem;
 	height: 1.75rem;
-	border-radius: ${ vars.radius.sm };
-	background: ${ vars.colors.copper[4] };
-	color: ${ vars.colors.harbor[9] };
+	object-fit: contain;
 `
 
 export const brandName = css`

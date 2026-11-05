@@ -5,7 +5,7 @@ import { useWorkspaceQuery } from "@/frontend/queries/workspace"
 
 import { ApiStatusPanel } from "../ApiStatusPanel"
 import { apiStatusNeedsAuthorization, buildApiStatusRows } from "../ApiStatusPanel/apiStatusRows"
-import { DelegationSetup } from "../DelegationSetup"
+import { MarketplaceInstall } from "../MarketplaceInstall"
 import { useAutomaticApiStatus } from "./useAutomaticApiStatus"
 
 function requestErrorMessage(error: unknown): string | undefined {
@@ -42,10 +42,7 @@ export function ApiStatusTab() {
 				onCheck={ handleCheck }
 			/>
 			{ apiStatusNeedsAuthorization(rows)
-				? <DelegationSetup
-					clientId={ workspace.data.clientId }
-					scopes={ workspace.data.scopes }
-				/>
+				? <MarketplaceInstall marketplaceUrl={ workspace.data.marketplaceUrl } />
 				: null }
 		</Stack>
 	)

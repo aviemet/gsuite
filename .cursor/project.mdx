@@ -1,8 +1,8 @@
-# Suite Desk
+# SuiteOcean
 
 ## Workspace
 
-Each user has one membership, and that membership is the customer they can access. Site access is granted by email from the Workspace Directory as super admin, admin, editor, or viewer; signing in with that Google account links the membership. The customer link stores the primary domain and the Workspace admin email. Directory calls impersonate that admin. Signature updates impersonate each mailbox. The API resolves the customer from the membership because it writes with the Admin SDK.
+Each user has one membership, and that membership is the customer they can access. Site access is granted by email from the Workspace Directory as super admin, admin, editor, or viewer; signing in with that Google account links the membership. The customer link stores the primary domain and the Workspace admin email. Directory calls impersonate that admin. Signature updates impersonate each mailbox. The API resolves the customer from the membership because it writes with the Admin SDK. Workspace API access comes from a domain-wide Marketplace install, which grants delegation only to the service account in the same Cloud project as the Marketplace SDK listing.
 
 ## Data
 
@@ -13,6 +13,8 @@ Wizard Save goes through the API, which writes templates and assignments in Fire
 Signature fonts are inline font stacks. Gmail and Outlook strip `@font-face`.
 
 The rich text editor uses TinyMCE's oxide skin. That skin is what makes the canvas visible after init.
+
+Signature variables live in one shared registry (`templatePlaceholders`). That registry drives the editor helper list and `buildTemplateContext`, which is the only way templates are filled for Gmail writes. Preview calls `buildPreviewTemplateContext`, which alone may use the dummy person. Deploy must never import or spread the dummy person.
 
 ## Runtime
 

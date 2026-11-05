@@ -8,7 +8,7 @@
   "scripts": {
     "build": "tsc --build",
     "dev": "tsc --build --watch",
-    "dev:server": "node --env-file=../.env --import tsx src/localServer.ts",
+    "dev:server": "node --env-file=../.env --import tsx --watch src/localServer.ts",
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest"

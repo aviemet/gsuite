@@ -125,7 +125,7 @@ export function SignaturesListPage() {
 								},
 							} }
 						/>
-						<Button component={ Link } to="/signatures/edit">
+						<Button component={ Link } to="/admin/signatures/edit">
 							Create New Signature
 						</Button>
 					</Group>

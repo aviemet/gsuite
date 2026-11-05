@@ -73,8 +73,8 @@ vi.mock("@/frontend/queries/workspace", () => ({
 		isError: false,
 		error: null,
 		data: {
-			clientId: "mock-client-id",
-			scopes: ["https://www.googleapis.com/auth/admin.directory.user.readonly"],
+			directoryMode: "real" as const,
+			marketplaceUrl: "https://workspace.google.com/marketplace/app/suiteocean",
 			customer: {
 				id: "example-corp",
 				primaryDomain: "example.com",
@@ -139,12 +139,15 @@ describe("WorkspaceSettings", () => {
 		renderSettings()
 
 		expect(screen.getByRole("heading", { name: "Connect Workspace" })).toBeInTheDocument()
-		expect(screen.getByRole("heading", { name: /Step 1: Authorize Suite Desk in Google Admin/ })).toBeInTheDocument()
-		expect(screen.getByRole("heading", { name: "Step 2: Connect with a Super Admin email" })).toBeInTheDocument()
+		expect(screen.getByRole("heading", { name: /Step 1: Install SuiteOcean from Google Workspace Marketplace/ })).toBeInTheDocument()
+		expect(screen.getByRole("heading", { name: "Step 2: Connect as test@test.com" })).toBeInTheDocument()
 		expect(screen.getByRole("button", { name: "Connect" })).toBeInTheDocument()
 		expect(screen.getByRole("tab", { name: "Workspace" })).toHaveAttribute("aria-selected", "true")
-		expect(screen.getByLabelText("Workspace admin email")).toHaveValue("test@test.com")
-		expect(screen.getByLabelText("Client ID")).toHaveValue("mock-client-id")
+		expect(screen.getByRole("link", { name: "Install from Google Workspace Marketplace" })).toHaveAttribute(
+			"href",
+			"https://workspace.google.com/marketplace/app/suiteocean",
+		)
+		expect(screen.queryByLabelText("Workspace admin email")).not.toBeInTheDocument()
 	})
 
 	it("keeps each settings section on its own tab", async () => {
@@ -153,7 +156,7 @@ describe("WorkspaceSettings", () => {
 
 		expect(screen.getByRole("tab", { name: "Workspace" })).toHaveAttribute("aria-selected", "true")
 		expect(screen.getByLabelText("Current Workspace admin")).toHaveValue("jane.doe@example.com")
-		expect(screen.queryByLabelText("Client ID")).not.toBeInTheDocument()
+		expect(screen.queryByRole("link", { name: "Install from Google Workspace Marketplace" })).not.toBeInTheDocument()
 		expect(screen.queryByRole("button", { name: "Check again" })).not.toBeInTheDocument()
 		expect(screen.queryByRole("heading", { name: "Permissions" })).not.toBeInTheDocument()
 
@@ -194,8 +197,11 @@ describe("WorkspaceSettings", () => {
 		await user.click(screen.getByRole("tab", { name: "API status" }))
 
 		expect(screen.getByText("Delegation denied")).toBeInTheDocument()
-		expect(screen.getByRole("heading", { name: "Authorize Suite Desk in Google Admin" })).toBeInTheDocument()
-		expect(screen.getByLabelText("Client ID")).toHaveValue("mock-client-id")
+		expect(screen.getByRole("heading", { name: "Install SuiteOcean from Google Workspace Marketplace" })).toBeInTheDocument()
+		expect(screen.getByRole("link", { name: "Install from Google Workspace Marketplace" })).toHaveAttribute(
+			"href",
+			"https://workspace.google.com/marketplace/app/suiteocean",
+		)
 	})
 
 	it("offers directory users in an autocomplete", async () => {

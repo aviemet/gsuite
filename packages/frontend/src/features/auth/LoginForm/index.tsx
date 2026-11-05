@@ -6,6 +6,7 @@ import { GoogleMark } from "@/frontend/features/auth/GoogleMark"
 import { useAuth } from "@/frontend/hooks/useAuth"
 import { APP_NAME } from "@/frontend/lib/appName"
 import { sanitizeRedirectPath } from "@/frontend/lib/auth"
+import { SEED_WORKSPACE_ADMIN_EMAIL } from "@/shared/workspace"
 
 interface LoginFormProps {
 	redirectTo?: string
@@ -16,19 +17,31 @@ export function LoginForm({ redirectTo = "/" }: LoginFormProps) {
 	const router = useRouter()
 	const [errorMessage, setErrorMessage] = useState<string | null>(null)
 	const [isGoogleLoading, setIsGoogleLoading] = useState(false)
+	const [isMockLoading, setIsMockLoading] = useState(false)
 	const safeRedirectTo = sanitizeRedirectPath(redirectTo)
+	const showMockSignIn = import.meta.env.DEV
 
-	async function handleGoogleSignIn() {
+	async function completeSignIn(signIn: () => Promise<unknown>) {
 		setErrorMessage(null)
-		setIsGoogleLoading(true)
 		try {
-			await auth.signInWithGoogle()
+			await signIn()
 			await router.invalidate()
 			router.history.push(safeRedirectTo)
 		} catch (error) {
 			setErrorMessage(auth.getAuthErrorMessage(error))
 		}
+	}
+
+	async function handleGoogleSignIn() {
+		setIsGoogleLoading(true)
+		await completeSignIn(() => auth.signInWithGoogle())
 		setIsGoogleLoading(false)
+	}
+
+	async function handleMockSignIn() {
+		setIsMockLoading(true)
+		await completeSignIn(() => auth.signInAsMockWorkspaceAdmin())
+		setIsMockLoading(false)
 	}
 
 	return (
@@ -55,6 +68,24 @@ export function LoginForm({ redirectTo = "/" }: LoginFormProps) {
 			>
 				Continue with Google
 			</Button>
+
+			{ showMockSignIn
+				? (
+					<Stack gap="xs">
+						<Button
+							variant="default"
+							fullWidth
+							loading={ isMockLoading }
+							onClick={ handleMockSignIn }
+						>
+							Continue as Jane Doe (local mock)
+						</Button>
+						<Text c="dimmed" size="xs">
+							Local Directory mock only accepts { SEED_WORKSPACE_ADMIN_EMAIL }. Skip the Auth Emulator account generator.
+						</Text>
+					</Stack>
+				)
+				: null }
 		</Stack>
 	)
 }

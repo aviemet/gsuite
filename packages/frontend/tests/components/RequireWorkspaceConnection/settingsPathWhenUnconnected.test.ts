@@ -7,34 +7,34 @@ import {
 
 describe("settingsPathWhenUnconnected", () => {
 	it("returns null while signed out", () => {
-		expect(settingsPathWhenUnconnected("/", false, true, false)).toBeNull()
+		expect(settingsPathWhenUnconnected("/admin", false, true, false)).toBeNull()
 	})
 
 	it("returns null while membership is unresolved", () => {
-		expect(settingsPathWhenUnconnected("/", false, false, true)).toBeNull()
+		expect(settingsPathWhenUnconnected("/admin", false, false, true)).toBeNull()
 	})
 
 	it("returns null when the user already has a membership", () => {
-		expect(settingsPathWhenUnconnected("/", true, true, true)).toBeNull()
-		expect(settingsPathWhenUnconnected("/signatures", true, true, true)).toBeNull()
+		expect(settingsPathWhenUnconnected("/admin", true, true, true)).toBeNull()
+		expect(settingsPathWhenUnconnected("/admin/signatures", true, true, true)).toBeNull()
 	})
 
 	it("keeps settings reachable without a membership", () => {
-		expect(settingsPathWhenUnconnected("/settings", false, true, true)).toBeNull()
+		expect(settingsPathWhenUnconnected("/admin/settings", false, true, true)).toBeNull()
 	})
 
 	it("sends unconnected users to settings", () => {
-		expect(settingsPathWhenUnconnected("/", false, true, true)).toBe("/settings")
-		expect(settingsPathWhenUnconnected("/signatures", false, true, true)).toBe("/settings")
-		expect(settingsPathWhenUnconnected("/signatures/edit", false, true, true)).toBe("/settings")
+		expect(settingsPathWhenUnconnected("/admin", false, true, true)).toBe("/admin/settings")
+		expect(settingsPathWhenUnconnected("/admin/signatures", false, true, true)).toBe("/admin/settings")
+		expect(settingsPathWhenUnconnected("/admin/signatures/edit", false, true, true)).toBe("/admin/settings")
 	})
 })
 
 describe("isSettingsPath", () => {
 	it("recognizes settings routes", () => {
-		expect(isSettingsPath("/settings")).toBe(true)
-		expect(isSettingsPath("/settings/")).toBe(true)
-		expect(isSettingsPath("/")).toBe(false)
-		expect(isSettingsPath("/signatures")).toBe(false)
+		expect(isSettingsPath("/admin/settings")).toBe(true)
+		expect(isSettingsPath("/admin/settings/")).toBe(true)
+		expect(isSettingsPath("/admin")).toBe(false)
+		expect(isSettingsPath("/admin/signatures")).toBe(false)
 	})
 })

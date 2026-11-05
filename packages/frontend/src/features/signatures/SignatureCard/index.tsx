@@ -1,15 +1,15 @@
-import { Badge, Box, Button, Card, Group, Text } from "@mantine/core"
+import { ActionIcon, Badge, Box, Card, Group, Text, Tooltip } from "@mantine/core"
 import { IconCalendarEvent, IconPencil } from "@tabler/icons-react"
 import { Link, useRouter } from "@tanstack/react-router"
 import clsx from "clsx"
 
 import { HtmlPreview } from "@/frontend/components/HtmlPreview"
 import { AssignmentSummaryBadge } from "@/frontend/features/signatures/AssignmentSummaryBadge"
+import { DeploySignatureAction } from "@/frontend/features/signatures/DeploySignatureAction"
 import { type TemplateAssignmentSummary } from "@/frontend/features/signatures/summarizeTemplateAssignments"
 import { Template } from "@/frontend/types/firebase"
 import { safeTemplateParse } from "@/shared/parseTemplate"
-import { samplePerson } from "@/shared/person.testdata"
-import { getTemplatePreviewContext } from "@/shared/templatePlaceholders"
+import { buildPreviewTemplateContext } from "@/shared/templatePlaceholders"
 
 import * as classes from "./SignatureCard.css"
 
@@ -18,7 +18,7 @@ interface SignatureCardProps {
 	assignmentSummary: TemplateAssignmentSummary
 }
 
-const previewContext = getTemplatePreviewContext(samplePerson)
+const previewContext = buildPreviewTemplateContext()
 
 export function SignatureCard({ template, assignmentSummary }: SignatureCardProps) {
 	const router = useRouter()
@@ -34,7 +34,7 @@ export function SignatureCard({ template, assignmentSummary }: SignatureCardProp
 		>
 			<Group justify="space-between" align="flex-start" mb="sm">
 				<Link
-					to="/signatures/edit/$id"
+					to="/admin/signatures/edit/$id"
 					params={ { id: template.id } }
 					style={ { textDecoration: "none", color: "inherit" } }
 				>
@@ -42,15 +42,24 @@ export function SignatureCard({ template, assignmentSummary }: SignatureCardProp
 						{ template.name }
 					</Text>
 				</Link>
-				<Button
-					variant="subtle"
-					size="xs"
-					className={ clsx(classes.editButton) }
-					aria-label={ `Edit ${ template.name }` }
-					onClick={ () => router.navigate({ to: "/signatures/edit/$id", params: { id: template.id } }) }
-				>
-					<IconPencil size={ 16 } aria-hidden />
-				</Button>
+				<Group gap={ 4 } wrap="nowrap">
+					<DeploySignatureAction
+						templateId={ template.id }
+						templateName={ template.name }
+					/>
+					<Tooltip label="Edit" withArrow position="top">
+						<ActionIcon
+							variant="subtle"
+							color="harbor"
+							size="sm"
+							className={ clsx(classes.editButton) }
+							aria-label={ `Edit ${ template.name }` }
+							onClick={ () => router.navigate({ to: "/admin/signatures/edit/$id", params: { id: template.id } }) }
+						>
+							<IconPencil size={ 16 } aria-hidden />
+						</ActionIcon>
+					</Tooltip>
+				</Group>
 			</Group>
 			<Group gap="xs" mb="md">
 				<AssignmentSummaryBadge summary={ assignmentSummary } />

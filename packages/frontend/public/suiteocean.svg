@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none" role="img" aria-label="SuiteOcean">
+  <rect width="512" height="512" rx="96" fill="#203c6c"/>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path
+      d="M84 214 C 148 292, 212 292, 256 214 C 300 136, 364 136, 428 214"
+      stroke="#d59a4d"
+      stroke-width="38"
+    />
+    <path
+      d="M84 310 C 148 388, 212 388, 256 310 C 300 232, 364 232, 428 310"
+      stroke="#edd3ad"
+      stroke-width="38"
+    />
+  </g>
+</svg>

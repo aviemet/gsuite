@@ -13,14 +13,10 @@
     "paths": {
       "@/frontend/*": ["./src/*"],
       "@/shared/*": ["../shared/src/*"],
-      "@/firebase/*": ["../firebase/*"],
       "@/functions/*": ["../functions/src/*"]
     }
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist"],
-  "references": [
-    { "path": "../shared" },
-    { "path": "../firebase" }
-  ]
+  "references": [{ "path": "../shared" }]
 }

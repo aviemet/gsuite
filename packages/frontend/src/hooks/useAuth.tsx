@@ -10,6 +10,7 @@ import {
 
 import {
 	getAuthErrorMessage,
+	signInAsMockWorkspaceAdmin,
 	signInWithGoogle,
 	signOutCurrentUser,
 } from "@/frontend/lib/auth"
@@ -20,6 +21,7 @@ export interface AuthState {
 	isAuthenticated: boolean
 	isLoading: boolean
 	signInWithGoogle: () => Promise<User>
+	signInAsMockWorkspaceAdmin: () => Promise<User>
 	signOut: () => Promise<void>
 	getAuthErrorMessage: (error: unknown) => string
 }
@@ -49,6 +51,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 		isAuthenticated: user !== null,
 		isLoading,
 		signInWithGoogle,
+		signInAsMockWorkspaceAdmin,
 		signOut: signOutCurrentUser,
 		getAuthErrorMessage,
 	}), [user, isLoading])

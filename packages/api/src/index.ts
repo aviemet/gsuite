@@ -1,22 +1,28 @@
-export { createDirectoryClient } from "./directory"
-export { type DirectoryClient, type DirectorySnapshot } from "./directory/client"
-export { getSharedMockDirectoryClient, MockDirectoryClient } from "./directory/mockClient"
-export { RealDirectoryClient } from "./directory/realClient"
-export { directoryHandler } from "./directoryHandler"
 export {
-	enqueueScheduledDeploys,
-	type EnqueueScheduledDeploysDependencies,
-	enqueueScheduledDeploysForCustomer,
-	type EnqueueScheduledDeploysResult,
-	type ScheduledCustomerDeployResult,
-} from "./enqueueScheduledDeploys"
-export { getAdminApp, getAdminAuth, getAdminFirestore, verifyIdToken } from "./firebase/admin"
-export { createGmailClient } from "./gmail"
-export { type GmailClient, type SignatureUpdate } from "./gmail/client"
-export { getSharedMockGmailClient, MockGmailClient } from "./gmail/mockClient"
-export { RealGmailClient } from "./gmail/realClient"
-export { handleScheduledDeploys } from "./handleScheduledDeploys"
-export { handleSignatureUpdate } from "./handleSignatureUpdate"
+	createDirectoryClient,
+	type DirectoryClient,
+	directoryHandler,
+	type DirectoryMode,
+	type DirectorySnapshot,
+	getSharedMockDirectoryClient,
+	MockDirectoryClient,
+	readDirectoryMode,
+	RealDirectoryClient,
+} from "./directory"
+export {
+	getAdminApp,
+	getAdminAuth,
+	getAdminFirestore,
+	verifyIdToken,
+} from "./firebase/admin"
+export {
+	createGmailClient,
+	getSharedMockGmailClient,
+	type GmailClient,
+	MockGmailClient,
+	RealGmailClient,
+	type SignatureUpdate,
+} from "./gmail"
 export {
 	type ApiHandler,
 	type ApiRequestContext,
@@ -37,10 +43,32 @@ export {
 	withMemberAuth,
 	withSignedInAuth,
 } from "./http"
-export { processSignatureDeploy } from "./processSignatureDeploy"
-export { createCloudTasksPublisher, createInlineQueuePublisher, shouldEnqueueCloudTask } from "./queue/publisher"
-export { type QueueEnvironment, type QueuePublisher } from "./queue/publisher"
-export { apiRoutes } from "./routes"
-export { saveAndDeploy } from "./saveAndDeploy"
-export { saveAndDeployHandler } from "./saveAndDeployHandler"
-export { getPersonForEmail } from "./targets/people"
+export { apiRoutes } from "./http/routes"
+export {
+	createCloudTasksPublisher,
+	createInlineQueuePublisher,
+	type QueueEnvironment,
+	type QueuePublisher,
+	shouldEnqueueCloudTask,
+} from "./queue"
+export {
+	type DeployActor,
+	deployTemplate,
+	type DeployTemplateDependencies,
+	deployTemplateHandler,
+	enqueueScheduledDeploys,
+	type EnqueueScheduledDeploysDependencies,
+	enqueueScheduledDeploysForCustomer,
+	type EnqueueScheduledDeploysResult,
+	getPersonForEmail,
+	handleScheduledDeploys,
+	handleSignatureUpdate,
+	personFromDirectoryUser,
+	processSignatureDeploy,
+	type ProcessSignatureDeployDependencies,
+	type SaveActor,
+	saveAndDeploy,
+	type SaveAndDeployDependencies,
+	saveAndDeployHandler,
+	type ScheduledCustomerDeployResult,
+} from "./signatures"

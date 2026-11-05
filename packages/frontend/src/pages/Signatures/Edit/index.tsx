@@ -30,7 +30,7 @@ export function SignatureEditPage() {
 				color: "green",
 				message: "Signature saved and queued for deploy",
 			})
-			navigate({ to: "/signatures" })
+			navigate({ to: "/admin/signatures" })
 		} catch (error) {
 			notifications.show({
 				color: "red",
@@ -42,7 +42,7 @@ export function SignatureEditPage() {
 	}
 
 	function handleCancel() {
-		navigate({ to: "/signatures" })
+		navigate({ to: "/admin/signatures" })
 	}
 
 	if(isEdit && isLoading) {

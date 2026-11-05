@@ -17,9 +17,10 @@ import { HtmlPreview } from "@/frontend/components/HtmlPreview"
 import { RichTextEditor, type RichTextEditorHandle } from "@/frontend/components/RichTextEditor"
 import * as richTextClasses from "@/frontend/components/RichTextEditor/RichTextEditor.css"
 import { PlaceholderPicker } from "@/frontend/features/signatures/PlaceholderPicker"
+import { formatHtmlWithDirectives } from "@/frontend/lib"
 import { safeTemplateParse } from "@/shared/parseTemplate"
 import { samplePerson } from "@/shared/person.testdata"
-import { getTemplatePreviewContext } from "@/shared/templatePlaceholders"
+import { buildPreviewTemplateContext } from "@/shared/templatePlaceholders"
 
 import { ComposeEditorShell } from "./ComposeEditorShell"
 import { EmailPreviewFrame } from "./EmailPreviewFrame"
@@ -72,6 +73,10 @@ export function SignatureTemplateForm({
 	}
 
 	function handleEditorModeChange(newMode: string) {
+		if(newMode === "code") {
+			const formattedContent = formatHtmlWithDirectives(content)
+			if(formattedContent !== content) onContentChange(formattedContent)
+		}
 		if(newMode === "visual" || newMode === "code") {
 			setEditorMode(newMode)
 		}
@@ -90,7 +95,7 @@ export function SignatureTemplateForm({
 		richTextEditorRef.current?.insertAtCursor(value)
 	}
 
-	const previewHtml = safeTemplateParse(content, getTemplatePreviewContext(samplePerson))
+	const previewHtml = safeTemplateParse(content, buildPreviewTemplateContext())
 
 	return (
 		<Grid mt="md">

@@ -5,27 +5,32 @@ import {
 	handleSignatureUpdate,
 } from "@gsuite/api"
 import { type SignatureUpdateMessage } from "@gsuite/shared"
-import { defineSecret } from "firebase-functions/params"
+import { defineSecret, defineString } from "firebase-functions/params"
+import { onInit } from "firebase-functions/v2/core"
 import { onRequest } from "firebase-functions/v2/https"
 import { onSchedule } from "firebase-functions/v2/scheduler"
 import { onTaskDispatched } from "firebase-functions/v2/tasks"
 
 const region = "us-central1"
-const googleServiceAccountJson = defineSecret("GOOGLE_SERVICE_ACCOUNT_JSON")
 
-function applyProductionWorkspaceEnv(): void {
+const googleServiceAccountJson = defineSecret("GOOGLE_SERVICE_ACCOUNT_JSON")
+const workspaceMarketplaceUrl = defineString("WORKSPACE_MARKETPLACE_URL", {
+	description: "Published Google Workspace Marketplace listing URL shown in Connect Workspace",
+})
+
+onInit(() => {
 	process.env.GMAIL_MODE = "real"
 	process.env.DIRECTORY_MODE = "real"
-}
+	process.env.WORKSPACE_MARKETPLACE_URL = workspaceMarketplaceUrl.value()
+})
 
 export const api = onRequest({
 	region,
+	memory: "512MiB",
 	invoker: "public",
 	timeoutSeconds: 60,
 	secrets: [googleServiceAccountJson],
 }, async (request, response) => {
-	applyProductionWorkspaceEnv()
-
 	const result = await dispatchApiRequest(apiRoutes, {
 		method: request.method,
 		path: request.path,
@@ -47,6 +52,7 @@ export const api = onRequest({
 
 export const updateSignature = onTaskDispatched<SignatureUpdateMessage>({
 	region,
+	memory: "512MiB",
 	timeoutSeconds: 1800,
 	secrets: [googleServiceAccountJson],
 	retryConfig: {
@@ -57,16 +63,15 @@ export const updateSignature = onTaskDispatched<SignatureUpdateMessage>({
 		maxConcurrentDispatches: 1,
 	},
 }, async (request) => {
-	applyProductionWorkspaceEnv()
 	await handleSignatureUpdate(request.data)
 })
 
 export const redeployScheduledSignatures = onSchedule({
 	schedule: "every 24 hours",
 	region,
+	memory: "512MiB",
 	timeoutSeconds: 540,
 	secrets: [googleServiceAccountJson],
 }, async () => {
-	applyProductionWorkspaceEnv()
 	await handleScheduledDeploys()
 })

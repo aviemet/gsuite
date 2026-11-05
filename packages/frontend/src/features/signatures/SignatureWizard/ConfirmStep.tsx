@@ -1,12 +1,13 @@
 import { Badge, Grid, Group, Paper, Stack, Text } from "@mantine/core"
-import { ReactNode } from "react"
+import { type ReactNode, useMemo } from "react"
 
 import { HtmlPreview } from "@/frontend/components/HtmlPreview"
+import { DeployRecipientsList } from "@/frontend/features/signatures/DeployRecipientsList"
+import { listWizardRecipientEmails } from "@/frontend/features/signatures/listTemplateRecipients"
 import { type DirectorySnapshot } from "@/frontend/queries/directory"
-import { Template } from "@/frontend/types/firebase"
+import { type Template, type TemplateAssignment } from "@/frontend/types/firebase"
 import { safeTemplateParse } from "@/shared/parseTemplate"
-import { samplePerson } from "@/shared/person.testdata"
-import { getTemplatePreviewContext } from "@/shared/templatePlaceholders"
+import { buildPreviewTemplateContext } from "@/shared/templatePlaceholders"
 
 import {
 	findDirectoryGroup,
@@ -17,12 +18,14 @@ import { findStartTemplate } from "./startTemplates"
 import { SETUP_SOURCE_LABELS, type SignatureWizardValues } from "./types"
 
 interface ConfirmStepProps {
+	templateId: string
 	values: SignatureWizardValues
 	templates: Template[]
+	assignments: readonly TemplateAssignment[]
 	directory: DirectorySnapshot
 }
 
-const previewContext = getTemplatePreviewContext(samplePerson)
+const previewContext = buildPreviewTemplateContext()
 
 function SummaryRow({ label, children }: { label: string, children: ReactNode }) {
 	return (
@@ -33,7 +36,13 @@ function SummaryRow({ label, children }: { label: string, children: ReactNode })
 	)
 }
 
-export function ConfirmStep({ values, templates, directory }: ConfirmStepProps) {
+export function ConfirmStep({
+	templateId,
+	values,
+	templates,
+	assignments,
+	directory,
+}: ConfirmStepProps) {
 	const previewHtml = safeTemplateParse(values.content, previewContext)
 	const selectedTemplate = values.sourceTemplateId
 		? findStartTemplate(values.sourceTemplateId, templates)
@@ -60,6 +69,13 @@ export function ConfirmStep({ values, templates, directory }: ConfirmStepProps) 
 		if(!unit) return path
 		return unit.path === "/" ? unit.name : unit.path
 	})
+	const recipients = useMemo(() => listWizardRecipientEmails(
+		templateId,
+		values,
+		templates,
+		assignments,
+		directory.users,
+	), [templateId, values, templates, assignments, directory.users])
 
 	return (
 		<Grid mt="md">
@@ -114,6 +130,15 @@ export function ConfirmStep({ values, templates, directory }: ConfirmStepProps) 
 									</Text>
 								</Stack>
 							) }
+					</SummaryRow>
+
+					<SummaryRow label="Recipients">
+						<Stack gap="xs">
+							<Text size="sm">
+								These mailboxes will receive this signature when you save.
+							</Text>
+							<DeployRecipientsList recipients={ recipients } />
+						</Stack>
 					</SummaryRow>
 
 					<SummaryRow label="Schedule">

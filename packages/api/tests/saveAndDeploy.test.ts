@@ -11,9 +11,9 @@ import { describe, expect, it, vi } from "vitest"
 
 import { type GmailClient, type SignatureUpdate } from "../src/gmail/client"
 import { MockGmailClient } from "../src/gmail/mockClient"
-import { processSignatureDeploy } from "../src/processSignatureDeploy"
 import { createInlineQueuePublisher } from "../src/queue/publisher"
-import { saveAndDeploy } from "../src/saveAndDeploy"
+import { processSignatureDeploy } from "../src/signatures/processSignatureDeploy"
+import { saveAndDeploy } from "../src/signatures/saveAndDeploy"
 
 function isSignatureDeployLog(
 	value: Record<string, unknown> | SignatureDeployLog,

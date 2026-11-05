@@ -11,7 +11,7 @@ export function formatHtmlWithDirectives(html: string): string {
 		indent_size: 2,
 		indent_char: " ",
 		indent_handlebars: true, // Essential for {{...}} directive formatting
-		wrap_line_length: 100, // A sensible default, can be configured
+		wrap_line_length: 0,
 		max_preserve_newlines: 1, // Prevents js-beautify from creating too many consecutive blank lines
 		// preserve_newlines: true, // Default is true. Set to false if you want js-beautify to be more aggressive.
 	}

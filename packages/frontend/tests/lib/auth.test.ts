@@ -4,15 +4,15 @@ import { getAuthErrorMessage, sanitizeRedirectPath } from "@/frontend/lib/auth"
 
 describe("sanitizeRedirectPath", () => {
 	it("keeps internal paths", () => {
-		expect(sanitizeRedirectPath("/signatures")).toBe("/signatures")
-		expect(sanitizeRedirectPath("/settings?tab=1")).toBe("/settings?tab=1")
+		expect(sanitizeRedirectPath("/admin/signatures")).toBe("/admin/signatures")
+		expect(sanitizeRedirectPath("/admin/settings?tab=1")).toBe("/admin/settings?tab=1")
 	})
 
 	it("rejects external and protocol-relative urls", () => {
-		expect(sanitizeRedirectPath("https://evil.example")).toBe("/")
-		expect(sanitizeRedirectPath("//evil.example")).toBe("/")
-		expect(sanitizeRedirectPath("login")).toBe("/")
-		expect(sanitizeRedirectPath(undefined)).toBe("/")
+		expect(sanitizeRedirectPath("https://evil.example")).toBe("/admin")
+		expect(sanitizeRedirectPath("//evil.example")).toBe("/admin")
+		expect(sanitizeRedirectPath("login")).toBe("/admin")
+		expect(sanitizeRedirectPath(undefined)).toBe("/admin")
 	})
 })
 
@@ -31,4 +31,3 @@ describe("getAuthErrorMessage", () => {
 		expect(getAuthErrorMessage(new Error("nope"))).toBe("Something went wrong. Please try again")
 	})
 })
-

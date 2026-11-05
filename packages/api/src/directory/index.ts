@@ -1,12 +1,11 @@
-import { type DirectoryClient } from "./client"
-import { getSharedMockDirectoryClient } from "./mockClient"
-import { RealDirectoryClient } from "./realClient"
-
-export function createDirectoryClient(
-	subjectEmail: string,
-	mode = process.env.DIRECTORY_MODE ?? process.env.GMAIL_MODE ?? "mock",
-): DirectoryClient {
-	return mode === "real"
-		? new RealDirectoryClient(subjectEmail)
-		: getSharedMockDirectoryClient()
-}
+export type { DirectoryClient, DirectorySnapshot } from "./client"
+export {
+	createDirectoryClient,
+	type DirectoryMode,
+	readDirectoryMode,
+} from "./createClient"
+export { directoryHandler } from "./handler"
+export { mapDirectoryUserProfile } from "./mapDirectoryUserProfile"
+export { getSharedMockDirectoryClient, MockDirectoryClient } from "./mockClient"
+export { RealDirectoryClient } from "./realClient"
+export { buildDirectorySnapshot, organizationalUnitPaths } from "./snapshot"

@@ -1,9 +1,63 @@
+export interface DirectoryPhoneNumber {
+	type: "mobile" | "work" | "home"
+	number: string
+}
+
 export interface DirectoryUser {
 	email: string
 	displayName: string
+	givenName: string
+	familyName: string
 	signatureHtml: string
 	groupIds: string[]
 	organizationalUnitPaths: string[]
+	jobTitle: string
+	department: string
+	organization: string
+	location: string
+	employeeId: string
+	address: string
+	photoUrl: string
+	costCenter: string
+	companyDescription: string
+	managerEmail: string
+	buildingId: string
+	floorName: string
+	floorSection: string
+	deskCode: string
+	website: string
+	workWebsite: string
+	homeWebsite: string
+	blog: string
+	profileUrl: string
+	phoneNumbers: DirectoryPhoneNumber[]
+}
+
+export function emptyDirectoryProfile(): Omit<DirectoryUser, "email" | "displayName" | "signatureHtml" | "groupIds" | "organizationalUnitPaths"> {
+	return {
+		givenName: "",
+		familyName: "",
+		jobTitle: "",
+		department: "",
+		organization: "",
+		location: "",
+		employeeId: "",
+		address: "",
+		photoUrl: "",
+		costCenter: "",
+		companyDescription: "",
+		managerEmail: "",
+		buildingId: "",
+		floorName: "",
+		floorSection: "",
+		deskCode: "",
+		website: "",
+		workWebsite: "",
+		homeWebsite: "",
+		blog: "",
+		profileUrl: "",
+		phoneNumbers: [],
+	}
 }
 
 export interface DirectoryGroup {
@@ -19,8 +73,11 @@ export interface DirectoryOrganizationalUnit {
 
 export const directoryUsers: DirectoryUser[] = [
 	{
+		...emptyDirectoryProfile(),
 		email: "jane.doe@example.com",
 		displayName: "Jane Doe",
+		givenName: "Jane",
+		familyName: "Doe",
 		signatureHtml: `
 			<div>
 				<p><strong>{{fullName}}</strong></p>
@@ -30,10 +87,34 @@ export const directoryUsers: DirectoryUser[] = [
 		`,
 		groupIds: ["engineering", "product", "all-employees"],
 		organizationalUnitPaths: ["/", "/Engineering", "/Product"],
+		jobTitle: "Product Manager",
+		department: "Product",
+		organization: "Example Corp",
+		location: "San Francisco, CA",
+		employeeId: "E-10428",
+		address: "123 Market Street, San Francisco, CA 94105",
+		costCenter: "CC-4400",
+		companyDescription: "Example Corp builds workplace software.",
+		managerEmail: "sam.lee@example.com",
+		buildingId: "SFO-4",
+		floorName: "7",
+		floorSection: "West",
+		deskCode: "7W-18",
+		website: "https://example.com/jane",
+		workWebsite: "https://example.com",
+		profileUrl: "https://example.com/people/jane-doe",
+		phoneNumbers: [
+			{ type: "mobile", number: "+1-555-123-4567" },
+			{ type: "work", number: "+1-555-987-6543" },
+			{ type: "home", number: "+1-555-222-3344" },
+		],
 	},
 	{
+		...emptyDirectoryProfile(),
 		email: "sam.lee@example.com",
 		displayName: "Sam Lee",
+		givenName: "Sam",
+		familyName: "Lee",
 		signatureHtml: `
 			<div>
 				<p><strong>{{fullName}}</strong></p>
@@ -43,10 +124,16 @@ export const directoryUsers: DirectoryUser[] = [
 		`,
 		groupIds: ["sales", "all-employees"],
 		organizationalUnitPaths: ["/", "/Sales", "/Sales/West"],
+		jobTitle: "Sales Director",
+		department: "Sales",
+		organization: "Example Corp",
 	},
 	{
+		...emptyDirectoryProfile(),
 		email: "alex.kim@example.com",
 		displayName: "Alex Kim",
+		givenName: "Alex",
+		familyName: "Kim",
 		signatureHtml: `
 			<div>
 				<p>{{fullName}}</p>
@@ -55,10 +142,17 @@ export const directoryUsers: DirectoryUser[] = [
 		`,
 		groupIds: ["engineering", "all-employees"],
 		organizationalUnitPaths: ["/", "/Engineering", "/Engineering/Platform"],
+		jobTitle: "Software Engineer",
+		department: "Engineering",
+		organization: "Example Corp",
+		phoneNumbers: [{ type: "mobile", number: "+1-555-111-2222" }],
 	},
 	{
+		...emptyDirectoryProfile(),
 		email: "morgan.patel@example.com",
 		displayName: "Morgan Patel",
+		givenName: "Morgan",
+		familyName: "Patel",
 		signatureHtml: `
 			<div>
 				<p><strong>{{fullName}}</strong> | {{jobTitle}}</p>
@@ -68,6 +162,9 @@ export const directoryUsers: DirectoryUser[] = [
 		`,
 		groupIds: ["marketing", "all-employees"],
 		organizationalUnitPaths: ["/", "/Marketing"],
+		jobTitle: "Marketing Lead",
+		department: "Marketing",
+		organization: "Example Corp",
 	},
 ]
 
