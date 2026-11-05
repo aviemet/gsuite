@@ -18,6 +18,7 @@ import { type DirectoryClient, type DirectorySnapshot } from "./client"
 import { googleGroupUpdateBody, googleUserUpdateBody } from "./googleDirectoryUpdate"
 import { mapDirectoryUserProfile } from "./mapDirectoryUserProfile"
 import { buildDirectorySnapshot, type RawDirectoryGroup, type RawDirectoryMember, type RawDirectoryUser } from "./snapshot"
+import { userGroupMembershipChanges } from "./userGroupMembershipChanges"
 
 function createJwt(subject: string, scopes: readonly string[]): JWT {
 	const account = requireServiceAccount()
@@ -142,28 +143,34 @@ export class RealDirectoryClient implements DirectoryClient {
 			userKey: update.email,
 			requestBody: googleUserUpdateBody(update),
 		})
-		await this.syncUserGroups(update.email, current.groupIds, update.groupIds)
+		await this.syncUserGroups(update.email, before.groups, update)
 		return this.listDirectory()
 	}
 
 	private async syncUserGroups(
 		email: string,
-		currentGroupIds: readonly string[],
-		nextGroupIds: readonly string[],
+		groups: DirectorySnapshot["groups"],
+		update: DirectoryUserUpdate,
 	): Promise<void> {
 		const admin = this.admin()
-		const currentIds = new Set(currentGroupIds)
-		const nextIds = new Set(nextGroupIds)
-		for(const groupId of nextIds) {
-			if(currentIds.has(groupId)) continue
-			await admin.members.insert({
-				groupKey: groupId,
-				requestBody: { email, role: "MEMBER" },
+		const changes = userGroupMembershipChanges(email, groups, update.groupIds, update.groupMemberships)
+		for(const change of changes) {
+			if(change.action === "delete") {
+				await admin.members.delete({ groupKey: change.groupId, memberKey: email })
+				continue
+			}
+			if(change.action === "insert") {
+				await admin.members.insert({
+					groupKey: change.groupId,
+					requestBody: { email, role: change.role },
+				})
+				continue
+			}
+			await admin.members.update({
+				groupKey: change.groupId,
+				memberKey: email,
+				requestBody: { email, role: change.role },
 			})
-		}
-		for(const groupId of currentIds) {
-			if(nextIds.has(groupId)) continue
-			await admin.members.delete({ groupKey: groupId, memberKey: email })
 		}
 	}
 

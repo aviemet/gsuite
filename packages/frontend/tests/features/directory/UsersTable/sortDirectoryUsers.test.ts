@@ -59,6 +59,41 @@ describe("sortDirectoryUsers", () => {
 		}).map((row) => row.email)).toEqual(["bravo@example.com", "alpha@example.com"])
 	})
 
+	it("reads the work phone and ignores other phone types", () => {
+		const row = toDirectoryUserRow(user({
+			email: "jane.doe@example.com",
+			displayName: "Jane Doe",
+			phoneNumbers: [
+				{ type: "mobile", number: "+1-555-123-4567" },
+				{ type: "work", number: "+1-555-987-6543" },
+			],
+		}))
+		expect(row.workPhone).toBe("+1-555-987-6543")
+
+		const mobileOnly = toDirectoryUserRow(user({
+			email: "alex.kim@example.com",
+			displayName: "Alex Kim",
+			phoneNumbers: [{ type: "mobile", number: "+1-555-111-2222" }],
+		}))
+		expect(mobileOnly.workPhone).toBe("")
+	})
+
+	it("sorts by work phone", () => {
+		const withWorkPhone = toDirectoryUserRow(user({
+			email: "jane.doe@example.com",
+			displayName: "Jane Doe",
+			phoneNumbers: [{ type: "work", number: "+1-555-987-6543" }],
+		}))
+		const withoutWorkPhone = toDirectoryUserRow(user({
+			email: "alex.kim@example.com",
+			displayName: "Alex Kim",
+		}))
+		expect(sortDirectoryUsers([withWorkPhone, withoutWorkPhone], {
+			columnAccessor: "workPhone",
+			direction: "asc",
+		}).map((row) => row.email)).toEqual(["alex.kim@example.com", "jane.doe@example.com"])
+	})
+
 	it("sorts by organizationalUnit", () => {
 		expect(sortDirectoryUsers([bravo, alpha], {
 			columnAccessor: "organizationalUnit",

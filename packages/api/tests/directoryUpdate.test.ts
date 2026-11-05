@@ -84,9 +84,20 @@ describe("MockDirectoryClient updates", () => {
 		expect(user?.groupIds).toEqual(["product"])
 		expect(user?.organizationalUnitPaths).toEqual(["/", "/Product"])
 		const product = snapshot.groups.find((group) => group.id === "product")
-		expect(product?.members.some((member) => member.email === userUpdate.email)).toBe(true)
+		expect(product?.members.find((member) => member.email === userUpdate.email)?.role).toBe("MEMBER")
 		const engineering = snapshot.groups.find((group) => group.id === "engineering")
 		expect(engineering?.members.some((member) => member.email === userUpdate.email)).toBe(false)
+	})
+
+	it("updates an existing group role from the user draft", async () => {
+		const client = new MockDirectoryClient()
+		const snapshot = await client.updateUser({
+			...userUpdate,
+			groupIds: ["engineering"],
+			groupMemberships: [{ groupId: "engineering", role: "OWNER" }],
+		})
+		const engineering = snapshot.groups.find((group) => group.id === "engineering")
+		expect(engineering?.members.find((member) => member.email === userUpdate.email)?.role).toBe("OWNER")
 	})
 
 	it("writes group details and member roles", async () => {

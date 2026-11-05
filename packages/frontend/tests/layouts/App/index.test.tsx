@@ -89,4 +89,14 @@ describe("AppLayout", () => {
 		expect(screen.getAllByRole("button", { name: "Open navigation" }).length).toBeGreaterThanOrEqual(2)
 		expect(screen.queryByRole("button", { name: "Close navigation" })).not.toBeInTheDocument()
 	})
+
+	it("links to Company", () => {
+		render(
+			<MantineProvider theme={ theme }>
+				<AppLayout />
+			</MantineProvider>,
+		)
+
+		expect(screen.getByRole("link", { name: "Company" })).toHaveAttribute("href", "/admin/company")
+	})
 })

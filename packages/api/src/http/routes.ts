@@ -1,3 +1,4 @@
+import { readCompanyHandler, saveCompanyHandler } from "../company/handlers"
 import { directoryHandler, updateDirectoryGroupHandler, updateDirectoryUserHandler } from "../directory"
 import { deployTemplateHandler, saveAssignmentHandler, saveTemplateHandler } from "../signatures"
 import {
@@ -14,6 +15,8 @@ const healthHandler: ApiHandler = async () => ok({ ok: true })
 
 export const apiRoutes: ApiRouteDefinition[] = [
 	{ method: "GET", path: "/api/health", handler: healthHandler },
+	{ method: "GET", path: "/api/company", handler: readCompanyHandler },
+	{ method: "POST", path: "/api/company", handler: saveCompanyHandler },
 	{ method: "GET", path: "/api/directory", handler: directoryHandler },
 	{ method: "POST", path: "/api/directory/users/update", handler: updateDirectoryUserHandler },
 	{ method: "POST", path: "/api/directory/groups/update", handler: updateDirectoryGroupHandler },

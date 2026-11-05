@@ -2,6 +2,7 @@ import {
 	type DirectoryGroupMember,
 	type DirectoryGroupUpdate,
 	type DirectoryPhoneNumber,
+	type DirectoryUserGroupMembership,
 	type DirectoryUserUpdate,
 	isDirectoryGroupMemberRole,
 } from "@gsuite/shared"
@@ -47,6 +48,19 @@ function readPhoneNumbers(value: object): DirectoryPhoneNumber[] {
 	})
 }
 
+function readGroupMemberships(value: object): DirectoryUserGroupMembership[] | undefined {
+	if(!hasKey(value, "groupMemberships")) return undefined
+	const field = Reflect.get(value, "groupMemberships")
+	if(!Array.isArray(field)) throw new HttpError("Invalid group memberships", 400)
+	return field.map((entry) => {
+		if(!entry || typeof entry !== "object") throw new HttpError("Invalid group memberships", 400)
+		const groupId = readString(entry, "groupId").trim()
+		const role = hasKey(entry, "role") ? Reflect.get(entry, "role") : undefined
+		if(!groupId || !isDirectoryGroupMemberRole(role)) throw new HttpError("Invalid member role", 400)
+		return { groupId, role }
+	})
+}
+
 function readMembers(value: object): DirectoryGroupMember[] {
 	if(!hasKey(value, "members")) return []
 	const field = Reflect.get(value, "members")
@@ -77,6 +91,7 @@ export function parseDirectoryUserUpdate(body: unknown): DirectoryUserUpdate {
 		managerEmail: readString(body, "managerEmail").trim().toLowerCase(),
 		phoneNumbers: readPhoneNumbers(body),
 		groupIds: readStringList(body, "groupIds"),
+		groupMemberships: readGroupMemberships(body),
 	}
 }
 

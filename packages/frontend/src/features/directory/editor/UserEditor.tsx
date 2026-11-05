@@ -14,6 +14,7 @@ interface UserEditorProps {
 	user: DirectoryUser
 	groups: readonly DirectoryGroup[]
 	organizationalUnits: readonly DirectoryOrganizationalUnit[]
+	departments: readonly string[] | undefined
 	canSave: boolean
 	isSaving: boolean
 	onCancel: () => void
@@ -24,12 +25,13 @@ export function UserEditor({
 	user,
 	groups,
 	organizationalUnits,
+	departments,
 	canSave,
 	isSaving,
 	onCancel,
 	onSave,
 }: UserEditorProps) {
-	const [draft, setDraft] = useState(() => directoryUserUpdateFromUser(user))
+	const [draft, setDraft] = useState(() => directoryUserUpdateFromUser(user, groups))
 	const fieldsDisabled = !canSave || isSaving
 
 	return (
@@ -60,6 +62,7 @@ export function UserEditor({
 				<Tabs.Panel value="employee" pt="md">
 					<UserEmployeeFields
 						value={ draft }
+						departments={ departments }
 						disabled={ fieldsDisabled }
 						onChange={ setDraft }
 					/>

@@ -58,6 +58,7 @@ describe("UsersTable", () => {
 					columnFilters={ {} }
 					onColumnFilterChange={ vi.fn() }
 					recordLimit={ 25 }
+					loading={ false }
 					canEdit
 					onOpenUser={ vi.fn() }
 					onQuickEditUser={ vi.fn() }
@@ -66,6 +67,8 @@ describe("UsersTable", () => {
 		)
 
 		expect(screen.getByText("Jane Doe")).toBeInTheDocument()
+		const table = document.querySelector("table")
+		expect(table).toHaveStyle({ width: "100%", tableLayout: "fixed" })
 		expect(screen.getByText("jane.doe@example.com")).toBeInTheDocument()
 		expect(screen.queryByText("Engineer")).not.toBeInTheDocument()
 		expect(screen.getByText("Name")).toBeInTheDocument()
@@ -91,6 +94,7 @@ describe("UsersTable", () => {
 					columnFilters={ {} }
 					onColumnFilterChange={ vi.fn() }
 					recordLimit={ 25 }
+					loading={ false }
 					canEdit
 					onOpenUser={ onOpenUser }
 					onQuickEditUser={ onQuickEditUser }
@@ -105,5 +109,30 @@ describe("UsersTable", () => {
 		fireEvent.click(screen.getByRole("button", { name: "Quick edit Jane Doe" }))
 		expect(onQuickEditUser).toHaveBeenCalledWith(jane)
 		expect(onOpenUser).toHaveBeenCalledTimes(1)
+	})
+
+	it("shows row placeholders instead of an empty message while loading", () => {
+		enableDataTableMediaQueries()
+		const visibleColumns = resolveVisibleColumns(userColumns, ["displayName", "email"])
+
+		render(
+			<MantineProvider theme={ theme }>
+				<UsersTable
+					users={ [] }
+					columns={ visibleColumns }
+					columnFilters={ {} }
+					onColumnFilterChange={ vi.fn() }
+					recordLimit={ 25 }
+					loading
+					canEdit={ false }
+					onOpenUser={ vi.fn() }
+					onQuickEditUser={ vi.fn() }
+				/>
+			</MantineProvider>,
+		)
+
+		expect(screen.getByLabelText("Loading users")).toBeInTheDocument()
+		expect(screen.queryByText("No users found")).not.toBeInTheDocument()
+		expect(document.querySelectorAll(".mantine-Skeleton-root").length).toBe(8)
 	})
 })

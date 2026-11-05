@@ -77,4 +77,10 @@ export const userColumns: TableColumnDefinition<DirectoryUserRow>[] = [
 		defaultVisible: false,
 		getValue: (row) => row.managerEmail,
 	},
+	{
+		id: "workPhone",
+		label: "Work phone",
+		defaultVisible: false,
+		getValue: (row) => row.workPhone,
+	},
 ]

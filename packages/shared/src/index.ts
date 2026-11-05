@@ -1,3 +1,4 @@
+export * from "./company"
 export * from "./directoryFixtures"
 export * from "./directoryUpdate"
 export * from "./findConflictingAssignments"

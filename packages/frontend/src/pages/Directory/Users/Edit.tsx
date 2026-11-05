@@ -5,8 +5,10 @@ import { useNavigate } from "@tanstack/react-router"
 
 import { Page } from "@/frontend/components/Page"
 import { UserEditor } from "@/frontend/features/directory/editor/UserEditor"
+import { useCompanyQuery } from "@/frontend/queries/company"
 import { useDirectoryQuery, useUpdateDirectoryUser } from "@/frontend/queries/directory"
 import { useMembershipQuery } from "@/frontend/queries/templates"
+import { companyDepartmentNames } from "@/shared/company"
 
 interface DirectoryUserPageProps {
 	email: string
@@ -15,10 +17,14 @@ interface DirectoryUserPageProps {
 export function DirectoryUserPage({ email }: DirectoryUserPageProps) {
 	const navigate = useNavigate()
 	const directory = useDirectoryQuery()
+	const company = useCompanyQuery()
 	const membership = useMembershipQuery()
 	const updateUser = useUpdateDirectoryUser()
 	const user = directory.data?.users.find((entry) => entry.email === email)
 	const canSave = membership.data ? canManageAccess(membership.data.role) : false
+	const departments = company.isPending
+		? undefined
+		: companyDepartmentNames(company.data?.departments ?? [])
 
 	if(directory.isError) {
 		return (
@@ -49,6 +55,7 @@ export function DirectoryUserPage({ email }: DirectoryUserPageProps) {
 							user={ user }
 							groups={ directory.data?.groups ?? [] }
 							organizationalUnits={ directory.data?.organizationalUnits ?? [] }
+							departments={ departments }
 							canSave={ canSave }
 							isSaving={ updateUser.isPending }
 							onCancel={ () => {

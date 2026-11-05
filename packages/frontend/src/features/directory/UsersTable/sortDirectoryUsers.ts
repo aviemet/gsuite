@@ -7,6 +7,7 @@ import { deepestOrganizationalUnitPath } from "./deepestOrganizationalUnitPath"
 export type DirectoryUserRow = DirectoryUser & {
 	organizationalUnit: string
 	groupCount: number
+	workPhone: string
 }
 
 const sortableAccessors = [
@@ -22,6 +23,7 @@ const sortableAccessors = [
 	"location",
 	"employeeId",
 	"managerEmail",
+	"workPhone",
 ] as const
 
 type SortableAccessor = typeof sortableAccessors[number]
@@ -37,6 +39,7 @@ export function toDirectoryUserRow(user: DirectoryUser): DirectoryUserRow {
 		...user,
 		organizationalUnit: deepestOrganizationalUnitPath(user.organizationalUnitPaths),
 		groupCount: user.groupIds.length,
+		workPhone: user.phoneNumbers.find((phone) => phone.type === "work")?.number ?? "",
 	}
 }
 

@@ -47,6 +47,7 @@ describe("directory editors", () => {
 				user={ user }
 				groups={ [] }
 				organizationalUnits={ [{ path: "/", name: "Example Corp" }] }
+				departments={ [] }
 				canSave
 				isSaving={ false }
 				onCancel={ vi.fn() }
@@ -66,6 +67,7 @@ describe("directory editors", () => {
 				user={ user }
 				groups={ [group] }
 				organizationalUnits={ [{ path: "/", name: "Example Corp" }] }
+				departments={ [] }
 				opened
 				canSave
 				isSaving={ false }

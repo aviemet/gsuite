@@ -14,8 +14,10 @@ import {
 	userColumns,
 } from "@/frontend/features/directory/UsersTable/userColumns"
 import { useTableViewPreferences } from "@/frontend/hooks/useTableViewPreferences"
+import { useCompanyQuery } from "@/frontend/queries/company"
 import { useDirectoryQuery, useUpdateDirectoryUser } from "@/frontend/queries/directory"
 import { useMembershipQuery } from "@/frontend/queries/templates"
+import { companyDepartmentNames } from "@/shared/company"
 
 const recordLimitOptions = TABLE_RECORD_LIMITS.map((limit) => ({
 	value: String(limit),
@@ -25,10 +27,14 @@ const recordLimitOptions = TABLE_RECORD_LIMITS.map((limit) => ({
 export function DirectoryUsersPage() {
 	const navigate = useNavigate()
 	const { data, isLoading, error } = useDirectoryQuery()
+	const company = useCompanyQuery()
 	const membership = useMembershipQuery()
 	const updateUser = useUpdateDirectoryUser()
 	const [quickEditEmail, setQuickEditEmail] = useState<string | null>(null)
 	const canEdit = membership.data ? canManageAccess(membership.data.role) : false
+	const departments = company.isPending
+		? undefined
+		: companyDepartmentNames(company.data?.departments ?? [])
 	const quickEditUser = data?.users.find((user) => user.email === quickEditEmail) ?? null
 	const {
 		visibleColumnIds,
@@ -88,6 +94,7 @@ export function DirectoryUsersPage() {
 							columnFilters={ columnFilters }
 							onColumnFilterChange={ setColumnFilter }
 							recordLimit={ recordLimit }
+							loading={ isLoading }
 							canEdit={ canEdit }
 							onOpenUser={ (user) => {
 								void navigate({
@@ -104,6 +111,7 @@ export function DirectoryUsersPage() {
 							user={ quickEditUser }
 							groups={ data?.groups ?? [] }
 							organizationalUnits={ data?.organizationalUnits ?? [] }
+							departments={ departments }
 							opened
 							canSave={ canEdit }
 							isSaving={ updateUser.isPending }

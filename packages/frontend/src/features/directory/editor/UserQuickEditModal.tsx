@@ -9,6 +9,7 @@ interface UserQuickEditModalProps {
 	user: DirectoryUser
 	groups: readonly DirectoryGroup[]
 	organizationalUnits: readonly DirectoryOrganizationalUnit[]
+	departments: readonly string[] | undefined
 	opened: boolean
 	canSave: boolean
 	isSaving: boolean
@@ -20,6 +21,7 @@ export function UserQuickEditModal({
 	user,
 	groups,
 	organizationalUnits,
+	departments,
 	opened,
 	canSave,
 	isSaving,
@@ -41,6 +43,7 @@ export function UserQuickEditModal({
 						user={ user }
 						groups={ groups }
 						organizationalUnits={ organizationalUnits }
+						departments={ departments }
 						canSave={ canSave }
 						isSaving={ isSaving }
 						onCancel={ onClose }

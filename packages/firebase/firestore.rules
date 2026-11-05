@@ -27,6 +27,11 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    match /companies/{customerId} {
+      allow read: if isMember() && callerCustomerId() == customerId;
+      allow write: if false;
+    }
+
     match /accessByEmail/{email} {
       allow read: if isMember() && resource.data.customerId == callerCustomerId();
       allow write: if false;

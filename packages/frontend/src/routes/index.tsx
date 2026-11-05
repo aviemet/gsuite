@@ -10,6 +10,7 @@ import { type AuthState } from "@/frontend/hooks/useAuth"
 import { AppLayout, PublicLayout } from "@/frontend/layouts"
 import { sanitizeRedirectPath } from "@/frontend/lib/auth"
 
+import { CompanyPage } from "../pages/Company"
 import { DashboardPage } from "../pages/Dashboard"
 import { DirectoryGroupsPage } from "../pages/Directory/Groups"
 import { DirectoryGroupPage } from "../pages/Directory/Groups/Edit"
@@ -101,6 +102,12 @@ const indexRoute = createRoute({
 	getParentRoute: () => authenticatedRoute,
 	path: "/",
 	component: DashboardPage,
+})
+
+const companyRoute = createRoute({
+	getParentRoute: () => authenticatedRoute,
+	path: "company",
+	component: CompanyPage,
 })
 
 const settingsRoute = createRoute({
@@ -195,6 +202,7 @@ const routeTree = rootRoute.addChildren([
 	loginRoute,
 	authenticatedRoute.addChildren([
 		indexRoute,
+		companyRoute,
 		settingsRoute,
 		signaturesRoute,
 		signatureEditRoute,

@@ -1,9 +1,10 @@
 import { Button, Group, Select, Stack, Text } from "@mantine/core"
 
 import {
-	type DirectoryGroupMemberRole,
+	directoryGroupMemberRoleChoices,
 	directoryGroupMemberRoles,
 	type DirectoryUser,
+	isDirectoryGroupMemberRole,
 } from "@/shared/directoryFixtures"
 import { type DirectoryGroupUpdate } from "@/shared/directoryUpdate"
 
@@ -13,12 +14,6 @@ interface GroupMembersFieldsProps {
 	disabled: boolean
 	onChange: (value: DirectoryGroupUpdate) => void
 }
-
-const roleOptions: Array<{ value: DirectoryGroupMemberRole, label: string }> = [
-	{ value: directoryGroupMemberRoles.owner, label: "Owner" },
-	{ value: directoryGroupMemberRoles.manager, label: "Manager" },
-	{ value: directoryGroupMemberRoles.member, label: "Member" },
-]
 
 export function GroupMembersFields({
 	value,
@@ -37,13 +32,13 @@ export function GroupMembersFields({
 					<Group gap="xs" wrap="nowrap">
 						<Select
 							aria-label={ `Role for ${ member.email }` }
-							data={ roleOptions }
+							data={ directoryGroupMemberRoleChoices }
 							value={ member.role }
 							disabled={ disabled }
 							allowDeselect={ false }
 							w={ 140 }
 							onChange={ (role) => {
-								if(role !== "OWNER" && role !== "MANAGER" && role !== "MEMBER") return
+								if(!isDirectoryGroupMemberRole(role)) return
 								onChange({
 									...value,
 									members: value.members.map((current) => (

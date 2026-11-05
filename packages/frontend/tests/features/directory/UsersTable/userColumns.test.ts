@@ -14,4 +14,10 @@ describe("userColumns", () => {
 			"groupCount",
 		])
 	})
+
+	it("includes work phone as an optional column", () => {
+		const workPhone = userColumns.find((column) => column.id === "workPhone")
+		expect(workPhone?.label).toBe("Work phone")
+		expect(workPhone?.defaultVisible).toBe(false)
+	})
 })

@@ -3,8 +3,10 @@ import {
 	directoryGroups,
 	type DirectoryGroupUpdate,
 	directoryOrganizationalUnits,
+	directoryUserGroupRole,
 	directoryUsers,
 	type DirectoryUserUpdate,
+	nextGroupMembersForUser,
 	SEED_WORKSPACE_ADMIN_EMAIL,
 } from "@gsuite/shared"
 
@@ -76,7 +78,7 @@ export class MockDirectoryClient implements DirectoryClient {
 			groupIds: [...update.groupIds],
 			organizationalUnitPaths: organizationalUnitPaths(update.organizationalUnitPath),
 		}
-		this.applyUserGroups(update.email, update.groupIds)
+		this.applyUserGroups(update.email, update.groupIds, update.groupMemberships)
 		return this.snapshot
 	}
 
@@ -117,25 +119,21 @@ export class MockDirectoryClient implements DirectoryClient {
 
 	async checkOrganizationalUnits(): Promise<void> {}
 
-	private applyUserGroups(email: string, groupIds: readonly string[]): void {
+	private applyUserGroups(
+		email: string,
+		groupIds: readonly string[],
+		memberships: DirectoryUserUpdate["groupMemberships"],
+	): void {
 		const nextIds = new Set(groupIds)
-		this.snapshot.groups = this.snapshot.groups.map((group) => {
-			const isMember = nextIds.has(group.id)
-			const existing = group.members.find((member) => member.email === email)
-			if(isMember && !existing) {
-				return {
-					...group,
-					members: [...group.members, { email, role: "MEMBER" }],
-				}
-			}
-			if(!isMember && existing) {
-				return {
-					...group,
-					members: group.members.filter((member) => member.email !== email),
-				}
-			}
-			return group
-		})
+		this.snapshot.groups = this.snapshot.groups.map((group) => ({
+			...group,
+			members: nextGroupMembersForUser(
+				group.members,
+				email,
+				nextIds.has(group.id),
+				directoryUserGroupRole(group.id, memberships),
+			),
+		}))
 	}
 }
 

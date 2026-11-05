@@ -79,6 +79,12 @@ export function isDirectoryGroupMemberRole(value: unknown): value is DirectoryGr
 		|| value === directoryGroupMemberRoles.member
 }
 
+export const directoryGroupMemberRoleChoices: Array<{ value: DirectoryGroupMemberRole, label: string }> = [
+	{ value: directoryGroupMemberRoles.owner, label: "Owner" },
+	{ value: directoryGroupMemberRoles.manager, label: "Manager" },
+	{ value: directoryGroupMemberRoles.member, label: "Member" },
+]
+
 export interface DirectoryGroup {
 	id: string
 	name: string

@@ -8,6 +8,8 @@ import {
 } from "@/shared/directoryFixtures"
 import { type DirectoryGroupUpdate, type DirectoryUserUpdate } from "@/shared/directoryUpdate"
 
+import { applyDirectoryUpdate } from "./applyDirectoryUpdate"
+
 export interface DirectorySnapshot {
 	users: DirectoryUser[]
 	groups: DirectoryGroup[]
@@ -16,8 +18,8 @@ export interface DirectorySnapshot {
 
 const DIRECTORY_QUERY_KEY = ["directory"] as const
 
-async function fetchDirectory(): Promise<DirectorySnapshot> {
-	const response = await fetchAuthorized("/api/directory")
+async function fetchDirectory(context?: { signal?: AbortSignal }): Promise<DirectorySnapshot> {
+	const response = await fetchAuthorized("/api/directory", { signal: context?.signal })
 	const payload = await response.json() as DirectorySnapshot & { error?: string }
 	if(!response.ok) {
 		throw new Error(payload.error ?? "Failed to load directory")
@@ -59,8 +61,21 @@ function useDirectoryUpdateMutation<TBody extends DirectoryUserUpdate | Director
 	const queryClient = useQueryClient()
 	return useMutation({
 		mutationFn: (body: TBody) => postDirectoryUpdate(path, body, fallback),
-		onSuccess: (snapshot) => {
-			queryClient.setQueryData(DIRECTORY_QUERY_KEY, snapshot)
+		onMutate: async (body) => {
+			await queryClient.cancelQueries({ queryKey: DIRECTORY_QUERY_KEY })
+			const previous = queryClient.getQueryData<DirectorySnapshot>(DIRECTORY_QUERY_KEY)
+			if(previous) {
+				queryClient.setQueryData(DIRECTORY_QUERY_KEY, applyDirectoryUpdate(previous, body))
+			}
+			return { previous }
+		},
+		onError: (_error, _body, context) => {
+			if(context?.previous) {
+				queryClient.setQueryData(DIRECTORY_QUERY_KEY, context.previous)
+			}
+		},
+		onSuccess: (snapshot, body) => {
+			queryClient.setQueryData(DIRECTORY_QUERY_KEY, applyDirectoryUpdate(snapshot, body))
 		},
 	})
 }

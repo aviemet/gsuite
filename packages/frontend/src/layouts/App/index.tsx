@@ -1,6 +1,6 @@
 import { AppShell, Box, Burger, Center, Group, Loader, NavLink, Stack } from "@mantine/core"
 import { useDisclosure } from "@mantine/hooks"
-import { IconDashboard, IconSettings, IconSignature, IconUsers } from "@tabler/icons-react"
+import { IconBuilding, IconDashboard, IconSettings, IconSignature, IconUsers } from "@tabler/icons-react"
 import { Link, Outlet, useNavigate } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
 
@@ -106,6 +106,15 @@ export function AppLayout() {
 										label="Dashboard"
 										leftSection={ <IconDashboard size="1.2rem" /> }
 										active={ currentPath === "/admin" }
+									/>
+
+									<NavLink
+										className={ classes.navLink }
+										component={ Link }
+										to="/admin/company"
+										label="Company"
+										leftSection={ <IconBuilding size="1.2rem" /> }
+										active={ currentPath.startsWith("/admin/company") }
 									/>
 
 									<NavLink

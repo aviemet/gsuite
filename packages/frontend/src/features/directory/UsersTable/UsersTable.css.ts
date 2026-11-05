@@ -9,6 +9,14 @@ export const table = css`
 	overflow: hidden;
 	box-shadow: ${ vars.shadows.xs };
 
+	:global(th),
+	:global(td) {
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
 	:global(.mantine-datatable-header) {
 		background-color: light-dark(${ vars.colors.gray[2] }, ${ vars.colors.dark[5] });
 		border-bottom: 1px solid light-dark(${ vars.colors.gray[6] }, ${ vars.colors.dark[4] });

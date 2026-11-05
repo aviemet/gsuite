@@ -1,5 +1,5 @@
 import { type TableRecordLimit } from "@gsuite/shared"
-import { ActionIcon } from "@mantine/core"
+import { ActionIcon, Skeleton, Stack } from "@mantine/core"
 import { IconPencil } from "@tabler/icons-react"
 import clsx from "clsx"
 import { DataTable, type DataTableColumn, type DataTableSortStatus } from "mantine-datatable"
@@ -29,6 +29,7 @@ interface UsersTableProps {
 	columnFilters: ColumnFilters
 	onColumnFilterChange: (columnId: string, filter: ColumnFilterState) => void
 	recordLimit: TableRecordLimit
+	loading: boolean
 	canEdit: boolean
 	onOpenUser: (user: DirectoryUserRow) => void
 	onQuickEditUser: (user: DirectoryUserRow) => void
@@ -45,6 +46,7 @@ export function UsersTable({
 	columnFilters,
 	onColumnFilterChange,
 	recordLimit,
+	loading,
 	canEdit,
 	onOpenUser,
 	onQuickEditUser,
@@ -126,6 +128,10 @@ export function UsersTable({
 	return (
 		<DataTable
 			className={ clsx(classes.table) }
+			styles={ {
+				root: { width: "100%" },
+				table: { width: "100%", tableLayout: "fixed" },
+			} }
 			idAccessor="email"
 			withTableBorder={ false }
 			borderRadius="md"
@@ -140,13 +146,24 @@ export function UsersTable({
 			sortStatus={ sortStatus }
 			onSortStatusChange={ setSortStatus }
 			columns={ tableColumns }
+			minHeight={ loading ? 360 : undefined }
+			emptyState={ loading
+				? (
+					<Stack gap="sm" px="md" py="sm" w="100%" aria-label="Loading users" aria-busy="true">
+						{ Array.from({ length: 8 }, (_, index) => (
+							<Skeleton key={ index } height={ 22 } radius="sm" />
+						)) }
+					</Stack>
+				)
+				: sortedUsers.length === 0
+					? "No users found"
+					: undefined }
 			pinLastColumn
 			onRowClick={ ({ record, event }) => {
 				const target = event.target
 				if(target instanceof Element && target.closest("[data-row-actions]")) return
 				onOpenUser(record)
 			} }
-			emptyState={ sortedUsers.length === 0 ? "No users found" : undefined }
 		/>
 	)
 }
