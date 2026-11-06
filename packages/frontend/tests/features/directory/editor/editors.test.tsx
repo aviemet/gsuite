@@ -1,5 +1,5 @@
 import { MantineProvider } from "@mantine/core"
-import { cleanup, render, screen } from "@testing-library/react"
+import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { type ReactNode } from "react"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
@@ -59,6 +59,32 @@ describe("directory editors", () => {
 		expect(screen.queryByRole("textbox", { name: "Primary email" })).not.toBeInTheDocument()
 		expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument()
 		expect(screen.getByRole("tab", { name: "Contact" })).toBeInTheDocument()
+	})
+
+	it("saves the original profile beside the edited profile", () => {
+		const onSave = vi.fn()
+		renderWithTheme(
+			<UserEditor
+				user={ user }
+				groups={ [] }
+				organizationalUnits={ [{ path: "/", name: "Example Corp" }] }
+				departments={ [] }
+				canSave
+				isSaving={ false }
+				onCancel={ vi.fn() }
+				onSave={ onSave }
+			/>,
+		)
+
+		fireEvent.click(screen.getByRole("button", { name: "Save" }))
+		expect(onSave).toHaveBeenCalledTimes(1)
+		const request: unknown = onSave.mock.calls[0]?.[0]
+		expect(request).toEqual(expect.objectContaining({
+			baseline: expect.objectContaining({ email: user.email }),
+			next: expect.objectContaining({ email: user.email }),
+		}))
+		if(!request || typeof request !== "object") throw new Error("Expected a save request")
+		expect(Reflect.get(request, "baseline")).not.toBe(Reflect.get(request, "next"))
 	})
 
 	it("opens every user tab from quick edit", () => {

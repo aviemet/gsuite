@@ -1,7 +1,7 @@
 import { Modal } from "@mantine/core"
 
 import { type DirectoryGroup, type DirectoryUser } from "@/shared/directoryFixtures"
-import { type DirectoryGroupUpdate } from "@/shared/directoryUpdate"
+import { type DirectoryGroupUpdateRequest } from "@/shared/directoryUpdate"
 
 import { GroupEditor } from "./GroupEditor"
 
@@ -12,7 +12,7 @@ interface GroupQuickEditModalProps {
 	canSave: boolean
 	isSaving: boolean
 	onClose: () => void
-	onSave: (update: DirectoryGroupUpdate) => void
+	onSave: (update: DirectoryGroupUpdateRequest) => void
 }
 
 export function GroupQuickEditModal({

@@ -102,6 +102,35 @@ export function applyDirectoryGroupUpdate(
 	return { ...snapshot, users, groups }
 }
 
+export function mergeSavedDirectoryUser(
+	snapshot: DirectorySnapshot,
+	saved: DirectoryUser,
+): DirectorySnapshot {
+	const index = snapshot.users.findIndex((user) => user.email === saved.email)
+	if(index < 0) return snapshot
+	const users = snapshot.users.map((user, userIndex) => {
+		if(userIndex !== index) return user
+		return {
+			...user,
+			displayName: saved.displayName,
+			givenName: saved.givenName,
+			familyName: saved.familyName,
+			jobTitle: saved.jobTitle,
+			department: saved.department,
+			organization: saved.organization,
+			location: saved.location,
+			employeeId: saved.employeeId,
+			address: saved.address,
+			costCenter: saved.costCenter,
+			managerEmail: saved.managerEmail,
+			phoneNumbers: saved.phoneNumbers.map((phone) => ({ ...phone })),
+			groupIds: [...saved.groupIds],
+			organizationalUnitPaths: [...saved.organizationalUnitPaths],
+		}
+	})
+	return { ...snapshot, users }
+}
+
 export function applyDirectoryUpdate(
 	snapshot: DirectorySnapshot,
 	update: DirectoryUserUpdate | DirectoryGroupUpdate,

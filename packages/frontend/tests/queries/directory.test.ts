@@ -58,6 +58,7 @@ function storedUser(): DirectoryUser {
 		groupIds: [],
 		organizationalUnitPaths: ["/"],
 		jobTitle: "Product Manager",
+		photoUrl: "https://photo.example/jane",
 	}
 }
 
@@ -86,12 +87,18 @@ describe("useUpdateDirectoryUser", () => {
 		vi.stubGlobal("fetch", vi.fn())
 	})
 
-	it("shows the submitted job title while the save is in flight and keeps it if the listing is stale", async () => {
+	it("shows the submitted job title while the save is in flight and keeps the rest of the directory", async () => {
 		const queryClient = new QueryClient({
 			defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
 		})
+		const coworker = {
+			...storedUser(),
+			email: "sam.lee@example.com",
+			displayName: "Sam Lee",
+			jobTitle: "Sales Director",
+		}
 		const current: DirectorySnapshot = {
-			users: [storedUser()],
+			users: [storedUser(), coworker],
 			groups: [],
 			organizationalUnits: [],
 		}
@@ -105,26 +112,33 @@ describe("useUpdateDirectoryUser", () => {
 			wrapper: ({ children }: { children: ReactNode }) => createElement(QueryClientProvider, { client: queryClient }, children),
 		})
 
-		result.current.mutate(jobTitleUpdate("Director"))
+		const baseline = jobTitleUpdate("Product Manager")
+		const next = jobTitleUpdate("Director")
+		result.current.mutate({ baseline, next })
 
 		await waitFor(() => {
 			const shown = queryClient.getQueryData<DirectorySnapshot>(["directory"])
 			expect(shown?.users[0]?.jobTitle).toBe("Director")
 		})
 
-		const stale: DirectorySnapshot = {
-			...current,
-			users: [{ ...storedUser(), jobTitle: "Product Manager" }],
-		}
 		finishSave({
 			ok: true,
-			json: async () => stale,
+			json: async () => ({
+				...storedUser(),
+				jobTitle: "Director",
+				photoUrl: "",
+			}),
 		} as Response)
 
 		await waitFor(() => {
 			expect(result.current.isSuccess).toBe(true)
 		})
-		expect(queryClient.getQueryData<DirectorySnapshot>(["directory"])?.users[0]?.jobTitle).toBe("Director")
+		const saved = queryClient.getQueryData<DirectorySnapshot>(["directory"])
+		expect(saved?.users[0]?.jobTitle).toBe("Director")
+		expect(saved?.users[0]?.photoUrl).toBe("https://photo.example/jane")
+		expect(saved?.users[1]).toEqual(coworker)
+		const [, init] = vi.mocked(fetch).mock.calls[0] ?? []
+		expect(JSON.parse(String(init?.body))).toEqual({ baseline, next })
 	})
 
 	it("restores the previous directory when the save fails", async () => {
@@ -145,7 +159,10 @@ describe("useUpdateDirectoryUser", () => {
 			wrapper: ({ children }: { children: ReactNode }) => createElement(QueryClientProvider, { client: queryClient }, children),
 		})
 
-		result.current.mutate(jobTitleUpdate("Director"))
+		result.current.mutate({
+			baseline: jobTitleUpdate("Product Manager"),
+			next: jobTitleUpdate("Director"),
+		})
 
 		await waitFor(() => {
 			expect(result.current.isError).toBe(true)

@@ -2,7 +2,7 @@ import { Button, Group, Stack, Tabs, Title } from "@mantine/core"
 import { useState } from "react"
 
 import { type DirectoryGroup, type DirectoryOrganizationalUnit, type DirectoryUser } from "@/shared/directoryFixtures"
-import { type DirectoryUserUpdate } from "@/shared/directoryUpdate"
+import { type DirectoryUserUpdateRequest } from "@/shared/directoryUpdate"
 
 import { directoryUserUpdateFromUser } from "./directoryUserUpdateFromUser"
 import { UserContactFields } from "./UserContactFields"
@@ -18,7 +18,7 @@ interface UserEditorProps {
 	canSave: boolean
 	isSaving: boolean
 	onCancel: () => void
-	onSave: (update: DirectoryUserUpdate) => void
+	onSave: (update: DirectoryUserUpdateRequest) => void
 }
 
 export function UserEditor({
@@ -31,6 +31,7 @@ export function UserEditor({
 	onCancel,
 	onSave,
 }: UserEditorProps) {
+	const [baseline] = useState(() => directoryUserUpdateFromUser(user, groups))
 	const [draft, setDraft] = useState(() => directoryUserUpdateFromUser(user, groups))
 	const fieldsDisabled = !canSave || isSaving
 
@@ -82,7 +83,7 @@ export function UserEditor({
 				</Button>
 				{ canSave
 					? (
-						<Button loading={ isSaving } onClick={ () => onSave(draft) }>
+						<Button loading={ isSaving } onClick={ () => onSave({ baseline, next: draft }) }>
 							Save
 						</Button>
 					)

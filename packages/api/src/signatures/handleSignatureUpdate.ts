@@ -15,6 +15,6 @@ export async function handleSignatureUpdate(message: SignatureUpdateMessage): Pr
 	await processSignatureDeploy(message, {
 		db,
 		gmail,
-		loadUsers: async () => (await directory.listDirectory()).users,
+		loadUsers: () => directory.loadUsersForEmails(message.userEmails),
 	})
 }

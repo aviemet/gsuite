@@ -1,7 +1,7 @@
 import { Modal } from "@mantine/core"
 
 import { type DirectoryGroup, type DirectoryOrganizationalUnit, type DirectoryUser } from "@/shared/directoryFixtures"
-import { type DirectoryUserUpdate } from "@/shared/directoryUpdate"
+import { type DirectoryUserUpdateRequest } from "@/shared/directoryUpdate"
 
 import { UserEditor } from "./UserEditor"
 
@@ -14,7 +14,7 @@ interface UserQuickEditModalProps {
 	canSave: boolean
 	isSaving: boolean
 	onClose: () => void
-	onSave: (update: DirectoryUserUpdate) => void
+	onSave: (update: DirectoryUserUpdateRequest) => void
 }
 
 export function UserQuickEditModal({

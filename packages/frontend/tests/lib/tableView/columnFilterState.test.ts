@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import {
+	columnFiltersWithChange,
 	formatColumnFilterValue,
 	isColumnFilterActive,
 } from "@/frontend/lib/tableView/columnFilterState"
@@ -23,6 +24,23 @@ describe("isColumnFilterActive", () => {
 			query: "",
 			selectedValues: ["a"],
 		}, ["a", "b"])).toBe(true)
+	})
+})
+
+describe("columnFiltersWithChange", () => {
+	it("keeps a filter and drops it when the column is cleared", () => {
+		const withDepartment = columnFiltersWithChange({}, "department", {
+			query: "eng",
+			selectedValues: ["Engineering"],
+		})
+		expect(withDepartment).toEqual({
+			department: { query: "eng", selectedValues: ["Engineering"] },
+		})
+
+		expect(columnFiltersWithChange(withDepartment, "department", {
+			query: "  ",
+			selectedValues: null,
+		})).toEqual({})
 	})
 })
 

@@ -1,9 +1,11 @@
 import {
 	type DirectoryGroupMember,
 	type DirectoryGroupUpdate,
+	type DirectoryGroupUpdateRequest,
 	type DirectoryPhoneNumber,
 	type DirectoryUserGroupMembership,
 	type DirectoryUserUpdate,
+	type DirectoryUserUpdateRequest,
 	isDirectoryGroupMemberRole,
 } from "@gsuite/shared"
 
@@ -95,6 +97,17 @@ export function parseDirectoryUserUpdate(body: unknown): DirectoryUserUpdate {
 	}
 }
 
+export function parseDirectoryUserUpdateRequest(body: unknown): DirectoryUserUpdateRequest {
+	if(!body || typeof body !== "object") throw new HttpError("Invalid request body", 400)
+	if(!hasKey(body, "baseline") || !hasKey(body, "next")) {
+		throw new HttpError("Invalid request body", 400)
+	}
+	const baseline = parseDirectoryUserUpdate(Reflect.get(body, "baseline"))
+	const next = parseDirectoryUserUpdate(Reflect.get(body, "next"))
+	if(baseline.email !== next.email) throw new HttpError("User email cannot change", 400)
+	return { baseline, next }
+}
+
 export function parseDirectoryGroupUpdate(body: unknown): DirectoryGroupUpdate {
 	if(!body || typeof body !== "object") throw new HttpError("Invalid request body", 400)
 	const id = readString(body, "id").trim()
@@ -108,4 +121,15 @@ export function parseDirectoryGroupUpdate(body: unknown): DirectoryGroupUpdate {
 		description: readString(body, "description").trim(),
 		members: readMembers(body),
 	}
+}
+
+export function parseDirectoryGroupUpdateRequest(body: unknown): DirectoryGroupUpdateRequest {
+	if(!body || typeof body !== "object") throw new HttpError("Invalid request body", 400)
+	if(!hasKey(body, "baseline") || !hasKey(body, "next")) {
+		throw new HttpError("Invalid request body", 400)
+	}
+	const baseline = parseDirectoryGroupUpdate(Reflect.get(body, "baseline"))
+	const next = parseDirectoryGroupUpdate(Reflect.get(body, "next"))
+	if(baseline.id !== next.id) throw new HttpError("Group id cannot change", 400)
+	return { baseline, next }
 }

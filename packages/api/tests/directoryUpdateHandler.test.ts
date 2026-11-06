@@ -48,24 +48,27 @@ describe("updateDirectoryUserHandler", () => {
 			method: "POST",
 			authorizationHeader: "Bearer token",
 			body: {
-				email: "jane.doe@example.com",
-				givenName: "Janet",
-				familyName: "Doe",
-				organizationalUnitPath: "/Product",
-				jobTitle: "Director",
-				groupIds: ["product"],
+				baseline: {
+					email: "jane.doe@example.com",
+					givenName: "Jane",
+					familyName: "Doe",
+					jobTitle: "Product Manager",
+					groupIds: ["engineering", "product", "all-employees"],
+				},
+				next: {
+					email: "jane.doe@example.com",
+					givenName: "Janet",
+					familyName: "Doe",
+					organizationalUnitPath: "/Product",
+					jobTitle: "Director",
+					groupIds: ["product"],
+				},
 			},
 		})
 		expect(result.status).toBe(200)
 		const payload = result.payload
-		if(!payload || typeof payload !== "object" || !("users" in payload)) {
-			throw new Error("Expected a directory snapshot")
-		}
-		const users = Reflect.get(payload, "users")
-		if(!Array.isArray(users)) throw new Error("Expected users")
-		const jane = users.find((user) => {
-			return user && typeof user === "object" && Reflect.get(user, "email") === "jane.doe@example.com"
-		})
-		expect(jane && typeof jane === "object" ? Reflect.get(jane, "jobTitle") : undefined).toBe("Director")
+		if(!payload || typeof payload !== "object") throw new Error("Expected the saved user")
+		expect(Reflect.get(payload, "email")).toBe("jane.doe@example.com")
+		expect(Reflect.get(payload, "jobTitle")).toBe("Director")
 	})
 })

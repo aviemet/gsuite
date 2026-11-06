@@ -9,6 +9,7 @@ import { getAdminFirestore } from "../firebase/admin"
 import { createGmailClient } from "../gmail"
 import { HttpError, ok, withMemberAuth } from "../http"
 import { requireSignatureEditor } from "../workspace/authorize"
+import { assignedGroupsForSave } from "./assignedGroupsForSave"
 import { createInlineSignatureDeployQueue } from "./createSignatureQueue"
 import { deployTemplate } from "./deployTemplate"
 import { saveAssignment } from "./saveAssignment"
@@ -84,10 +85,11 @@ export const saveAssignmentHandler = withMemberAuth(async ({ member, body }) => 
 		throw new HttpError("Invalid request body", 400)
 	}
 
-	const directory = await createDirectoryClient(member.workspaceAdminEmail).listDirectory()
+	const directory = createDirectoryClient(member.workspaceAdminEmail)
+	const groups = await assignedGroupsForSave(directory, body.groupIds)
 	const result = await saveAssignment(body, member, {
 		db: getAdminFirestore(),
-		groups: directory.groups,
+		groups,
 	})
 	return ok(result)
 })

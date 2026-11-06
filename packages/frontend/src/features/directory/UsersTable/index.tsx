@@ -137,7 +137,10 @@ export function UsersTable({
 			borderRadius="md"
 			withColumnBorders={ false }
 			withRowBorders
+			striped
+			stripedColor={ { light: "gray.1", dark: "dark.5" } }
 			highlightOnHover
+			highlightOnHoverColor={ { light: "gray.2", dark: "dark.4" } }
 			records={ pageRecords }
 			totalRecords={ sortedUsers.length }
 			recordsPerPage={ recordLimit }

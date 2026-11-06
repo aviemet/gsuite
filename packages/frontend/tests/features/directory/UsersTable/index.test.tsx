@@ -69,6 +69,8 @@ describe("UsersTable", () => {
 		expect(screen.getByText("Jane Doe")).toBeInTheDocument()
 		const table = document.querySelector("table")
 		expect(table).toHaveStyle({ width: "100%", tableLayout: "fixed" })
+		expect(table).toHaveAttribute("data-striped")
+		expect(table).toHaveAttribute("data-highlight-on-hover")
 		expect(screen.getByText("jane.doe@example.com")).toBeInTheDocument()
 		expect(screen.queryByText("Engineer")).not.toBeInTheDocument()
 		expect(screen.getByText("Name")).toBeInTheDocument()

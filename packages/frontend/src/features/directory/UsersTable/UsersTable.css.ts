@@ -26,12 +26,17 @@ export const table = css`
 		background-color: light-dark(${ vars.colors.gray[2] }, ${ vars.colors.dark[5] });
 	}
 
-	:global(td[data-pinned]) {
+	:global(tbody .mantine-datatable-row td) {
 		background-color: light-dark(${ vars.colors.gray[0] }, ${ vars.colors.dark[6] });
 	}
 
-	:global(.mantine-datatable-row:hover td[data-pinned]) {
-		background-color: light-dark(${ vars.colors.gray[1] }, ${ vars.colors.dark[5] });
+	:global(table[data-striped] tbody tr:nth-of-type(odd) td) {
+		background-color: var(--mantine-datatable-striped-color);
+	}
+
+	:global(table[data-highlight-on-hover] tbody tr:hover td),
+	:global(table[data-highlight-on-hover] tbody .mantine-datatable-row:hover td[data-pinned]) {
+		background-color: var(--mantine-datatable-highlight-on-hover-color);
 	}
 
 	:global(.mantine-datatable-row td) {

@@ -2,7 +2,7 @@ import { Button, Group, Stack, Tabs } from "@mantine/core"
 import { useState } from "react"
 
 import { type DirectoryGroup, type DirectoryUser } from "@/shared/directoryFixtures"
-import { type DirectoryGroupUpdate } from "@/shared/directoryUpdate"
+import { type DirectoryGroupUpdateRequest } from "@/shared/directoryUpdate"
 
 import { directoryGroupUpdateFromGroup } from "./directoryGroupUpdateFromGroup"
 import { GroupDetailsFields } from "./GroupDetailsFields"
@@ -14,7 +14,7 @@ interface GroupEditorProps {
 	canSave: boolean
 	isSaving: boolean
 	onCancel: () => void
-	onSave: (update: DirectoryGroupUpdate) => void
+	onSave: (update: DirectoryGroupUpdateRequest) => void
 }
 
 export function GroupEditor({
@@ -25,6 +25,7 @@ export function GroupEditor({
 	onCancel,
 	onSave,
 }: GroupEditorProps) {
+	const [baseline] = useState(() => directoryGroupUpdateFromGroup(group))
 	const [draft, setDraft] = useState(() => directoryGroupUpdateFromGroup(group))
 	const fieldsDisabled = !canSave || isSaving
 
@@ -57,7 +58,7 @@ export function GroupEditor({
 				</Button>
 				{ canSave
 					? (
-						<Button loading={ isSaving } onClick={ () => onSave(draft) }>
+						<Button loading={ isSaving } onClick={ () => onSave({ baseline, next: draft }) }>
 							Save
 						</Button>
 					)

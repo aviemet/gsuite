@@ -64,6 +64,16 @@ export interface DirectoryGroupUpdate {
 	members: DirectoryGroupMember[]
 }
 
+export interface DirectoryUserUpdateRequest {
+	baseline: DirectoryUserUpdate
+	next: DirectoryUserUpdate
+}
+
+export interface DirectoryGroupUpdateRequest {
+	baseline: DirectoryGroupUpdate
+	next: DirectoryGroupUpdate
+}
+
 export interface DirectoryMemberChanges {
 	added: DirectoryGroupMember[]
 	removed: DirectoryGroupMember[]

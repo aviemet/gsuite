@@ -2,6 +2,7 @@ import { directoryAccountStatus, type DirectoryPhoneNumber, emptyDirectoryProfil
 
 export interface GoogleDirectoryUserLike {
 	primaryEmail?: string | null
+	isAdmin?: boolean | null
 	name?: {
 		fullName?: string | null
 		givenName?: string | null
@@ -60,7 +61,9 @@ function primaryOrganization(user: GoogleDirectoryUserLike) {
 	return organizations.find((entry) => entry.primary) ?? organizations[0]
 }
 
-function mapPhoneType(type: string | null | undefined): DirectoryPhoneNumber["type"] | undefined {
+export function managedDirectoryPhoneType(
+	type: string | null | undefined,
+): DirectoryPhoneNumber["type"] | undefined {
 	const normalized = text(type).toLowerCase()
 	if(!normalized) return undefined
 	if(normalized.includes("mobile") || normalized.includes("cell")) return "mobile"
@@ -73,7 +76,7 @@ function mapPhoneNumbers(user: GoogleDirectoryUserLike): DirectoryPhoneNumber[] 
 	const phones: DirectoryPhoneNumber[] = []
 	for(const phone of user.phones ?? []) {
 		const number = text(phone.value)
-		const mappedType = mapPhoneType(phone.type)
+		const mappedType = managedDirectoryPhoneType(phone.type)
 		if(!number || !mappedType) continue
 		phones.push({ type: mappedType, number })
 	}

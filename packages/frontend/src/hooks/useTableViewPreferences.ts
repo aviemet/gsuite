@@ -2,14 +2,16 @@ import { type TableRecordLimit } from "@gsuite/shared"
 import { useCallback, useMemo, useState } from "react"
 
 import {
-	type ColumnFilters,
 	type ColumnFilterState,
+	columnFiltersWithChange,
 	defaultVisibleColumnIds,
 	emptyColumnFilterState,
 	normalizeVisibleColumnIds,
+	readSessionColumnFilters,
 	resolveRecordLimit,
 	resolveVisibleColumns,
 	type TableColumnDefinition,
+	writeSessionColumnFilters,
 } from "@/frontend/lib/tableView"
 import {
 	useSaveTableViewPreferencesMutation,
@@ -22,7 +24,13 @@ export function useTableViewPreferences<TRow>(
 ) {
 	const settingsQuery = useUserSettingsQuery()
 	const saveMutation = useSaveTableViewPreferencesMutation()
-	const [columnFilters, setColumnFilters] = useState<ColumnFilters>({})
+	const [filterState, setFilterState] = useState(() => ({
+		viewId,
+		filters: readSessionColumnFilters(viewId),
+	}))
+	const columnFilters = filterState.viewId === viewId
+		? filterState.filters
+		: readSessionColumnFilters(viewId)
 
 	const viewPreferences = settingsQuery.data?.tableViews[viewId]
 	const defaults = useMemo(() => defaultVisibleColumnIds(columns), [columns])
@@ -60,21 +68,15 @@ export function useTableViewPreferences<TRow>(
 	}, [persistView, visibleColumnIds])
 
 	const setColumnFilter = useCallback((columnId: string, filter: ColumnFilterState) => {
-		setColumnFilters((currentFilters) => {
-			const isEmpty = filter.query.trim().length === 0 && filter.selectedValues === null
-			if(isEmpty) {
-				const remainingFilters: ColumnFilters = {}
-				for(const [filterColumnId, filterValue] of Object.entries(currentFilters)) {
-					if(filterColumnId !== columnId) remainingFilters[filterColumnId] = filterValue
-				}
-				return remainingFilters
-			}
-			return {
-				...currentFilters,
-				[columnId]: filter,
-			}
+		setFilterState((current) => {
+			const currentFilters = current.viewId === viewId
+				? current.filters
+				: readSessionColumnFilters(viewId)
+			const filters = columnFiltersWithChange(currentFilters, columnId, filter)
+			writeSessionColumnFilters(viewId, filters)
+			return { viewId, filters }
 		})
-	}, [])
+	}, [viewId])
 
 	const clearColumnFilter = useCallback((columnId: string) => {
 		setColumnFilter(columnId, emptyColumnFilterState())

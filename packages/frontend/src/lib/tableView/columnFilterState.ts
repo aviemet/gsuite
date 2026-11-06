@@ -12,6 +12,26 @@ export function emptyColumnFilterState(): ColumnFilterState {
 	}
 }
 
+export function columnFiltersWithChange(
+	filters: ColumnFilters,
+	columnId: string,
+	filter: ColumnFilterState,
+): ColumnFilters {
+	const isEmpty = filter.query.trim().length === 0 && filter.selectedValues === null
+	if(!isEmpty) {
+		return {
+			...filters,
+			[columnId]: filter,
+		}
+	}
+
+	const remainingFilters: ColumnFilters = {}
+	for(const [filterColumnId, filterValue] of Object.entries(filters)) {
+		if(filterColumnId !== columnId) remainingFilters[filterColumnId] = filterValue
+	}
+	return remainingFilters
+}
+
 export function isColumnFilterActive(
 	filter: ColumnFilterState | undefined,
 	allValues: readonly string[],

@@ -5,6 +5,7 @@ import {
 	type DirectoryOrganizationalUnit,
 	type DirectoryPhoneNumber,
 	type DirectoryUser,
+	type DirectoryUserUpdate,
 	emptyDirectoryProfile,
 	isDirectoryGroupMemberRole,
 } from "@gsuite/shared"
@@ -65,6 +66,84 @@ export function organizationalUnitPaths(orgUnitPath: string): string[] {
 	return paths
 }
 
+export function directoryUserFromRaw(user: RawDirectoryUser): DirectoryUser {
+	const empty = emptyDirectoryProfile()
+	return {
+		...empty,
+		email: user.email.toLowerCase(),
+		displayName: user.displayName || user.email,
+		givenName: user.givenName ?? empty.givenName,
+		familyName: user.familyName ?? empty.familyName,
+		signatureHtml: "",
+		groupIds: [],
+		organizationalUnitPaths: organizationalUnitPaths(user.orgUnitPath),
+		jobTitle: user.jobTitle ?? empty.jobTitle,
+		department: user.department ?? empty.department,
+		organization: user.organization ?? empty.organization,
+		location: user.location ?? empty.location,
+		employeeId: user.employeeId ?? empty.employeeId,
+		address: user.address ?? empty.address,
+		photoUrl: user.photoUrl ?? empty.photoUrl,
+		costCenter: user.costCenter ?? empty.costCenter,
+		companyDescription: user.companyDescription ?? empty.companyDescription,
+		managerEmail: user.managerEmail ?? empty.managerEmail,
+		buildingId: user.buildingId ?? empty.buildingId,
+		floorName: user.floorName ?? empty.floorName,
+		floorSection: user.floorSection ?? empty.floorSection,
+		deskCode: user.deskCode ?? empty.deskCode,
+		website: user.website ?? empty.website,
+		workWebsite: user.workWebsite ?? empty.workWebsite,
+		homeWebsite: user.homeWebsite ?? empty.homeWebsite,
+		blog: user.blog ?? empty.blog,
+		profileUrl: user.profileUrl ?? empty.profileUrl,
+		phoneNumbers: user.phoneNumbers ?? empty.phoneNumbers,
+		accountStatus: user.accountStatus ?? empty.accountStatus,
+	}
+}
+
+export function directoryUserFromUpdate(
+	current: DirectoryUser | undefined,
+	update: DirectoryUserUpdate,
+): DirectoryUser {
+	const email = update.email.trim().toLowerCase()
+	const givenName = update.givenName.trim()
+	const familyName = update.familyName.trim()
+	const displayName = `${ givenName } ${ familyName }`.trim() || current?.displayName || email
+	const empty = emptyDirectoryProfile()
+	const base: DirectoryUser = current ?? {
+		...empty,
+		email,
+		displayName,
+		signatureHtml: "",
+		groupIds: [],
+		organizationalUnitPaths: ["/"],
+	}
+	return {
+		...base,
+		email,
+		displayName,
+		givenName,
+		familyName,
+		jobTitle: update.jobTitle.trim(),
+		department: update.department.trim(),
+		organization: update.organization.trim(),
+		location: update.location.trim(),
+		employeeId: update.employeeId.trim(),
+		address: update.address.trim(),
+		costCenter: update.costCenter.trim(),
+		managerEmail: update.managerEmail.trim().toLowerCase(),
+		phoneNumbers: update.phoneNumbers.map((phone) => ({
+			type: phone.type,
+			number: phone.number.trim(),
+		})),
+		groupIds: update.groupIds.flatMap((groupId) => {
+			const trimmed = groupId.trim()
+			return trimmed.length === 0 ? [] : [trimmed]
+		}),
+		organizationalUnitPaths: organizationalUnitPaths(update.organizationalUnitPath),
+	}
+}
+
 export function buildDirectorySnapshot(input: {
 	users: RawDirectoryUser[]
 	groups: RawDirectoryGroup[]
@@ -84,40 +163,10 @@ export function buildDirectorySnapshot(input: {
 		membersByGroupId.set(member.groupId, members)
 	}
 
-	const users: DirectoryUser[] = input.users.map((user) => {
-		const empty = emptyDirectoryProfile()
-		return {
-			...empty,
-			email: user.email.toLowerCase(),
-			displayName: user.displayName || user.email,
-			givenName: user.givenName ?? empty.givenName,
-			familyName: user.familyName ?? empty.familyName,
-			signatureHtml: "",
-			groupIds: groupIdsByEmail.get(user.email.toLowerCase()) ?? [],
-			organizationalUnitPaths: organizationalUnitPaths(user.orgUnitPath),
-			jobTitle: user.jobTitle ?? empty.jobTitle,
-			department: user.department ?? empty.department,
-			organization: user.organization ?? empty.organization,
-			location: user.location ?? empty.location,
-			employeeId: user.employeeId ?? empty.employeeId,
-			address: user.address ?? empty.address,
-			photoUrl: user.photoUrl ?? empty.photoUrl,
-			costCenter: user.costCenter ?? empty.costCenter,
-			companyDescription: user.companyDescription ?? empty.companyDescription,
-			managerEmail: user.managerEmail ?? empty.managerEmail,
-			buildingId: user.buildingId ?? empty.buildingId,
-			floorName: user.floorName ?? empty.floorName,
-			floorSection: user.floorSection ?? empty.floorSection,
-			deskCode: user.deskCode ?? empty.deskCode,
-			website: user.website ?? empty.website,
-			workWebsite: user.workWebsite ?? empty.workWebsite,
-			homeWebsite: user.homeWebsite ?? empty.homeWebsite,
-			blog: user.blog ?? empty.blog,
-			profileUrl: user.profileUrl ?? empty.profileUrl,
-			phoneNumbers: user.phoneNumbers ?? empty.phoneNumbers,
-			accountStatus: user.accountStatus ?? empty.accountStatus,
-		}
-	})
+	const users: DirectoryUser[] = input.users.map((user) => ({
+		...directoryUserFromRaw(user),
+		groupIds: groupIdsByEmail.get(user.email.toLowerCase()) ?? [],
+	}))
 
 	const groups: DirectoryGroup[] = input.groups.map((group) => ({
 		id: group.id,

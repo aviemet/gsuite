@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { type QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 import { fetchAuthorized } from "@/frontend/lib/fetchAuthorized"
 import {
@@ -6,9 +6,14 @@ import {
 	type DirectoryOrganizationalUnit,
 	type DirectoryUser,
 } from "@/shared/directoryFixtures"
-import { type DirectoryGroupUpdate, type DirectoryUserUpdate } from "@/shared/directoryUpdate"
+import {
+	type DirectoryGroupUpdate,
+	type DirectoryGroupUpdateRequest,
+	type DirectoryUserUpdate,
+	type DirectoryUserUpdateRequest,
+} from "@/shared/directoryUpdate"
 
-import { applyDirectoryUpdate } from "./applyDirectoryUpdate"
+import { applyDirectoryUpdate, mergeSavedDirectoryUser } from "./applyDirectoryUpdate"
 
 export interface DirectorySnapshot {
 	users: DirectoryUser[]
@@ -38,58 +43,87 @@ export function useDirectoryQuery(options?: { enabled?: boolean }) {
 	})
 }
 
-async function postDirectoryUpdate(
+async function postDirectoryRecord<TRecord>(
 	path: string,
-	body: DirectoryUserUpdate | DirectoryGroupUpdate,
+	body: DirectoryUserUpdateRequest | DirectoryGroupUpdateRequest,
 	fallback: string,
-): Promise<DirectorySnapshot> {
+): Promise<TRecord> {
 	const response = await fetchAuthorized(path, {
 		method: "POST",
 		body: JSON.stringify(body),
 	})
-	const payload = await response.json() as DirectorySnapshot & { error?: string }
+	const payload = await response.json() as TRecord & { error?: string }
 	if(!response.ok) {
 		throw new Error(payload.error ?? fallback)
 	}
 	return payload
 }
 
-function useDirectoryUpdateMutation<TBody extends DirectoryUserUpdate | DirectoryGroupUpdate>(
-	path: string,
-	fallback: string,
-) {
+async function beginDirectoryUpdate(
+	queryClient: QueryClient,
+	update: DirectoryUserUpdate | DirectoryGroupUpdate,
+): Promise<{ previous: DirectorySnapshot | undefined }> {
+	await queryClient.cancelQueries({ queryKey: DIRECTORY_QUERY_KEY })
+	const previous = queryClient.getQueryData<DirectorySnapshot>(DIRECTORY_QUERY_KEY)
+	if(previous) {
+		queryClient.setQueryData(DIRECTORY_QUERY_KEY, applyDirectoryUpdate(previous, update))
+	}
+	return { previous }
+}
+
+function restoreDirectory(
+	queryClient: QueryClient,
+	context: { previous: DirectorySnapshot | undefined } | undefined,
+): void {
+	if(context?.previous) {
+		queryClient.setQueryData(DIRECTORY_QUERY_KEY, context.previous)
+	}
+}
+
+export function useUpdateDirectoryUser() {
 	const queryClient = useQueryClient()
 	return useMutation({
-		mutationFn: (body: TBody) => postDirectoryUpdate(path, body, fallback),
-		onMutate: async (body) => {
-			await queryClient.cancelQueries({ queryKey: DIRECTORY_QUERY_KEY })
-			const previous = queryClient.getQueryData<DirectorySnapshot>(DIRECTORY_QUERY_KEY)
-			if(previous) {
-				queryClient.setQueryData(DIRECTORY_QUERY_KEY, applyDirectoryUpdate(previous, body))
-			}
-			return { previous }
-		},
+		mutationFn: (body: DirectoryUserUpdateRequest) => postDirectoryRecord<DirectoryUser>(
+			"/api/directory/users/update",
+			body,
+			"Failed to update user",
+		),
+		onMutate: (body) => beginDirectoryUpdate(queryClient, body.next),
 		onError: (_error, _body, context) => {
-			if(context?.previous) {
-				queryClient.setQueryData(DIRECTORY_QUERY_KEY, context.previous)
-			}
+			restoreDirectory(queryClient, context)
 		},
-		onSuccess: (snapshot, body) => {
-			queryClient.setQueryData(DIRECTORY_QUERY_KEY, applyDirectoryUpdate(snapshot, body))
+		onSuccess: (user) => {
+			queryClient.setQueryData<DirectorySnapshot>(DIRECTORY_QUERY_KEY, (current) => (
+				current ? mergeSavedDirectoryUser(current, user) : current
+			))
 		},
 	})
 }
 
-export function useUpdateDirectoryUser() {
-	return useDirectoryUpdateMutation<DirectoryUserUpdate>(
-		"/api/directory/users/update",
-		"Failed to update user",
-	)
-}
-
 export function useUpdateDirectoryGroup() {
-	return useDirectoryUpdateMutation<DirectoryGroupUpdate>(
-		"/api/directory/groups/update",
-		"Failed to update group",
-	)
+	const queryClient = useQueryClient()
+	return useMutation({
+		mutationFn: (body: DirectoryGroupUpdateRequest) => postDirectoryRecord<DirectoryGroup>(
+			"/api/directory/groups/update",
+			body,
+			"Failed to update group",
+		),
+		onMutate: (body) => beginDirectoryUpdate(queryClient, body.next),
+		onError: (_error, _body, context) => {
+			restoreDirectory(queryClient, context)
+		},
+		onSuccess: (group) => {
+			queryClient.setQueryData<DirectorySnapshot>(DIRECTORY_QUERY_KEY, (current) => (
+				current
+					? applyDirectoryUpdate(current, {
+						id: group.id,
+						name: group.name,
+						email: group.email,
+						description: group.description,
+						members: group.members,
+					})
+					: current
+			))
+		},
+	})
 }

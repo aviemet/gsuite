@@ -1,39 +1,61 @@
+import { type DirectoryUserUpdate } from "@gsuite/shared"
 import { describe, expect, it } from "vitest"
 
+import { directoryUserMembershipChanges } from "../src/directory/directoryUpdateDiff"
 import { parseDirectoryUserUpdate } from "../src/directory/parseDirectoryUpdate"
-import { userGroupMembershipChanges } from "../src/directory/userGroupMembershipChanges"
 
-const groups = [
-	{
-		id: "engineering",
-		members: [{ email: "jane.doe@example.com", role: "MEMBER" as const }],
-	},
-	{
-		id: "sales",
-		members: [{ email: "sam.lee@example.com", role: "OWNER" as const }],
-	},
-]
+const baseline: DirectoryUserUpdate = {
+	email: "jane.doe@example.com",
+	givenName: "Jane",
+	familyName: "Doe",
+	organizationalUnitPath: "/",
+	jobTitle: "",
+	department: "",
+	organization: "",
+	location: "",
+	employeeId: "",
+	address: "",
+	costCenter: "",
+	managerEmail: "",
+	phoneNumbers: [],
+	groupIds: ["engineering", "sales"],
+	groupMemberships: [
+		{ groupId: "engineering", role: "MEMBER" },
+		{ groupId: "sales", role: "MEMBER" },
+	],
+}
 
-describe("userGroupMembershipChanges", () => {
-	it("inserts, updates, and deletes membership from the submitted roles", () => {
-		expect(userGroupMembershipChanges(
-			"jane.doe@example.com",
-			groups,
-			["engineering", "product"],
-			[
+describe("directoryUserMembershipChanges", () => {
+	it("inserts, updates, and leaves untouched groups unwritten", () => {
+		expect(directoryUserMembershipChanges(baseline, {
+			...baseline,
+			groupIds: ["engineering", "sales", "product"],
+			groupMemberships: [
 				{ groupId: "engineering", role: "MANAGER" },
+				{ groupId: "sales", role: "MEMBER" },
 				{ groupId: "product", role: "OWNER" },
 			],
-		)).toEqual([
+		})).toEqual([
 			{ action: "update", groupId: "engineering", role: "MANAGER" },
 			{ action: "insert", groupId: "product", role: "OWNER" },
 		])
 	})
 
-	it("defaults a new membership to member when no role was submitted", () => {
-		expect(userGroupMembershipChanges("jane.doe@example.com", groups, ["sales"], undefined)).toEqual([
+	it("removes a group that is no longer selected", () => {
+		expect(directoryUserMembershipChanges(
+			baseline,
+			{ ...baseline, groupIds: ["sales"], groupMemberships: [{ groupId: "sales", role: "MEMBER" }] },
+		)).toEqual([
 			{ action: "delete", groupId: "engineering" },
-			{ action: "insert", groupId: "sales", role: "MEMBER" },
+		])
+	})
+
+	it("defaults a new membership to member when no role was submitted", () => {
+		expect(directoryUserMembershipChanges(
+			{ ...baseline, groupIds: ["engineering"], groupMemberships: undefined },
+			{ ...baseline, groupIds: ["engineering", "product"], groupMemberships: undefined },
+		)).toEqual([
+			{ action: "insert", groupId: "product", role: "MEMBER" },
 		])
 	})
 })
