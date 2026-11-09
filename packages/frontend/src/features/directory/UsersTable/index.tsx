@@ -1,4 +1,4 @@
-import { type TableRecordLimit } from "@gsuite/shared"
+import { isTableRecordLimit, TABLE_RECORD_LIMITS, type TableRecordLimit } from "@gsuite/shared"
 import { ActionIcon, Skeleton, Stack } from "@mantine/core"
 import { IconPencil } from "@tabler/icons-react"
 import clsx from "clsx"
@@ -29,15 +29,23 @@ interface UsersTableProps {
 	columnFilters: ColumnFilters
 	onColumnFilterChange: (columnId: string, filter: ColumnFilterState) => void
 	recordLimit: TableRecordLimit
+	onRecordLimitChange?: (recordLimit: TableRecordLimit) => void
 	loading: boolean
 	canEdit: boolean
 	onOpenUser: (user: DirectoryUserRow) => void
 	onQuickEditUser: (user: DirectoryUserRow) => void
+	sortStatus?: DataTableSortStatus<DirectoryUserRow>
+	onSortStatusChange?: (sortStatus: DataTableSortStatus<DirectoryUserRow>) => void
 }
 
-const defaultSortStatus: DataTableSortStatus<DirectoryUserRow> = {
+export const defaultDirectoryUserSortStatus: DataTableSortStatus<DirectoryUserRow> = {
 	columnAccessor: "displayName",
 	direction: "asc",
+}
+
+export function isDefaultDirectoryUserSort(sortStatus: DataTableSortStatus<DirectoryUserRow>): boolean {
+	return sortStatus.columnAccessor === defaultDirectoryUserSortStatus.columnAccessor
+		&& sortStatus.direction === defaultDirectoryUserSortStatus.direction
 }
 
 export function UsersTable({
@@ -46,12 +54,20 @@ export function UsersTable({
 	columnFilters,
 	onColumnFilterChange,
 	recordLimit,
+	onRecordLimitChange,
 	loading,
 	canEdit,
 	onOpenUser,
 	onQuickEditUser,
+	sortStatus: sortStatusProp,
+	onSortStatusChange,
 }: UsersTableProps) {
-	const [sortStatus, setSortStatus] = useState<DataTableSortStatus<DirectoryUserRow>>(defaultSortStatus)
+	const [internalSortStatus, setInternalSortStatus] = useState(defaultDirectoryUserSortStatus)
+	const sortStatus = sortStatusProp ?? internalSortStatus
+	function handleSortStatusChange(nextSortStatus: DataTableSortStatus<DirectoryUserRow>) {
+		if(sortStatusProp === undefined) setInternalSortStatus(nextSortStatus)
+		onSortStatusChange?.(nextSortStatus)
+	}
 	const filteredUsers = useMemo(
 		() => filterRowsByColumnValues(users, columns, columnFilters),
 		[users, columns, columnFilters],
@@ -144,10 +160,15 @@ export function UsersTable({
 			records={ pageRecords }
 			totalRecords={ sortedUsers.length }
 			recordsPerPage={ recordLimit }
+			recordsPerPageOptions={ [...TABLE_RECORD_LIMITS] }
+			recordsPerPageLabel="Rows per page"
+			onRecordsPerPageChange={ (nextLimit) => {
+				if(isTableRecordLimit(nextLimit)) onRecordLimitChange?.(nextLimit)
+			} }
 			page={ currentPage }
 			onPageChange={ (nextPage) => setPageState({ identity: listIdentity, page: nextPage }) }
 			sortStatus={ sortStatus }
-			onSortStatusChange={ setSortStatus }
+			onSortStatusChange={ handleSortStatusChange }
 			columns={ tableColumns }
 			minHeight={ loading ? 360 : undefined }
 			emptyState={ loading

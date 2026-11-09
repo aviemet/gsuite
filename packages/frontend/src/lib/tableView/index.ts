@@ -11,6 +11,7 @@ export {
 	filterRowsByColumnValues,
 	filterRowsExcludingColumn,
 } from "./filterRowsByColumnValues"
+export { filterRowsBySearch } from "./filterRowsBySearch"
 export {
 	defaultVisibleColumnIds,
 	normalizeVisibleColumnIds,

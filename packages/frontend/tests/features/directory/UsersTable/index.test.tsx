@@ -179,4 +179,36 @@ describe("UsersTable", () => {
 		expect(screen.queryByText("No users found")).not.toBeInTheDocument()
 		expect(document.querySelectorAll(".mantine-Skeleton-root").length).toBe(8)
 	})
+
+	it("shows the page size control beside the result count", () => {
+		enableDataTableMediaQueries()
+		const visibleColumns = resolveVisibleColumns(userColumns, ["displayName"])
+
+		render(
+			<MantineProvider theme={ theme }>
+				<UsersTable
+					users={ [
+						toDirectoryUserRow(user({
+							email: "jane.doe@example.com",
+							displayName: "Jane Doe",
+						})),
+					] }
+					columns={ visibleColumns }
+					columnFilters={ {} }
+					onColumnFilterChange={ vi.fn() }
+					recordLimit={ 25 }
+					onRecordLimitChange={ vi.fn() }
+					loading={ false }
+					canEdit={ false }
+					onOpenUser={ vi.fn() }
+					onQuickEditUser={ vi.fn() }
+				/>
+			</MantineProvider>,
+		)
+
+		const footer = document.querySelector(".mantine-datatable-pagination")
+		expect(footer).toHaveTextContent("1 - 1 / 1")
+		expect(footer).toHaveTextContent("Rows per page")
+		expect(footer).toContainElement(screen.getByRole("button", { name: "25" }))
+	})
 })

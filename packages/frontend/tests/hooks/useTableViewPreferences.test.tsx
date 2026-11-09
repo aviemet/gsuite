@@ -37,4 +37,21 @@ describe("useTableViewPreferences", () => {
 			department: { query: "eng", selectedValues: ["Engineering"] },
 		})
 	})
+
+	it("clears every column filter for the view", () => {
+		const view = renderHook(() => useTableViewPreferences("directory.users", columns))
+		act(() => {
+			view.result.current.setColumnFilter("department", {
+				query: "eng",
+				selectedValues: ["Engineering"],
+			})
+		})
+
+		act(() => {
+			view.result.current.clearColumnFilters()
+		})
+
+		expect(view.result.current.columnFilters).toEqual({})
+		expect(sessionStorage.getItem("suiteocean.tableFilters.directory.users")).toBeNull()
+	})
 })

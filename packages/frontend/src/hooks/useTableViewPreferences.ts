@@ -82,6 +82,11 @@ export function useTableViewPreferences<TRow>(
 		setColumnFilter(columnId, emptyColumnFilterState())
 	}, [setColumnFilter])
 
+	const clearColumnFilters = useCallback(() => {
+		writeSessionColumnFilters(viewId, {})
+		setFilterState({ viewId, filters: {} })
+	}, [viewId])
+
 	return {
 		columns,
 		visibleColumnIds,
@@ -92,6 +97,7 @@ export function useTableViewPreferences<TRow>(
 		columnFilters,
 		setColumnFilter,
 		clearColumnFilter,
+		clearColumnFilters,
 		isLoading: settingsQuery.isLoading,
 		isSaving: saveMutation.isPending,
 	}

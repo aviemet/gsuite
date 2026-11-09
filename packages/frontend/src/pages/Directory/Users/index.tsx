@@ -1,28 +1,29 @@
-import { canManageAccess, isTableRecordLimit, TABLE_RECORD_LIMITS } from "@gsuite/shared"
-import { Container, Group, Select, Text } from "@mantine/core"
+import { canManageAccess } from "@gsuite/shared"
+import { Button, Container, Group, Text, TextInput } from "@mantine/core"
 import { notifications } from "@mantine/notifications"
+import { IconSearch } from "@tabler/icons-react"
 import { useNavigate } from "@tanstack/react-router"
 import { useMemo, useState } from "react"
 
 import { Page } from "@/frontend/components/Page"
 import { TableColumnPicker } from "@/frontend/components/TableColumnPicker"
 import { UserQuickEditModal } from "@/frontend/features/directory/editor/UserQuickEditModal"
-import { UsersTable } from "@/frontend/features/directory/UsersTable"
+import {
+	defaultDirectoryUserSortStatus,
+	isDefaultDirectoryUserSort,
+	UsersTable,
+} from "@/frontend/features/directory/UsersTable"
 import { toDirectoryUserRow } from "@/frontend/features/directory/UsersTable/sortDirectoryUsers"
 import {
 	DIRECTORY_USERS_VIEW_ID,
 	userColumns,
 } from "@/frontend/features/directory/UsersTable/userColumns"
 import { useTableViewPreferences } from "@/frontend/hooks/useTableViewPreferences"
+import { filterRowsBySearch } from "@/frontend/lib/tableView"
 import { useCompanyQuery } from "@/frontend/queries/company"
 import { useDirectoryQuery, useUpdateDirectoryUser } from "@/frontend/queries/directory"
 import { useMembershipQuery } from "@/frontend/queries/templates"
 import { companyDepartmentNames } from "@/shared/company"
-
-const recordLimitOptions = TABLE_RECORD_LIMITS.map((limit) => ({
-	value: String(limit),
-	label: `${ limit } / page`,
-}))
 
 export function DirectoryUsersPage() {
 	const navigate = useNavigate()
@@ -44,12 +45,22 @@ export function DirectoryUsersPage() {
 		setRecordLimit,
 		columnFilters,
 		setColumnFilter,
+		clearColumnFilters,
 		columns,
 	} = useTableViewPreferences(DIRECTORY_USERS_VIEW_ID, userColumns)
+	const [sortStatus, setSortStatus] = useState(defaultDirectoryUserSortStatus)
+	const [searchQuery, setSearchQuery] = useState("")
+	const hasTableViewOverrides = searchQuery.trim().length > 0
+		|| Object.keys(columnFilters).length > 0
+		|| !isDefaultDirectoryUserSort(sortStatus)
 
 	const rows = useMemo(
 		() => (data?.users ?? []).map(toDirectoryUserRow),
 		[data?.users],
+	)
+	const searchedRows = useMemo(
+		() => filterRowsBySearch(rows, columns, searchQuery),
+		[rows, columns, searchQuery],
 	)
 
 	if(error) {
@@ -66,22 +77,31 @@ export function DirectoryUsersPage() {
 		<Page title="Users">
 			<Container size="xl">
 				<Group mb="md" justify="space-between">
-					<Select
-						aria-label="Rows per page"
-						data={ recordLimitOptions }
-						value={ String(recordLimit) }
-						onChange={ (value) => {
-							const nextLimit = Number(value)
-							if(isTableRecordLimit(nextLimit)) setRecordLimit(nextLimit)
-						} }
-						allowDeselect={ false }
-						w={ 140 }
+					<TextInput
+						aria-label="Search users"
+						placeholder="Search users"
+						leftSection={ <IconSearch size={ 16 } /> }
+						value={ searchQuery }
+						onChange={ (event) => setSearchQuery(event.currentTarget.value) }
 					/>
-					<TableColumnPicker
-						columns={ columns }
-						visibleColumnIds={ visibleColumnIds }
-						onChange={ setVisibleColumnIds }
-					/>
+					<Group>
+						<Button
+							variant="subtle"
+							disabled={ !hasTableViewOverrides }
+							onClick={ () => {
+								setSearchQuery("")
+								clearColumnFilters()
+								setSortStatus(defaultDirectoryUserSortStatus)
+							} }
+						>
+							Clear all
+						</Button>
+						<TableColumnPicker
+							columns={ columns }
+							visibleColumnIds={ visibleColumnIds }
+							onChange={ setVisibleColumnIds }
+						/>
+					</Group>
 				</Group>
 				{ !isLoading && rows.length === 0
 					? (
@@ -89,12 +109,15 @@ export function DirectoryUsersPage() {
 					)
 					: (
 						<UsersTable
-							users={ rows }
+							users={ searchedRows }
 							columns={ visibleColumns }
 							columnFilters={ columnFilters }
 							onColumnFilterChange={ setColumnFilter }
 							recordLimit={ recordLimit }
+							onRecordLimitChange={ setRecordLimit }
 							loading={ isLoading }
+							sortStatus={ sortStatus }
+							onSortStatusChange={ setSortStatus }
 							canEdit={ canEdit }
 							onOpenUser={ (user) => {
 								void navigate({
